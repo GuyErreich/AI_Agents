@@ -1,0 +1,3 @@
+# Known historical findings that are no longer present in HEAD.
+# Format: fingerprint from `gitleaks git --report-format json`
+# Docs: https://github.com/gitleaks/gitleaks#configuration

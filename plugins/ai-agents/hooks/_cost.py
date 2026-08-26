@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Guy Erreich
+#
+# SPDX-License-Identifier: MIT
+
 # /// script
 # requires-python = ">=3.12"
 # ///
+
 """Estimate tokens and dollars from Cursor agent-transcript JSONL files.
 
 Cursor does not persist billed token counts. This reconstructs an estimate by

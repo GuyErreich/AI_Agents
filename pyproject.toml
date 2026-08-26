@@ -1,0 +1,32 @@
+[project]
+name = "ai-agents"
+version = "1.0.0"
+description = "Cursor plugin — portable agent skills, rules, and review-loop hooks."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.12",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+src = ["plugins/ai-agents/hooks", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"plugins/ai-agents/hooks/**" = ["E501", "SIM114", "I001"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+testpaths = ["plugins/ai-agents/hooks/tests", "scripts"]
+pythonpath = ["plugins/ai-agents/hooks", "scripts"]
+addopts = "-q"

@@ -1,4 +1,8 @@
 #!/bin/bash
+# Copyright (c) 2026 Guy Erreich
+#
+# SPDX-License-Identifier: MIT
+
 # Interpreter resolver for review-loop Python hooks.
 # Works as a project hook (cwd = repo) or user hook (cwd = ~/.cursor/).
 # Always exits 0 with valid JSON so failClosed only fires on genuine crashes.

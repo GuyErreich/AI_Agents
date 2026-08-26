@@ -3,5 +3,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.venv/
 .review-loop/
 plugins/**/hooks/state/
+actionlint

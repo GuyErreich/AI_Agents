@@ -52,6 +52,21 @@ scripts/review-lock.py            # optional
 
 Do not copy portable `skills/code/**` or `rules/code/**` into app repos once this plugin is installed — they would load twice.
 
+## Validate (local)
+
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.12+:
+
+```bash
+uv sync --group dev
+uv run python scripts/validate_plugin.py
+uv run ruff check plugins/ai-agents/hooks scripts
+uv run ruff format --check scripts
+uv run pytest
+pre-commit run --all-files   # gitleaks, JSON/YAML, ruff
+```
+
+CI on `master` and pull requests runs Gitleaks, Ruff, pytest, plugin validation, license headers, CodeQL, and Semgrep.
+
 ## Inheritance
 
 Every skill under `code/` extends `skills/code/foundations/engineering`. Folder taxonomy lives in `skills/foundations/hierarchy`. Agent-library container tiers live in `skills/ai-agent/hierarchy`. Project skills may add stricter rules, never weaker ones.

@@ -1,0 +1,15 @@
+header:
+  license:
+    spdx-id: MIT
+    copyright-owner: Guy Erreich
+    content: |
+      Copyright (c) 2026 Guy Erreich
+
+      SPDX-License-Identifier: MIT
+  paths:
+    - plugins/ai-agents/hooks
+    - scripts
+  paths-ignore:
+    - '**/*.json'
+    - plugins/ai-agents/hooks/tests
+    - plugins/ai-agents/hooks/state

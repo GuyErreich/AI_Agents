@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Guy Erreich
+#
+# SPDX-License-Identifier: MIT
+
 # /// script
 # requires-python = ">=3.12"
 # ///
+
 """npm dep-file gate — mark pending on package/lock edits; force audit on stop.
 
 Project-specific (npm). Portable reviewer/CI stay agnostic via AGENT.md Validate.

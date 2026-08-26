@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Guy Erreich
+#
+# SPDX-License-Identifier: MIT
+
 # /// script
 # requires-python = ">=3.12"
 # ///
+
 """subagentStart budget guard for the PR review loop."""
 
 from __future__ import annotations

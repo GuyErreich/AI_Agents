@@ -1,0 +1,26 @@
+# Title for the gitleaks configuration file.
+title = "AI_Agents gitleaks config"
+
+# Extend the built-in default rules, then add allowlists.
+# Docs: https://github.com/gitleaks/gitleaks#configuration
+#
+# A global allowlist `paths` entry skips the *entire file* before content
+# scanning. Do not put broad dirs (workflows/, skills/) there — use
+# regex-only allowlists for documentation patterns instead.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "GitHub Actions secret *references* (not values)"
+regexTarget = "line"
+regexes = [
+  '''\$\{\{\s*secrets\.[A-Z0-9_]+''',
+  '''GITLEAKS_(CONFIG|VERSION|ENABLE_|LICENSE)''',
+]
+
+[[allowlists]]
+description = "Lockfiles and generated caches"
+paths = [
+  '''uv\.lock$''',
+  '''\.pytest_cache/''',
+]
