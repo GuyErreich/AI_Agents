@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "hooks": {
+    "subagentStart": [
+      {
+        "command": "./hooks/run-python.sh review_loop_budget.py",
+        "matcher": "pr-reviewer|pr-fixer"
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "./hooks/run-python.sh review_loop_round.py",
+        "matcher": "pr-reviewer|pr-fixer",
+        "loop_limit": 3
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "./hooks/run-python.sh review_loop_git_guard.py",
+        "matcher": "git",
+        "failClosed": true
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "./hooks/run-python.sh npm_dep_gate.py"
+      }
+    ],
+    "afterShellExecution": [
+      {
+        "command": "./hooks/run-python.sh npm_dep_gate.py",
+        "matcher": "npm\\s+(install|i\\b|ci|update|uninstall|remove|audit|upgrade)"
+      }
+    ],
+    "stop": [
+      {
+        "command": "./hooks/run-python.sh npm_dep_gate.py",
+        "loop_limit": 2
+      }
+    ]
+  }
+}

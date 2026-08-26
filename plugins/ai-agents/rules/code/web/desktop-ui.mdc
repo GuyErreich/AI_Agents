@@ -1,0 +1,16 @@
+---
+description: Desktop variant UI structure — hierarchy and composition under components/ui/desktop
+globs: "**/components/ui/**/desktop/**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# Desktop variant UI
+
+When editing files under `**/components/ui/**/desktop/**`:
+
+- Load `skills/code/web/ui/SKILL.md` and **`references/components-ui-hierarchy.md`**.
+- Desktop folder is **layout composition only** — compose from domain `common/`, never duplicate base logic.
+- Thin selectors live at domain root, not inside `desktop/`. See `references/responsive-variants.md`.
+- Reuse section wrappers; keep variant files declarative.
+
+Hover, wide nav, motion: paired **`desktop-ux.mdc`** (same glob) → `code/web/ux` + `references/desktop/*`.

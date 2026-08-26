@@ -1,0 +1,17 @@
+---
+description: Web UI structure, reuse, and accessibility standards
+globs: "**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# Web UI
+
+When editing UI files:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/web/ui/SKILL.md` for UI structure, reuse, and accessibility.
+- Load its `references/` only when the skill directs.
+- For motion, overlays, pickers, press feedback, or library choice → load `skills/code/web/ux/SKILL.md`.
+- Follow the nearest `AGENT.md` chain for the project's layout/viewport contract.
+
+Key rules: reuse before creating, minimal wrappers, data/view separation via hooks, no magic values, hierarchy-first sizing, interactive behavior on semantic elements.

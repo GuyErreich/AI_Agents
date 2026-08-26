@@ -1,0 +1,16 @@
+---
+description: Mobile variant UI structure — hierarchy and composition under components/ui/mobile
+globs: "**/components/ui/**/mobile/**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# Mobile variant UI
+
+When editing files under `**/components/ui/**/mobile/**`:
+
+- Load `skills/code/web/ui/SKILL.md` and **`references/components-ui-hierarchy.md`**.
+- Mobile folder is **layout composition only** — compose from domain `common/`, never duplicate base logic.
+- Thin selectors live at domain root, not inside `mobile/`. See `references/responsive-variants.md`.
+- Reuse section wrappers; keep variant files declarative.
+
+Motion, pickers, edge entrance: paired **`mobile-ux.mdc`** (same glob) → `code/web/ux` + `references/mobile/*`.

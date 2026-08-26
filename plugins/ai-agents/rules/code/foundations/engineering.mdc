@@ -1,0 +1,17 @@
+---
+description: Universal engineering principles applied to all code work
+alwaysApply: true
+---
+
+# Engineering Foundations
+
+Before writing or reviewing code, apply these universal principles:
+
+- Reuse before creating; extract a shared abstraction when the same pattern appears twice.
+- Use explicit, honest types at boundaries; never use typing to hide a design problem.
+- Name by responsibility and domain; stay consistent within a feature.
+- Place code by responsibility; shared vs feature-local must be obvious from the path.
+- Separate data, orchestration, presentation, and I/O; one module, one reason to change.
+- Couple what changes together; decouple what changes for different reasons — avoid both duplication and premature abstraction.
+
+Load `skills/code/foundations/engineering/SKILL.md` for decisions, and its `references/` only when a principle needs deep guidance. Glob-specific rules and downstream skills must not repeat these bullets — they reference this foundation instead.

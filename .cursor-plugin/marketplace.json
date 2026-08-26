@@ -1,0 +1,18 @@
+{
+  "name": "ai-agents",
+  "owner": {
+    "name": "Guy Erreich"
+  },
+  "metadata": {
+    "description": "Portable Cursor agent skills, rules, subagents, and review-loop hooks.",
+    "version": "1.0.0",
+    "pluginRoot": "plugins"
+  },
+  "plugins": [
+    {
+      "name": "ai-agents",
+      "source": "ai-agents",
+      "description": "Portable Cursor agent skills, rules, subagents, and review-loop hooks for engineering, web UI/UX, review, and CI."
+    }
+  ]
+}

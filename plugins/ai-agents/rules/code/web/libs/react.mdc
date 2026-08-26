@@ -1,0 +1,16 @@
+---
+description: React component and hook patterns
+globs: "**/*.{tsx,jsx}"
+alwaysApply: false
+---
+
+# React
+
+When editing React files:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/web/libs/react/SKILL.md` for hook, component, and animation patterns.
+- Load its `references/` only when the skill directs.
+- Follow the nearest `AGENT.md` chain for project component conventions.
+
+Key rules: complete dependency arrays, one concern per file, block separation by responsibility, ref mutation for continuous values, optimize renders only where it matters.

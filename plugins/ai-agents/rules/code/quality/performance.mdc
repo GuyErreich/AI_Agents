@@ -1,0 +1,15 @@
+---
+description: Memory cleanup and render performance
+globs: "**/*.{ts,tsx,jsx}"
+alwaysApply: false
+---
+
+# Performance & Memory
+
+When creating effects, listeners, timers, animations, or GPU/audio resources:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/quality/performance/SKILL.md` for cleanup and optimization patterns.
+- Load its `references/` only when the skill directs.
+
+Key rules: every effect that allocates a resource returns a cleanup that frees it; close AudioContext; dispose Three.js geom/mat/textures; remove listeners and clear timers; abort in-flight fetches; no allocation in the render loop; optimize renders only where it matters.

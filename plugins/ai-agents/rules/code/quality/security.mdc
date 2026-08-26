@@ -1,0 +1,15 @@
+---
+description: Security standards for auth, input, data access, and sensitive data
+globs: "**/*.{ts,tsx,js,mjs}"
+alwaysApply: false
+---
+
+# Security
+
+When code touches user input, auth, API routes, or sensitive data:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/quality/security/SKILL.md` for vulnerability-prevention patterns.
+- Load its `references/` only when the skill directs.
+
+Key rules: no injection (parameterize), no XSS (escape/sanitize), CSRF protection on state changes, server-side validation with allow-lists, no client-exposed secrets, no credential/PII logging, generic user-facing errors.

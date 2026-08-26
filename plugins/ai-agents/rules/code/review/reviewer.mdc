@@ -1,0 +1,16 @@
+---
+description: Use the reviewer skill for any code review, self-review, or pre-milestone inspection
+alwaysApply: false
+---
+
+# Reviewer
+
+When the user asks to review code, self-review changes, inspect a diff before a commit/PR/push milestone, or review **the PR**:
+
+- Load `skills/code/review/reviewer/SKILL.md`.
+- It routes to engineering + matching domain skills by changed files and reads the `AGENT.md` chain.
+- Load its `references/` only when a phase needs them.
+
+When reviewing **the open PR**, also load `references/pr-comments.md`: table in chat only; post on GitHub only when there is ≥1 finding (concise inline comments + one-sentence body). Never post clean-pass status reviews, Verdict/Lint checklists, or “intended event” footnotes on the PR. Clean verdicts require `references/thoroughness-pass.md` and every matching `references/lenses/*` specialist lens.
+
+The reviewer reports findings; it does not fix them unless the user asks. See `rules/behaviors/code-review-gate.mdc` for milestone wiring.

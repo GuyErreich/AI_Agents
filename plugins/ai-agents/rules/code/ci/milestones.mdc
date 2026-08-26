@@ -1,0 +1,18 @@
+---
+description: Use the CI skills when committing, opening a PR, or pushing
+alwaysApply: false
+---
+
+# CI Milestones
+
+When the user asks to commit, open a PR, or push, run the matching CI skill (each reviews before the git action and respects consent):
+
+| Intent | Skill |
+|---|---|
+| Commit | `skills/code/ci/commit/SKILL.md` |
+| Open / create a PR | `skills/code/ci/pr/SKILL.md` |
+| Push | `skills/code/ci/push/SKILL.md` |
+| Fix-until-clean self-review | `skills/code/ci/local-review-loop/SKILL.md` |
+| Autonomous PR review-fix loop | `skills/code/ci/pr-review-loop/SKILL.md` |
+
+See `rules/behaviors/code-review-gate.mdc` for the gate and `behaviors/git-*-consent.mdc` for consent rules.

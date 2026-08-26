@@ -1,0 +1,17 @@
+---
+description: Desktop variant UX — hover, wide layout nav for components/ui desktop paths
+globs: "**/components/ui/**/desktop/**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# Desktop variant UX
+
+When editing files under `**/components/ui/**/desktop/**`:
+
+- Apply engineering foundations and `code/web/ui` first.
+- Load `skills/code/web/ux/SKILL.md` and **`references/desktop/*`** (not mobile refs).
+- Sidebar, hover, wide layout nav: `references/desktop/navigation-motion.md`.
+- Overlays, press feedback, motion libs: `references/shared/*`.
+- Unsure which viewport applies: `references/viewport-routing.md`.
+
+UI structure and folder placement: paired `desktop-ui.mdc` + `components-ui-hierarchy.md`.

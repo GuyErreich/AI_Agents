@@ -1,0 +1,15 @@
+---
+description: components/ui folder hierarchy — common, mobile, desktop placement
+globs: "**/components/ui/**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# components/ui hierarchy
+
+When creating or moving files under `**/components/ui/**`:
+
+- Load `skills/code/web/ui/SKILL.md` and **`references/components-ui-hierarchy.md`** before adding folders or components.
+- Cross-feature primitives → `common/`; domain shared blocks → `<domain>/common/`; viewport layout → `<domain>/mobile/` or `<domain>/desktop/` only.
+- Do not put viewport-specific layout in `common/`; do not duplicate base logic across variants.
+- Thin selectors at domain root; compose from `common/`. See `references/responsive-variants.md` for composition rules.
+- Motion, overlays, pickers → `code/web/ux` (variant paths also match `mobile-ux.mdc` / `desktop-ux.mdc`).

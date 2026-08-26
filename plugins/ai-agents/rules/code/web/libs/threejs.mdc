@@ -1,0 +1,16 @@
+---
+description: React Three Fiber and Three.js performance, typing, and disposal
+globs: "**/three/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# React Three Fiber & 3D
+
+When editing R3F/Three.js files:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/web/libs/threejs/SKILL.md` for render-loop, typing, shader, and disposal rules.
+- Load its `references/` and `assets/r3f-component-template.tsx` only when the skill directs.
+- Follow the nearest `AGENT.md` chain for the project's 3D folder layout and orchestration wiring.
+
+Key rules: never allocate inside `useFrame`, mutate uniforms/refs per frame (no `setState`), type materials/refs concretely, dispose geometries/materials/textures, prefer drei + `InstancedMesh`.

@@ -1,0 +1,18 @@
+---
+description: Mobile variant UX — motion, pickers, edge entrance for components/ui mobile paths
+globs: "**/components/ui/**/mobile/**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# Mobile variant UX
+
+When editing files under `**/components/ui/**/mobile/**`:
+
+- Apply engineering foundations and `code/web/ui` first.
+- Load `skills/code/web/ux/SKILL.md` and **`references/mobile/*`** (not desktop refs).
+- Edge list entrance and clip-boundary: `references/mobile/navigation-motion.md`.
+- Pickers and snap scrollers: `references/mobile/pickers-and-scrollers.md`.
+- Overlays, press feedback, motion libs: `references/shared/*`.
+- Unsure which viewport applies: `references/viewport-routing.md`.
+
+UI structure and folder placement: paired `mobile-ui.mdc` + `components-ui-hierarchy.md`.

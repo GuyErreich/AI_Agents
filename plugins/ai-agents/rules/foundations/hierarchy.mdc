@@ -1,0 +1,13 @@
+---
+description: Load hierarchy skill before creating, naming, moving, or reorganizing folders
+alwaysApply: true
+---
+
+# Folder Hierarchy
+
+Before creating, naming, moving, or reorganizing any folder:
+
+- Load `skills/foundations/hierarchy/SKILL.md`.
+- Run the **nesting test** (wrong/meaningless outside parent?) and the **retrieval test** (where would a newcomer look?).
+- Favor retrieval on conflict; leave a pointer from the other path.
+- Load its `references/` only when restructuring or when the skill directs.

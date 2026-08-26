@@ -1,0 +1,15 @@
+---
+description: Flag gaps in skills, rules, and agent instructions after completing a task
+alwaysApply: true
+---
+
+# Improvement Flagging
+
+After completing a task — especially when a reusable pattern, class-of-bug, or instruction gap showed up, or when editing `skills/` / `rules/`:
+
+1. End the response with a **`## Improvement flags`** section (use `- [none]` when nothing applies).
+2. Flag **class-of-bug** fixes on first occurrence — not only after the pattern repeats.
+3. Load `skills/ai-agent/improvement-protocol/SKILL.md` when drafting flags or implementing doc updates.
+4. **Do not** implement skill/rule file changes unless the user approved (parallel session or explicit request).
+
+Portable lessons → this plugin (`skills/code/**` or `skills/ai-agent/**`). Project contracts → consuming repo `.cursor/skills/project/**`.

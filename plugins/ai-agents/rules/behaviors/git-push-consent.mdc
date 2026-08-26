@@ -1,0 +1,34 @@
+---
+description: Never push to remote without explicit user consent
+alwaysApply: true
+---
+
+# Git Push Consent
+
+**Never run `git push` (or any push variant) without the user's explicit consent.**
+
+## Forbidden Without Consent
+
+- `git push`, `git push -u`, `git push origin <branch>`
+- Force push: `git push --force`, `git push --force-with-lease`
+- Pushing as part of another workflow (PR creation, review resolution, CI fix) unless the user asked to push or pr-resolver scoped consent applies (see Exceptions)
+
+## What Counts as Consent
+
+Explicit approval only — e.g. "push", "push to remote", "go ahead and push", "push the branch".
+
+These do **not** count as push consent on their own:
+
+- Approving a general code or review plan (not a pr-resolver fix plan)
+- Asking to create a PR (ask before pushing; offer to push only if needed)
+- Completing fixes, commits, or lint/build validation
+
+## When Push May Be Needed
+
+1. Finish local work (commit if requested).
+2. Tell the user the branch is ready and whether a push is needed.
+3. Wait for explicit push approval before running any push command.
+
+## Exceptions
+
+**pr-resolver / pr-review-loop:** when running `code/review/pr-resolver` or `code/ci/pr-review-loop`, approving the resolver/loop plan or an explicit "resolve comments" / "run the PR review loop" request grants scoped push consent for approved fix commits on the current PR branch. See pr-resolver and pr-review-loop `## Scoped consent`. All other pushes still need explicit approval.
