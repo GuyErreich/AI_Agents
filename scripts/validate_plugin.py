@@ -134,9 +134,7 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
             script_path = (plugin_root / script).resolve()
             if not script_path.is_file():
                 loc = f"hooks.{event}[{index}]"
-                errors.append(
-                    f"{_rel(hooks_path)}: {loc} command not found: {script}"
-                )
+                errors.append(f"{_rel(hooks_path)}: {loc} command not found: {script}")
 
 
 def main() -> int:
