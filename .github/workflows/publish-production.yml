@@ -1,0 +1,59 @@
+name: Publish Release - Production
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+      - "!*.*.*-rc"
+      - "!*.*.*-dev"
+
+concurrency:
+  group: publish-production-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Release gate
+    uses: ./.github/workflows/release-gate.yml
+    with:
+      ref: ${{ github.ref }}
+    secrets: inherit
+
+  release:
+    name: Create production release
+    needs: gate
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.ref }}
+
+      - name: Get GitHub App Token
+        uses: ./.github/actions/app-authentication
+        id: app-token
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: GH Release
+        uses: ./.github/actions/gh-release
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      - name: Marketplace reminder
+        run: |
+          {
+            echo "### Production channel"
+            echo "Tag \`${{ github.ref_name }}\` passed the release gate and GitHub Release was created."
+            echo ""
+            echo "**Public marketplace:** Cursor reviews every update. Re-submit or notify via"
+            echo "[cursor.com/marketplace/publish](https://cursor.com/marketplace/publish) if required."
+            echo ""
+            echo "**Team marketplace:** track \`master\` and refresh (Auto Refresh if the Cursor GitHub App is installed)."
+          } >> "$GITHUB_STEP_SUMMARY"

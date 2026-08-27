@@ -1,0 +1,61 @@
+name: Sync Plugin Versions
+
+on:
+  push:
+    branches:
+      - "release/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-version-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync JSON manifests from pyproject
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.ref }}
+
+      - name: Get GitHub App Token
+        uses: ./.github/actions/app-authentication
+        id: app-token
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Configure Git for App
+        run: |
+          git config user.name "${{ steps.app-token.outputs.user-name }}"
+          git config user.email "${{ steps.app-token.outputs.user-email }}"
+          git remote set-url origin "https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Sync versions
+        run: uv run python scripts/sync_version.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- \
+            plugins/ai-agents/.cursor-plugin/plugin.json \
+            .cursor-plugin/marketplace.json; then
+            echo "No version drift to commit"
+            exit 0
+          fi
+          git add \
+            plugins/ai-agents/.cursor-plugin/plugin.json \
+            .cursor-plugin/marketplace.json
+          git commit -m "sync: version manifests from pyproject.toml"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
