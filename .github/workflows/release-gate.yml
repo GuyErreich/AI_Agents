@@ -52,6 +52,19 @@ jobs:
           CI: "1"
         run: uv run python scripts/validate_plugin.py
 
+      - name: Marketplace submission checklist
+        env:
+          RELEASE_TAG: ${{ inputs.ref || github.ref_name }}
+          CI: "1"
+        run: |
+          {
+            echo "### Marketplace submission checklist"
+            echo "- [x] \`validate_plugin.py\` (kebab-case name, description, logo, README, no \`..\`/absolute paths)"
+            echo "- [x] Version consistency with tag / pyproject / manifests"
+            echo "- [x] Hook events, executable bits, reference links, context budget"
+          } >> "$GITHUB_STEP_SUMMARY"
+          uv run python scripts/validate_plugin.py
+
       - name: Ruff lint
         run: uv run ruff check plugins/ai-agents/hooks scripts
 

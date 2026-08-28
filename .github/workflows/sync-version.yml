@@ -31,12 +31,6 @@ jobs:
           app-id: ${{ secrets.GH_APP_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
-      - name: Configure Git for App
-        run: |
-          git config user.name "${{ steps.app-token.outputs.user-name }}"
-          git config user.email "${{ steps.app-token.outputs.user-email }}"
-          git remote set-url origin "https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git"
-
       - name: Install uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
@@ -46,16 +40,69 @@ jobs:
       - name: Sync versions
         run: uv run python scripts/sync_version.py
 
-      - name: Commit if changed
-        run: |
-          if git diff --quiet -- \
-            plugins/ai-agents/.cursor-plugin/plugin.json \
-            .cursor-plugin/marketplace.json; then
-            echo "No version drift to commit"
-            exit 0
-          fi
-          git add \
-            plugins/ai-agents/.cursor-plugin/plugin.json \
-            .cursor-plugin/marketplace.json
-          git commit -m "sync: version manifests from pyproject.toml"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Commit if changed (verified via GraphQL)
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+            const paths = [
+              'plugins/ai-agents/.cursor-plugin/plugin.json',
+              '.cursor-plugin/marketplace.json',
+            ];
+            const changed = paths.filter((p) => {
+              try {
+                execSync(`git diff --quiet -- ${p}`);
+                return false;
+              } catch {
+                return fs.existsSync(p);
+              }
+            });
+            if (changed.length === 0) {
+              core.info('No version drift to commit');
+              return;
+            }
+            const branch = context.ref.replace(/^refs\/heads\//, '');
+            const expectedHeadOid = execSync('git rev-parse HEAD').toString().trim();
+            const additions = [];
+            const updates = [];
+            for (const p of changed) {
+              const contents = fs.readFileSync(p).toString('base64');
+              try {
+                const fileSha = execSync(`git rev-parse HEAD:${p}`).toString().trim();
+                updates.push({ path: p, fileSha, contents });
+              } catch {
+                additions.push({ path: p, contents });
+              }
+            }
+            const fileChanges = {};
+            if (additions.length) fileChanges.additions = additions;
+            if (updates.length) fileChanges.updates = updates;
+            // Omit author/committer/signature so GitHub signs as the App.
+            const result = await github.graphql(
+              `mutation ($input: CreateCommitOnBranchInput!) {
+                createCommitOnBranch(input: $input) {
+                  commit { oid url }
+                }
+              }`,
+              {
+                input: {
+                  branch: {
+                    repositoryNameWithOwner: context.repo.owner + '/' + context.repo.repo,
+                    branchName: branch,
+                  },
+                  message: {
+                    headline: 'sync: version manifests from pyproject.toml',
+                  },
+                  expectedHeadOid,
+                  fileChanges,
+                },
+              },
+            );
+            core.info(
+              `Verified commit ${result.createCommitOnBranch.commit.oid}: ` +
+                result.createCommitOnBranch.commit.url,
+            );

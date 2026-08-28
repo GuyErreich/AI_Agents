@@ -43,6 +43,7 @@ jobs:
         uses: ./.github/actions/gh-release
         with:
           github_token: ${{ steps.app-token.outputs.token }}
+          plugin_dir: plugins/ai-agents
 
       - name: Marketplace reminder
         run: |

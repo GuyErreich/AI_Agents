@@ -186,6 +186,66 @@ def check_version_consistency(plugin_root: Path, errors: list[str]) -> None:
         errors.append(f"release tag version {tag_ver!r} != pyproject {expected!r}")
 
 
+def _is_unsafe_path(value: str) -> bool:
+    """Return True when ``value`` looks like an absolute or escaping path."""
+    if not value or value.startswith(("http://", "https://", "mailto:")):
+        return False
+    if value.startswith(("/", "\\", "~")):
+        return True
+    parts = Path(value).parts
+    return ".." in parts
+
+
+def _collect_path_like_strings(node: Any, *, prefix: str = "") -> list[tuple[str, str]]:
+    """Walk JSON and collect string values that look like file paths."""
+    found: list[tuple[str, str]] = []
+    if isinstance(node, dict):
+        for key, value in node.items():
+            path = f"{prefix}.{key}" if prefix else key
+            # Manifest path fields and nested path references.
+            if isinstance(value, str) and key in {
+                "logo",
+                "rules",
+                "skills",
+                "agents",
+                "hooks",
+                "commands",
+                "mcpServers",
+                "source",
+                "pluginRoot",
+            }:
+                found.append((path, value))
+            else:
+                found.extend(_collect_path_like_strings(value, prefix=path))
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            found.extend(_collect_path_like_strings(value, prefix=f"{prefix}[{index}]"))
+    return found
+
+
+def check_manifest_paths(
+    label: str,
+    document: dict[str, Any],
+    errors: list[str],
+) -> None:
+    """Reject absolute paths and ``..`` segments in manifest path fields."""
+    for field, value in _collect_path_like_strings(document):
+        if _is_unsafe_path(value):
+            errors.append(
+                f"{label}: {field} must be a relative path without '..' (got {value!r})"
+            )
+
+
+def check_readme(errors: list[str]) -> None:
+    """Require a root README for marketplace submission."""
+    readme = REPO_ROOT / "README.md"
+    if not readme.is_file():
+        errors.append("README.md: missing (required for marketplace submission)")
+        return
+    if not readme.read_text(encoding="utf-8").strip():
+        errors.append("README.md: empty (required for marketplace submission)")
+
+
 def check_logo(plugin_root: Path, manifest: dict[str, Any], errors: list[str]) -> None:
     """Require a committed logo referenced by relative path."""
     logo = str(manifest.get("logo") or "").strip()
@@ -199,6 +259,12 @@ def check_logo(plugin_root: Path, manifest: dict[str, Any], errors: list[str]) -
         errors.append(
             f"{_rel(plugin_root / '.cursor-plugin' / 'plugin.json')}: "
             "logo must be a relative path in the repo, not a URL"
+        )
+        return
+    if _is_unsafe_path(logo):
+        errors.append(
+            f"{_rel(plugin_root / '.cursor-plugin' / 'plugin.json')}: "
+            f"logo must be a relative path without '..' (got {logo!r})"
         )
         return
     logo_path = (plugin_root / logo).resolve()
@@ -404,6 +470,7 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
     if not str(manifest.get("description") or "").strip():
         errors.append(f"{_rel(manifest_path)}: description is required")
 
+    check_manifest_paths(_rel(manifest_path), manifest, errors)
     check_logo(plugin_root, manifest, errors)
 
     skills_dir = plugin_root / "skills"
@@ -487,6 +554,7 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
 def main() -> int:
     """Validate marketplace.json and every plugin it lists."""
     errors: list[str] = []
+    check_readme(errors)
     try:
         marketplace = _load_json(MARKETPLACE_PATH)
     except ValueError as exc:
@@ -501,6 +569,8 @@ def main() -> int:
     if not isinstance(owner, dict) or not str(owner.get("name") or "").strip():
         errors.append(f"{_rel(MARKETPLACE_PATH)}: owner.name is required")
 
+    check_manifest_paths(_rel(MARKETPLACE_PATH), marketplace, errors)
+
     plugin_root_prefix = Path(
         str((marketplace.get("metadata") or {}).get("pluginRoot") or ".")
     )
@@ -508,16 +578,41 @@ def main() -> int:
     if not isinstance(plugins, list) or not plugins:
         errors.append(f"{_rel(MARKETPLACE_PATH)}: plugins must be a non-empty list")
     else:
+        seen_names: set[str] = set()
         for index, entry in enumerate(plugins):
             if not isinstance(entry, dict):
                 errors.append(
                     f"{_rel(MARKETPLACE_PATH)}: plugins[{index}] must be an object"
                 )
                 continue
+            plugin_name = str(entry.get("name") or "").strip()
+            if plugin_name:
+                if not KEBAB.match(plugin_name):
+                    errors.append(
+                        f"{_rel(MARKETPLACE_PATH)}: plugins[{index}].name "
+                        "must be lowercase kebab-case"
+                    )
+                if plugin_name in seen_names:
+                    errors.append(
+                        f"{_rel(MARKETPLACE_PATH)}: duplicate plugin name "
+                        f"{plugin_name!r}"
+                    )
+                seen_names.add(plugin_name)
+            if not str(entry.get("description") or "").strip():
+                errors.append(
+                    f"{_rel(MARKETPLACE_PATH)}: plugins[{index}].description "
+                    "is required"
+                )
             source = str(entry.get("source") or "").strip()
             if not source:
                 errors.append(
                     f"{_rel(MARKETPLACE_PATH)}: plugins[{index}] missing source"
+                )
+                continue
+            if _is_unsafe_path(source):
+                errors.append(
+                    f"{_rel(MARKETPLACE_PATH)}: plugins[{index}].source "
+                    f"must be a relative path without '..' (got {source!r})"
                 )
                 continue
             plugin_dir = (REPO_ROOT / plugin_root_prefix / source).resolve()

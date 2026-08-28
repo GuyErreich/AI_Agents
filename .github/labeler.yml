@@ -1,0 +1,58 @@
+# Labels applied based on changed files (any PR touching these paths)
+# and/or branch name prefixes.
+# Requires actions/labeler@v5 — see .github/workflows/pr-labeler.yml
+
+"plugin":
+  - changed-files:
+      - any-glob-to-any-file: "plugins/**"
+
+"skills":
+  - changed-files:
+      - any-glob-to-any-file: "plugins/ai-agents/skills/**"
+
+"rules":
+  - changed-files:
+      - any-glob-to-any-file: "plugins/ai-agents/rules/**"
+
+"hooks":
+  - changed-files:
+      - any-glob-to-any-file: "plugins/ai-agents/hooks/**"
+
+"agents":
+  - changed-files:
+      - any-glob-to-any-file: "plugins/ai-agents/agents/**"
+
+"scripts":
+  - changed-files:
+      - any-glob-to-any-file: "scripts/**"
+
+"ci/cd":
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+  - head-branch: ["^ci/.*", "^workflow/.*", "^devops/.*"]
+
+"dependencies":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "pyproject.toml"
+          - "uv.lock"
+
+"feature":
+  - head-branch: ["^feat/.*", "^feature/.*"]
+
+"bug":
+  - head-branch: ["^fix/.*", "^bugfix/.*", "^hotfix/.*"]
+
+"maintenance":
+  - head-branch: ["^chore/.*", "^refactor/.*"]
+
+"documentation":
+  - head-branch: ["^docs/.*"]
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "README*"
+          - "docs/**"
+
+"semver-bump":
+  - head-branch: ["^release/.*"]

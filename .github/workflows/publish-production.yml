@@ -26,6 +26,7 @@ jobs:
     environment: production
     permissions:
       contents: write
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -33,6 +34,19 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
           ref: ${{ github.ref }}
+
+      - name: Published-ref guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG_SHA="$(git rev-parse HEAD)"
+          git fetch origin master
+          if ! git merge-base --is-ancestor "$TAG_SHA" origin/master; then
+            echo "Tag ${{ github.ref_name }} ($TAG_SHA) is not an ancestor of origin/master."
+            echo "Cursor indexes the master branch; production tags must land on master first."
+            exit 1
+          fi
+          echo "Published-ref guard passed: $TAG_SHA is on master."
 
       - name: Get GitHub App Token
         uses: ./.github/actions/app-authentication
@@ -45,6 +59,52 @@ jobs:
         uses: ./.github/actions/gh-release
         with:
           github_token: ${{ steps.app-token.outputs.token }}
+          plugin_dir: plugins/ai-agents
+
+      - name: First marketplace submission issue
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          PRIOR="$(gh release list --limit 100 --json tagName \
+            --jq '[.[] | select(.tagName | test("-rc|-dev") | not)] | length')"
+          if [ "$PRIOR" -gt 1 ]; then
+            echo "Not the first production release (count=$PRIOR); skipping issue."
+            exit 0
+          fi
+          EXISTING="$(gh issue list --search 'Submit ai-agents to Cursor marketplace in:title' \
+            --state all --json number --jq 'length')"
+          if [ "$EXISTING" -gt 0 ]; then
+            echo "Marketplace submission issue already exists."
+            exit 0
+          fi
+          BODY_FILE="$(mktemp)"
+          cat > "$BODY_FILE" <<EOF
+          ## First public marketplace submission
+
+          Production tag \`${TAG}\` passed the release gate and a GitHub Release was created.
+
+          Cursor has **no publish API** — submit the public repository once at:
+
+          https://cursor.com/marketplace/publish
+
+          ### Checklist
+          - [ ] Repo is public and default branch is \`master\`
+          - [ ] \`.cursor-plugin/marketplace.json\` and \`plugins/ai-agents/.cursor-plugin/plugin.json\` validate
+          - [ ] Logo committed and referenced by relative path
+          - [ ] README documents usage
+          - [ ] Submitted at cursor.com/marketplace/publish
+          - [ ] Cursor manual review completed
+
+          Subsequent production tags only need a re-submit / notify if Cursor requires it for updates.
+          EOF
+          # Strip leading indentation from the heredoc body.
+          sed -i 's/^          //' "$BODY_FILE"
+          gh issue create \
+            --title "Submit ai-agents to Cursor marketplace" \
+            --body-file "$BODY_FILE"
+          rm -f "$BODY_FILE"
 
       - name: Marketplace reminder
         run: |

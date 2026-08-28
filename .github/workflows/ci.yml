@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -38,6 +39,14 @@ jobs:
 
       - name: Pytest
         run: uv run pytest
+
+      - name: Upload coverage report
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-code-coverage@1c15be36fc3733ba839b1dd643bd9556e4426dc1 # v1
+        with:
+          file: coverage.xml
+          language: Python
+          label: code-coverage/pytest
 
       - name: Version sync check
         run: uv run python scripts/sync_version.py --check
