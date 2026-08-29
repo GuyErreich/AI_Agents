@@ -24,3 +24,11 @@ paths = [
   '''uv\.lock$''',
   '''\.pytest_cache/''',
 ]
+
+# Default gitleaks rule uses ghs_[0-9a-zA-Z]{36} and misses stateless JWT tokens (~520 chars).
+[[rules]]
+id = "github-app-installation-token-stateless"
+description = "GitHub App installation token (stateful or stateless JWT format)"
+regex = '''ghs_[A-Za-z0-9\.\-_]{36,}'''
+entropy = 3
+keywords = ["ghs_"]

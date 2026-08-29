@@ -37,6 +37,8 @@ Verify:
 gh secret list --repo GuyErreich/AI_Agents
 ```
 
+**Stateless installation tokens:** GitHub is rolling out longer `ghs_` JWT-format App tokens (~520 characters). This repo treats tokens as opaque strings; no workflow changes are required. After secrets are configured, run the **Validate Stateless App Token** workflow on [Action-Semver-Control](https://github.com/GuyErreich/Action-Semver-Control/actions/workflows/validate-stateless-token.yml) with `enabled` and `disabled`. See [TOKEN_FORMAT.md](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TOKEN_FORMAT.md) for details.
+
 ### 3. Environments
 
 Applied live (2026-08-28):
