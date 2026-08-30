@@ -19,7 +19,7 @@ Load `skills/code/foundations/engineering/SKILL.md` first.
 | Title prefix (`feat:`, `fix:`, etc.) and release-notes grouping | `references/title-conventions.md` |
 | PR body scaffold (Summary + Test plan) | `assets/pr-template.md` |
 
-Load `title-conventions.md` before choosing the PR title. Copy/adapt `pr-template.md` for the body.
+Load `title-conventions.md` before choosing the PR title. Copy/adapt `pr-template.md` for the body. Under **Summary**, place each change in the matching section (Features, Bug Fixes, etc.); **omit empty sections**.
 
 ## Workflow
 
@@ -28,6 +28,6 @@ Load `title-conventions.md` before choosing the PR title. Copy/adapt `pr-templat
 3. **Ensure the branch is pushed.** Opening a PR requires the branch on the remote — but pushing requires explicit push consent (see `git-push-consent.mdc` and the push skill). Ask before pushing if needed.
 4. **Open the PR:**
    - **Title** — one line; prefix from `references/title-conventions.md` matching the primary change type (prefer `feat:` / `fix:` for auto-semver repos).
-   - **Body** — from `assets/pr-template.md`, passed via HEREDOC to `gh pr create --body "$(cat <<'EOF' ... EOF)"`.
-   - Multi-concern branches: prefer one PR per concern, or title the dominant type; secondary changes go in Summary bullets only.
+   - **Body** — from `assets/pr-template.md`, passed via HEREDOC to `gh pr create --body "$(cat <<'EOF' ... EOF)"`. Group changes under Summary by type (Features, Bug Fixes, …); drop sections with no items.
+   - Multi-concern branches: use multiple Summary sections when needed; **title** still reflects the dominant change type for squash-merge release notes (`header_only`).
 5. Write complete sentences. Reflect all commits in the branch, not only the most recent. Return the PR URL when done.

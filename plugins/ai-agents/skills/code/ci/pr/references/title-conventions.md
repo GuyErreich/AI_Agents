@@ -21,6 +21,21 @@ Squash-merge uses the **PR title** as the git commit header. Repos using auto-se
 
 Some teams use imperative titles without a prefix (`Add …`, `Fix …`, `Harden …`). These only land in the right release-notes group when the consumer's `commit_groups.patterns` lists that verb. Prefer `feat:` / `fix:` unless the repo documents supported imperatives.
 
+## Summary sections (PR body)
+
+The PR body template groups changes under **Summary** by type. Use the section that matches each bullet:
+
+| Summary section | Use for |
+|-----------------|---------|
+| Features | New capability, enhancement, hardening |
+| Bug Fixes | Defect or regression fixed |
+| Refactoring | Behavior-neutral restructure |
+| Documentation | Docs-only |
+| Infrastructure & Tooling | CI, deps, build, chore |
+| Other | Does not fit above |
+
+Include only sections that have at least one bullet. The **PR title** (not Summary bullets) drives auto-semver release-note grouping when `summary_mode: header_only`.
+
 ## Multi-concern branches
 
 Under `header_only`, only the **title** is grouped — Summary bullets are not classified separately.
