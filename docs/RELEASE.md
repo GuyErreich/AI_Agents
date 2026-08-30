@@ -102,6 +102,8 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 **Pin:** temporarily on [Action-Semver-Control#219](https://github.com/GuyErreich/Action-Semver-Control/pull/219) (`2f52db3…`). After merge and promotion to a production tag, re-pin `auto-semver.yml` and `promote.yml` to that tag SHA.
 
+**Concurrency:** `auto-semver.yml` must queue bump runs per target branch (`cancel-in-progress: false`). See [Action-Semver-Control SETUP — Concurrent merges](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/SETUP.md#concurrent-merges--bump-queue) and [TROUBLESHOOTING](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TROUBLESHOOTING.md).
+
 ## Version sync
 
 `Action-Semver-Control` updates `pyproject.toml` only. `scripts/sync_version.py` (via `sync-version.yml` on `release/**`) keeps:
