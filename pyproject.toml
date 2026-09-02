@@ -9,7 +9,7 @@ license = { text = "MIT" }
 [dependency-groups]
 dev = [
     "pytest>=8.0",
-    "ruff>=0.12",
+    "ruff>=0.16.5",
 ]
 
 [tool.ruff]
