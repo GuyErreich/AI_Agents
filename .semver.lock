@@ -1,5 +1,7 @@
-version: 1.0.0
+version: 1.0.1-dev
 source_branch: init
 target_branch: dev
+target_base_sha: fa2b1bc08e15f23224d12a668520582a076f6015
 finalized: false
 managed_by: auto-semver
+branch_role: release
