@@ -50,6 +50,8 @@ jobs:
           file: coverage.xml
           language: Python
           label: code-coverage/pytest
+          # Repo may not have Code Coverage enabled yet; do not fail the quality job.
+          fail-on-error: false
 
       - name: Version sync check
         run: uv run python scripts/sync_version.py --check
