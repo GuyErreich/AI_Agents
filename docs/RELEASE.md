@@ -73,7 +73,7 @@ Two rulesets mirror [PersonalWebsite](https://github.com/GuyErreich/PersonalWebs
 
 **Bypass actors:** repository admins may bypass via pull request only. The Auto Semver Bot GitHub App (`Integration` `2720857`, same as Action-Semver-Control) has **always** bypass so finalize auto-promote and manual `promote.yml` can update `staging` without opening a PR for the direct ref update.
 
-`release/**` is intentionally **not** covered so Action-Semver-Control can force-push release branches.
+`auto-semver/release/**` (and legacy `release/**`) are intentionally **not** covered so Action-Semver-Control can force-push release branches.
 
 **Default branch note:** `workflow_dispatch` (e.g. `promote.yml`) only registers when the workflow file exists on the repository default branch (`master`). Channel CD still runs from `dev`/`staging` tips for push/tag events; keep a copy of promote/publish callers on `master` so manual promotion stays available.
 
@@ -114,7 +114,7 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 `Action-Semver-Control` updates `pyproject.toml` only (`uv.lock` is **not** in `version_files`). After a version bump, run `uv lock` (or let Dependabot refresh) so the editable package version in the lockfile matches `pyproject.toml`.
 
-`scripts/sync_version.py` (via `sync-version.yml` on `release/**`) keeps:
+`scripts/sync_version.py` (via `sync-version.yml` on `auto-semver/release/**`) keeps:
 
 - `plugins/ai-agents/.cursor-plugin/plugin.json`
 - `.cursor-plugin/marketplace.json`

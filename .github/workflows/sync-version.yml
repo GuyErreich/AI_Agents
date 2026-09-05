@@ -3,6 +3,7 @@ name: Sync Plugin Versions
 on:
   push:
     branches:
+      - "auto-semver/release/**"
       - "release/**"
 
 permissions:
