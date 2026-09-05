@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Portable Cursor agent skills, rules, subagents, and review-loop hooks.",
-    "version": "1.0.1-dev",
+    "version": "1.0.2-dev",
     "pluginRoot": "plugins"
   },
   "plugins": [
