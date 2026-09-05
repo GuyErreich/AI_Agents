@@ -130,18 +130,17 @@ def _git_ls_files_mode(path: Path) -> str | None:
 
 
 def _expect_tag_version() -> str | None:
-    """Optional expected version from RELEASE_TAG / GITHUB_REF_NAME."""
+    """Optional expected version from RELEASE_TAG / GITHUB_REF_NAME.
+
+    Channel tags from Action-Semver-Control keep their suffixes (``-dev``,
+    ``-rc``) and must match ``pyproject.toml`` exactly.
+    """
     for key in ("RELEASE_TAG", "GITHUB_REF_NAME"):
         raw = os.environ.get(key, "").strip()
         if not raw:
             continue
         tag = raw.removeprefix("refs/tags/")
-        # Strip channel suffixes used by Action-Semver-Control.
-        for suffix in ("-dev", "-rc"):
-            if tag.endswith(suffix):
-                tag = tag[: -len(suffix)]
-                break
-        if re.fullmatch(r"\d+\.\d+\.\d+", tag):
+        if re.fullmatch(r"\d+\.\d+\.\d+(?:-(?:dev|rc))?", tag):
             return tag
     return None
 
