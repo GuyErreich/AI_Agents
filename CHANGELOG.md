@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - finish 1.0.2-rc metadata after partial auto-promote (#18)
 ### Bug Fixes & Resolutions
 - grant release-gate permissions from publish callers (#21)
+- compare channel release tags with suffixes intact (#24)
 
 ## License
 This project is licensed under the MIT License.

@@ -1,7 +1,7 @@
 version: 1.0.2-rc
 source_branch: init
 target_branch: dev
-target_base_sha: daf41eb0c6db796a89c0b22b27cac3561c73fd53
+target_base_sha: 6fa4a39a89abfd400f3a18d77d56064c20fc7fea
 finalized: false
 managed_by: auto-semver
 branch_role: release
