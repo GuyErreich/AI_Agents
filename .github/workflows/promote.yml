@@ -23,14 +23,62 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   promote:
-    uses: GuyErreich/Action-Semver-Control/.github/workflows/semver-promote.reusable.yml@v1
-    with:
-      from_tag: ${{ inputs.from_tag }}
-      to_branch: ${{ inputs.to_branch }}
-      dry_run: ${{ inputs.dry_run }}
-      client-id: ${{ vars.GH_APP_CLIENT_ID }}
-    secrets:
-      app-private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+    name: Promote tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Get GitHub App Token
+        uses: ./.github/actions/app-authentication
+        id: app-token
+        with:
+          client-id: ${{ vars.GH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Configure Git for App
+        run: |
+          git config user.name "${{ steps.app-token.outputs.user-name }}"
+          git config user.email "${{ steps.app-token.outputs.user-email }}"
+          git remote set-url origin "https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git"
+
+      - name: Validate promotion (dry run)
+        if: ${{ inputs.dry_run }}
+        uses: GuyErreich/Action-Semver-Control@v1
+        with:
+          action: promote
+          to_branch: ${{ inputs.to_branch }}
+          from_tag: ${{ inputs.from_tag }}
+          dry_run: "true"
+          github-token: ${{ steps.app-token.outputs.token }}
+          signed-commits: "true"
+          debug: "true"
+
+      - name: Execute Promotion
+        if: ${{ !inputs.dry_run }}
+        uses: GuyErreich/Action-Semver-Control@v1
+        with:
+          action: promote
+          to_branch: ${{ inputs.to_branch }}
+          from_tag: ${{ inputs.from_tag }}
+          github-token: ${{ steps.app-token.outputs.token }}
+          signed-commits: "true"
+          debug: "true"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Promotion"
+            echo "Source tag: \`${{ inputs.from_tag }}\`"
+            echo "Target branch: \`${{ inputs.to_branch }}\`"
+            echo "Dry run: \`${{ inputs.dry_run }}\`"
+            echo "Job status: \`${{ job.status }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
