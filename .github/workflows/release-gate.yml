@@ -1,0 +1,178 @@
+name: Release Gate
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref to validate (tag or SHA)"
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to validate (tag or SHA)"
+        required: false
+        default: ""
+        type: string
+
+concurrency:
+  group: release-gate-${{ inputs.ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  manifests:
+    name: Manifests & validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Sync dev dependencies
+        run: uv sync --group dev
+
+      - name: Dependency audit
+        run: uv audit --frozen
+
+      - name: Version sync check
+        env:
+          RELEASE_TAG: ${{ inputs.ref || github.ref_name }}
+        run: uv run python scripts/sync_version.py --check
+
+      - name: Validate plugin
+        env:
+          RELEASE_TAG: ${{ inputs.ref || github.ref_name }}
+          CI: "1"
+        run: uv run python scripts/validate_plugin.py
+
+      - name: Marketplace submission checklist
+        env:
+          RELEASE_TAG: ${{ inputs.ref || github.ref_name }}
+          CI: "1"
+        run: |
+          {
+            echo "### Marketplace submission checklist"
+            echo "- [x] \`validate_plugin.py\` (kebab-case name, description, logo, README, no \`..\`/absolute paths)"
+            echo "- [x] Version consistency with tag / pyproject / manifests"
+            echo "- [x] Hook events, executable bits, reference links, context budget"
+          } >> "$GITHUB_STEP_SUMMARY"
+          uv run python scripts/validate_plugin.py
+
+      - name: Ruff lint
+        run: uv run ruff check plugins/ai-agents/hooks scripts
+
+      - name: Ruff format
+        run: uv run ruff format --check scripts
+
+      - name: Pytest
+        run: uv run pytest
+
+  hook-smoke:
+    name: Hook install smoke (${{ matrix.os }} / ${{ matrix.mode }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        mode: [uv, degraded]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Install uv
+        if: matrix.mode == 'uv'
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Hook smoke
+        env:
+          CI: "1"
+        run: python3 scripts/hook_install_smoke.py --mode ${{ matrix.mode }}
+
+  gitleaks:
+    name: Gitleaks (full history)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+          GITLEAKS_VERSION: "8.30.1"
+          GITLEAKS_ENABLE_SUMMARY: "true"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+          GITLEAKS_ENABLE_COMMENTS: "false"
+
+  semgrep:
+    name: Semgrep (release SHA)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
+        with:
+          config: >-
+            p/python
+            p/owasp-top-ten
+            p/secrets
+            semgrep/
+
+  codeql:
+    name: CodeQL (release SHA)
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+        with:
+          languages: python
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+        with:
+          category: "/language:python"

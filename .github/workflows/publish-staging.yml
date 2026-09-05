@@ -1,0 +1,56 @@
+name: Publish Release - Staging
+
+on:
+  push:
+    tags:
+      - "*.*.*-rc"
+
+concurrency:
+  group: publish-staging-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Release gate
+    uses: ./.github/workflows/release-gate.yml
+    with:
+      ref: ${{ github.ref }}
+    secrets: inherit
+
+  release:
+    name: Create prerelease
+    needs: gate
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.ref }}
+
+      - name: Get GitHub App Token
+        uses: ./.github/actions/app-authentication
+        id: app-token
+        with:
+          client-id: ${{ vars.GH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: GH Release
+        uses: ./.github/actions/gh-release
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          plugin_dir: plugins/ai-agents
+
+      - name: Marketplace reminder
+        run: |
+          {
+            echo "### Staging channel"
+            echo "Tag \`${{ github.ref_name }}\` passed the release gate."
+            echo ""
+            echo "Point the **team marketplace** at the \`staging\` branch (or refresh it)."
+            echo "Requires the Cursor GitHub App on this repo for auto-refresh."
+          } >> "$GITHUB_STEP_SUMMARY"

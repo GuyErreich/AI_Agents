@@ -29,7 +29,7 @@
     "afterShellExecution": [
       {
         "command": "./hooks/run-python.sh npm_dep_gate.py",
-        "matcher": "npm\\s+(install|i\\b|ci|update|uninstall|remove|audit|upgrade)"
+        "matcher": "(npm\\s+(install|i\\b|ci|update|uninstall|remove|audit|upgrade)|uv\\s+(add|remove|lock|sync|audit|pip\\s+install|pip\\s+uninstall))"
       }
     ],
     "stop": [
