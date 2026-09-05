@@ -1,10 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.0.2-dev] - 05-09-2026
+## [1.0.2-rc] - 05-09-2026
 
-### Bug Fixes & Resolutions
-- sync manifests after ASC bump and allow App ruleset bypass (#15)
+### Infrastructure & Tooling
+- auto-promote 1.0.2-dev from 1.0.2-dev to staging as 1.0.2-rc
+- finish 1.0.2-rc metadata after partial auto-promote (#18)
 
 ## License
 This project is licensed under the MIT License.
