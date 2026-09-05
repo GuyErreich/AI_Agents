@@ -1,0 +1,43 @@
+name: PR Labeler
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  labeler:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create repository labels
+        run: |
+          create_label() {
+            gh label create "$1" --color "$2" --description "$3" \
+              --repo "$GITHUB_REPOSITORY" --force
+          }
+          create_label "plugin"         "5319e7" "Plugin package changes"
+          create_label "skills"         "0075ca" "Skill content changes"
+          create_label "rules"          "0e8a16" "Rule content changes"
+          create_label "hooks"          "006b75" "Hook script changes"
+          create_label "agents"         "a2eeef" "Subagent definition changes"
+          create_label "scripts"        "e4e669" "Repo script changes"
+          create_label "ci/cd"          "8f8f8f" "CI/CD and workflow changes"
+          create_label "dependencies"   "0366d6" "Dependency updates"
+          create_label "feature"        "84b6eb" "New feature"
+          create_label "bug"            "ee0701" "Bug fix"
+          create_label "maintenance"    "bfd4f2" "Maintenance / refactoring"
+          create_label "documentation"  "0052cc" "Documentation updates"
+          create_label "semver-bump"    "d93f0b" "Release PR from Action-Semver-Control"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply labels
+        uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
