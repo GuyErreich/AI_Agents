@@ -44,10 +44,10 @@ gh secret list --repo GuyErreich/AI_Agents
 
 ### 3. Environments
 
-| Environment | Branch policy | Protection |
+| Environment | Deploy-from policy | Protection |
 |---|---|---|
-| `staging` | `staging` only | No required reviewers |
-| `production` | `master` only | Required reviewer: `@GuyErreich` |
+| `staging` | branch `staging` + tags `*.*.*-rc` | No required reviewers |
+| `production` | branch `master` + tags `*.*.*` | Required reviewer: `@GuyErreich` |
 
 Re-apply or inspect:
 

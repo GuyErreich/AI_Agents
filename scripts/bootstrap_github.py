@@ -82,16 +82,29 @@ def apply_environments(repo: str, *, dry_run: bool) -> None:
         dry_run=dry_run,
     )
     if not dry_run:
+        # Branch tips (marketplace indexes branches) plus publish tags.
         _gh_api(
             "POST",
             f"{base}/staging/deployment-branch-policies",
-            {"name": "staging"},
+            {"name": "staging", "type": "branch"},
+            dry_run=dry_run,
+        )
+        _gh_api(
+            "POST",
+            f"{base}/staging/deployment-branch-policies",
+            {"name": "*.*.*-rc", "type": "tag"},
             dry_run=dry_run,
         )
         _gh_api(
             "POST",
             f"{base}/production/deployment-branch-policies",
-            {"name": "master"},
+            {"name": "master", "type": "branch"},
+            dry_run=dry_run,
+        )
+        _gh_api(
+            "POST",
+            f"{base}/production/deployment-branch-policies",
+            {"name": "*.*.*", "type": "tag"},
             dry_run=dry_run,
         )
 
