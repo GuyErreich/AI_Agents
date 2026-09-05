@@ -1,10 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - 2026-08-27
+## [1.0.1-dev] - 05-09-2026
 
-### Features & Enhancements
-- Package portable agent skills as a Cursor plugin with team and public marketplace support.
+### Other Changes
+- Miscellaneous changes
 
 ## License
 This project is licensed under the MIT License.
