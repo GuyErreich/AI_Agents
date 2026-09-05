@@ -31,6 +31,9 @@ jobs:
       - name: Sync dev dependencies
         run: uv sync --group dev
 
+      - name: Dependency audit
+        run: uv audit --frozen
+
       - name: Ruff lint
         run: uv run ruff check plugins/ai-agents/hooks scripts
 

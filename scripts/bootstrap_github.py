@@ -128,6 +128,7 @@ def apply_rulesets(repo: str, *, dry_run: bool) -> None:
                         {"context": "Gitleaks", "integration_id": gh_actions},
                         {"context": "SAST", "integration_id": gh_actions},
                         {"context": "Analyze Python", "integration_id": codeql},
+                        {"context": "license-check", "integration_id": gh_actions},
                     ],
                 },
             },

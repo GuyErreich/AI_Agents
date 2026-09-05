@@ -5,8 +5,8 @@
 
 """Local release-gate orchestrator (mirrors CI release-gate checks).
 
-Runs: sync --check, validate_plugin, hook install smoke (with uv), and
-optionally the degraded-toolchain smoke. Intended for the release milestone.
+Runs: uv audit, sync --check, validate_plugin, hook install smoke (with uv),
+and optionally the degraded-toolchain smoke. Intended for the release milestone.
 """
 
 from __future__ import annotations
@@ -37,6 +37,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     checks: list[list[str]] = [
+        ["uv", "audit", "--frozen"],
         [sys.executable, str(REPO_ROOT / "scripts" / "sync_version.py"), "--check"],
         [sys.executable, str(REPO_ROOT / "scripts" / "validate_plugin.py")],
         [

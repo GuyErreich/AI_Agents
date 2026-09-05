@@ -28,7 +28,7 @@ jobs:
         uses: ./.github/actions/app-authentication
         id: app-token
         with:
-          app-id: ${{ secrets.GH_APP_ID }}
+          client-id: ${{ vars.GH_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
 
       - name: Install uv

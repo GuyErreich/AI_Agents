@@ -41,6 +41,9 @@ jobs:
       - name: Sync dev dependencies
         run: uv sync --group dev
 
+      - name: Dependency audit
+        run: uv audit --frozen
+
       - name: Version sync check
         env:
           RELEASE_TAG: ${{ inputs.ref || github.ref_name }}

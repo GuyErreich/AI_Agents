@@ -73,6 +73,7 @@ Requires [uv](https://docs.astral.sh/uv/) and Python 3.12+:
 
 ```bash
 uv sync --group dev
+uv audit --frozen
 uv run python scripts/sync_version.py --check
 uv run python scripts/validate_plugin.py
 uv run ruff check plugins/ai-agents/hooks scripts
@@ -82,7 +83,7 @@ uv run python scripts/release_gate.py   # before promote / production tag
 pre-commit run --all-files   # gitleaks, JSON/YAML, ruff
 ```
 
-CI on `dev` / `staging` / `master` and pull requests runs Gitleaks, Ruff, pytest, plugin validation, license headers, CodeQL, and Semgrep. Tag pushes run the full **release gate** before creating a GitHub Release.
+CI on `dev` / `staging` / `master` and pull requests runs Gitleaks, Ruff, pytest, plugin validation, `uv audit`, license headers, CodeQL, and Semgrep. Tag pushes run the full **release gate** before creating a GitHub Release.
 
 ## Inheritance
 
