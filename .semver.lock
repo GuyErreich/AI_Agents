@@ -1,0 +1,5 @@
+version: 1.0.0
+source_branch: init
+target_branch: dev
+finalized: false
+managed_by: auto-semver
