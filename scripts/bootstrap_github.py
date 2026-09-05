@@ -163,12 +163,20 @@ def apply_rulesets(repo: str, *, dry_run: bool) -> None:
                 "parameters": {"minimum_coverage": 90, "max_coverage_drop": 5},
             },
         ],
+        # Repository admins: bypass only via PR. Auto Semver Bot (same Integration
+        # as Action-Semver-Control): always, so finalize auto-promote / promote
+        # can update staging without required checks on a direct ref update.
         "bypass_actors": [
             {
                 "actor_id": 5,
                 "actor_type": "RepositoryRole",
                 "bypass_mode": "pull_request",
-            }
+            },
+            {
+                "actor_id": 2720857,
+                "actor_type": "Integration",
+                "bypass_mode": "always",
+            },
         ],
     }
     linear_dev = {

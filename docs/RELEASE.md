@@ -71,7 +71,11 @@ Two rulesets mirror [PersonalWebsite](https://github.com/GuyErreich/PersonalWebs
 
 **Linear history (dev only)** — squash-only integration on `dev`; omitted on `staging`/`master` because promotions are merge commits.
 
+**Bypass actors:** repository admins may bypass via pull request only. The Auto Semver Bot GitHub App (`Integration` `2720857`, same as Action-Semver-Control) has **always** bypass so finalize auto-promote and manual `promote.yml` can update `staging` without opening a PR for the direct ref update.
+
 `release/**` is intentionally **not** covered so Action-Semver-Control can force-push release branches.
+
+**Default branch note:** `workflow_dispatch` (e.g. `promote.yml`) only registers when the workflow file exists on the repository default branch (`master`). Channel CD still runs from `dev`/`staging` tips for push/tag events; keep a copy of promote/publish callers on `master` so manual promotion stays available.
 
 Re-apply:
 
