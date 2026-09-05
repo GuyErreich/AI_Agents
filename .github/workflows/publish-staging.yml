@@ -19,7 +19,8 @@ jobs:
       contents: read
       security-events: write
     with:
-      ref: ${{ github.ref }}
+      # Tag short name (e.g. 1.0.2-rc), not refs/tags/...
+      ref: ${{ github.ref_name }}
     secrets: inherit
 
   release:
