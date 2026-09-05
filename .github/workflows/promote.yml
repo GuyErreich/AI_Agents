@@ -1,0 +1,36 @@
+name: Manual Semver Promotion
+
+on:
+  workflow_dispatch:
+    inputs:
+      from_tag:
+        description: "Tag to promote (e.g. 1.0.0-dev)"
+        required: true
+        type: string
+      to_branch:
+        description: "Target branch"
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - master
+      dry_run:
+        description: "Validate without performing changes"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    uses: GuyErreich/Action-Semver-Control/.github/workflows/semver-promote.reusable.yml@v1
+    with:
+      from_tag: ${{ inputs.from_tag }}
+      to_branch: ${{ inputs.to_branch }}
+      dry_run: ${{ inputs.dry_run }}
+      client-id: ${{ vars.GH_APP_CLIENT_ID }}
+    secrets:
+      app-private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}

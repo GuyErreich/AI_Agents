@@ -1,0 +1,25 @@
+name: Auto Semver Bump
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [dev, staging, master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Required: queue bump runs per integration branch when multiple PRs merge together.
+# Do not set cancel-in-progress: true — cancelled runs lose their version bump.
+concurrency:
+  group: auto-semver-bump-${{ github.repository }}-${{ github.event.pull_request.base.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    if: github.event.pull_request.merged == true
+    uses: GuyErreich/Action-Semver-Control/.github/workflows/semver-bump.reusable.yml@v1
+    with:
+      client-id: ${{ vars.GH_APP_CLIENT_ID }}
+    secrets:
+      app-private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}

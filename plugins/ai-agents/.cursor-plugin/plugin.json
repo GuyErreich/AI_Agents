@@ -9,6 +9,7 @@
   "homepage": "https://github.com/GuyErreich/AI_Agents",
   "repository": "https://github.com/GuyErreich/AI_Agents",
   "license": "MIT",
+  "logo": "assets/logo.svg",
   "keywords": [
     "skills",
     "rules",

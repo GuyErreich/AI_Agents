@@ -1,0 +1,192 @@
+start_version: "1.0.0"
+
+suffixes:
+  dev: "-dev"
+  staging: "-rc"
+  master: ""
+
+promotions:
+  - from_branch: dev
+    to_branch: staging
+    auto_promote: true
+  - from_branch: staging
+    to_branch: master
+    auto_promote: false
+
+# Only pyproject.toml — JSON manifests end with commas and are not updated by
+# VersionFileUpdater. scripts/sync_version.py keeps plugin.json / marketplace.json
+# in sync on release/** branches.
+version_files:
+  - "pyproject.toml"
+
+commit_groups:
+  - title: "Breaking Changes"
+    match_groups:
+      - "Breaking Changes"
+    patterns:
+      - "^(BREAKING CHANGE|breaking):"
+      - "^(major):"
+      - "^feat.*!:"
+      - "^fix.*!:"
+    priority: 1
+
+  - title: "Features & Enhancements"
+    match_groups:
+      - "Features"
+      - "New Features"
+      - "Enhancements"
+    patterns:
+      - "^feat(\\([^)]*\\))?:"
+      - "^feature(\\([^)]*\\))?:"
+      - "^Add "
+      - "^Added "
+      - "^Enhance "
+      - "^Enhanced "
+      - "^add(\\([^)]*\\))?:"
+      - "^enhance(\\([^)]*\\))?:"
+      - "^Implement "
+      - "^Implemented "
+      - "^Improve "
+      - "^Improved "
+      - "^Support "
+    priority: 2
+
+  - title: "Skills, Rules & Agents"
+    match_groups:
+      - "Skills"
+      - "Rules"
+      - "Agents"
+    patterns:
+      - "^skill(\\([^)]*\\))?:"
+      - "^rule(\\([^)]*\\))?:"
+      - "^agent(\\([^)]*\\))?:"
+      - "^hooks?(\\([^)]*\\))?:"
+    priority: 3
+
+  - title: "Refactoring & Code Quality"
+    match_groups:
+      - "Code Refactoring"
+      - "Refactoring"
+      - "Style"
+    patterns:
+      - "^refactor(\\([^)]*\\))?:"
+      - "^Refactor "
+      - "^style(\\([^)]*\\))?:"
+      - "^format(\\([^)]*\\))?:"
+      - "^lint(\\([^)]*\\))?:"
+      - "^Clean "
+      - "^Simplify "
+    priority: 4
+
+  - title: "Infrastructure & Tooling"
+    match_groups:
+      - "Infrastructure"
+      - "Chores"
+      - "Build"
+      - "CI"
+      - "CI/CD"
+      - "Workflows"
+    patterns:
+      - "^chore(\\([^)]*\\))?:"
+      - "^ci(\\([^)]*\\))?:"
+      - "^build(\\([^)]*\\))?:"
+      - "^devops(\\([^)]*\\))?:"
+      - "^deps?(\\([^)]*\\))?:"
+      - "^Update "
+      - "^Updated "
+    priority: 5
+
+  - title: "Bug Fixes & Resolutions"
+    match_groups:
+      - "Bug Fixes"
+      - "Bug Fix"
+      - "Fixes"
+    patterns:
+      - "^fix(\\([^)]*\\))?:"
+      - "^Fix "
+      - "^Resolve "
+      - "^Resolved "
+      - "^Fixed "
+      - "^bug(\\([^)]*\\))?:"
+      - "^hotfix(\\([^)]*\\))?:"
+      - "^patch(\\([^)]*\\))?:"
+    priority: 6
+
+  - title: "Testing"
+    match_groups:
+      - "Tests"
+      - "Testing"
+    patterns:
+      - "^test(\\([^)]*\\))?:"
+      - "^tests?(\\([^)]*\\))?:"
+      - "^testing(\\([^)]*\\))?:"
+    priority: 7
+
+  - title: "Documentation"
+    match_groups:
+      - "Documentation"
+      - "Docs"
+    patterns:
+      - "^docs?(\\([^)]*\\))?:"
+      - "^documentation(\\([^)]*\\))?:"
+      - "^readme(\\([^)]*\\))?:"
+      - "^Documentation "
+      - "^README "
+    priority: 8
+
+  - title: "Ignore"
+    patterns:
+      - "^Release [0-9]+\\.[0-9]+\\.[0-9]+.*"
+      - "^\\*\\* [0-9].*"
+      - "^[0-9]+\\.[0-9]+\\.[0-9]+.*"
+      - "^chore\\(release\\):"
+      - "^sync: version"
+    priority: 90
+
+  - title: "Other Changes"
+    patterns:
+      - ".*"
+    priority: 99
+
+pull_request:
+  title: "Release {{version}}"
+  labels:
+    - "semver-bump"
+  body: |
+    ## Release Notes
+    **Version:** {{version}}
+    **Date:** {{date}}
+
+    {% for group in commit_groups -%}
+    {% if group.title != "Ignore" and group.commits -%}
+    ### {{ group.title }}
+    {% for commit in group.commits -%}
+    - {{ commit.title }}
+    {% endfor -%}
+
+    {% endif -%}
+    {% endfor -%}
+
+changelog:
+  file: "CHANGELOG.md"
+  truncate: true
+  template: |
+    ## [{{version}}] - {{date}}
+
+    {% for group in grouped_messages -%}
+    {% if group.title != "Ignore" and group.commits -%}
+    ### {{ group.title }}
+    {% for commit in group.commits -%}
+    - {{ commit.title }}
+    {% endfor -%}
+
+    {% endif -%}
+    {% endfor -%}
+
+  header: |
+    # Changelog
+    All notable changes to this project will be documented in this file.
+
+  footer: |
+    ## License
+    This project is licensed under the MIT License.
