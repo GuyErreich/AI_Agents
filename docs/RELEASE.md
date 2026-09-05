@@ -134,3 +134,4 @@ CI uploads Cobertura XML via `actions/upload-code-coverage`. Land coverage on `m
 ## Public marketplace checklist
 
 Production tag must be an ancestor of `master` (enforced by `publish-production.yml`). On first production release, a GitHub issue is opened with the submission URL and checklist. Staging publishes are automatic on `*.*.*-rc` tags; production stays **manual** (`staging→master` with `auto_promote: false` plus environment reviewer).
+
