@@ -1,7 +1,7 @@
 {
   "name": "ai-agents",
   "displayName": "AI Agents",
-  "version": "1.0.2-rc",
+  "version": "1.1.4-rc",
   "description": "Portable Cursor agent skills, rules, subagents, and review-loop hooks for engineering, web UI/UX, review, and CI.",
   "author": {
     "name": "Guy Erreich"
