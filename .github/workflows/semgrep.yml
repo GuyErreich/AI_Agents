@@ -2,9 +2,9 @@ name: Semgrep
 
 on:
   push:
-    branches: ["master"]
+    branches: ["master", "staging", "dev"]
   pull_request:
-    branches: ["master"]
+    branches: ["master", "staging", "dev"]
   schedule:
     - cron: "0 5 * * 1"
   workflow_dispatch:
@@ -23,12 +23,13 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Run Semgrep
-        uses: semgrep/semgrep-action@v1
+        uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
         with:
           config: >-
             p/python
             p/owasp-top-ten
             p/secrets
+            semgrep/

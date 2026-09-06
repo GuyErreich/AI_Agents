@@ -1,0 +1,6 @@
+version: 1.0.2-dev
+source_branch: dev
+target_branch: dev
+target_base_sha: 55b4141d9820ea25bea555c556b46f1f98a4e904
+finalized: true
+managed_by: auto-semver
