@@ -13,6 +13,18 @@ jobs:
   labeler:
     runs-on: ubuntu-latest
     steps:
+      # pull_request_target has no workspace checkout by default; without one,
+      # actions/labeler falls back to the *default* branch (master) for
+      # configuration-path and 404s when labeler.yml only exists on dev/staging.
+      - name: Checkout base branch config
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            .github/labeler.yml
+          sparse-checkout-cone-mode: false
+
       - name: Create repository labels
         run: |
           create_label() {

@@ -1,7 +1,7 @@
 {
   "name": "ai-agents",
   "displayName": "AI Agents",
-  "version": "1.0.0",
+  "version": "1.0.2-dev",
   "description": "Portable Cursor agent skills, rules, subagents, and review-loop hooks for engineering, web UI/UX, review, and CI.",
   "author": {
     "name": "Guy Erreich"
@@ -9,6 +9,7 @@
   "homepage": "https://github.com/GuyErreich/AI_Agents",
   "repository": "https://github.com/GuyErreich/AI_Agents",
   "license": "MIT",
+  "logo": "assets/logo.svg",
   "keywords": [
     "skills",
     "rules",

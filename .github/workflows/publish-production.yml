@@ -15,8 +15,14 @@ jobs:
   gate:
     name: Release gate
     uses: ./.github/workflows/release-gate.yml
+    # Caller must grant the max permissions nested release-gate jobs request.
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     with:
-      ref: ${{ github.ref }}
+      # Tag short name (e.g. 1.0.0), not refs/tags/...
+      ref: ${{ github.ref_name }}
     secrets: inherit
 
   release:

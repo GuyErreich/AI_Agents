@@ -1,6 +1,6 @@
 [project]
 name = "ai-agents"
-version = "1.0.0"
+version = "1.0.2-dev"
 description = "Cursor plugin — portable agent skills, rules, and review-loop hooks."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -9,7 +9,8 @@ license = { text = "MIT" }
 [dependency-groups]
 dev = [
     "pytest>=8.0",
-    "ruff>=0.12",
+    "ruff>=0.16.5",
+    "pytest-cov>=5.0",
 ]
 
 [tool.ruff]
@@ -29,4 +30,20 @@ quote-style = "double"
 [tool.pytest.ini_options]
 testpaths = ["plugins/ai-agents/hooks/tests", "scripts"]
 pythonpath = ["plugins/ai-agents/hooks", "scripts"]
-addopts = "-q"
+addopts = "-q --cov=plugins/ai-agents/hooks --cov=scripts --cov-report=term --cov-report=xml"
+
+[tool.coverage.run]
+branch = false
+omit = [
+    "**/tests/**",
+    "scripts/hook_install_smoke.py",
+    "scripts/release_gate.py",
+    "plugins/ai-agents/hooks/review_loop_git_guard.py",
+    "plugins/ai-agents/hooks/review_loop_init.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
