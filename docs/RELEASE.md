@@ -103,23 +103,23 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 | Workflow | Mechanism |
 |---|---|
-| `sync-version.yml` | GraphQL `createCommitOnBranch` via `actions/github-script` + App token |
-| `auto-semver.yml` / `promote.yml` | Marketplace action `GuyErreich/Action-Semver-Control@v1` + App token (`signed-commits: true`) |
+| `auto-semver.yml` / `promote.yml` | Marketplace action `GuyErreich/Action-Semver-Control@1.6.15` + App token (`signed-commits: true`) |
 
-**Pin:** floating major tag `GuyErreich/Action-Semver-Control@v1` (force-updated on each ASC production release). Callers use the Docker action with local `app-authentication` (`vars.GH_APP_CLIENT_ID` + `secrets.GH_APP_PRIVATE_KEY`). ASC also publishes reusable `semver-*.reusable.yml@v1` workflows; this repo uses the action pin for reliable consumer runs.
+**Pin:** `GuyErreich/Action-Semver-Control@1.6.15` (JSON trailing-comma `version_files` support from [ASC #284](https://github.com/GuyErreich/Action-Semver-Control/issues/284) / [#285](https://github.com/GuyErreich/Action-Semver-Control/pull/285)). Prefer floating `@v1` again once that major tag is past 1.6.15. Callers use the Docker action with local `app-authentication` (`vars.GH_APP_CLIENT_ID` + `secrets.GH_APP_PRIVATE_KEY`).
 
 **Concurrency:** `auto-semver.yml` must queue bump runs per target branch (`cancel-in-progress: false`). See [Action-Semver-Control SETUP — Concurrent merges](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/SETUP.md#concurrent-merges--bump-queue) and [TROUBLESHOOTING](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TROUBLESHOOTING.md).
 
 ## Version sync
 
-`Action-Semver-Control` updates `pyproject.toml` only (`uv.lock` is **not** in `version_files`). After a version bump, run `uv lock` (or let Dependabot refresh) so the editable package version in the lockfile matches `pyproject.toml`.
+`Action-Semver-Control` updates (via `version_files` in `auto_semver_config.yml`):
 
-`scripts/sync_version.py` (via `sync-version.yml` on `release/**`) keeps:
-
+- `pyproject.toml`
 - `plugins/ai-agents/.cursor-plugin/plugin.json`
 - `.cursor-plugin/marketplace.json`
 
-`validate_plugin.py` fails if those drift.
+`uv.lock` is **not** in `version_files` — after a version bump, run `uv lock` (or let Dependabot refresh) so the editable package version matches `pyproject.toml`.
+
+`scripts/sync_version.py --check` and `validate_plugin.py` remain local/CI guards if manifests ever drift.
 
 ## Local validation
 
