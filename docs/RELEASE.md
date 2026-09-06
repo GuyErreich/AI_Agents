@@ -10,7 +10,7 @@ Cursor has no artifact registry. This repo’s CD produces a **trustworthy git r
 | Staging | `staging`, tags `X.Y.Z-rc` | Team marketplace |
 | Production | `master`, tags `X.Y.Z` | Public marketplace + team (stable) |
 
-Default branch stays **`master`**. Feature work merges to **`dev`**.
+Default branch is **`dev`** (feature / CD entry). Production consumers track **`master`**; staging tracks **`staging`**.
 
 ## One-time GitHub setup
 
@@ -75,7 +75,7 @@ Two rulesets mirror [PersonalWebsite](https://github.com/GuyErreich/PersonalWebs
 
 `release/**` is intentionally **not** covered so Action-Semver-Control can force-push release branches.
 
-**Default branch note:** `workflow_dispatch` (e.g. `promote.yml`) only registers when the workflow file exists on the repository default branch (`master`). Channel CD still runs from `dev`/`staging` tips for push/tag events; keep a copy of promote/publish callers on `master` so manual promotion stays available.
+**Default branch note:** `workflow_dispatch` (e.g. `promote.yml`) registers from the repository default branch (`dev`). Channel tips (`dev` / `staging` / `master`) still own push/tag CD; production publish stays on `master` tags with a manual promote.
 
 Re-apply:
 
