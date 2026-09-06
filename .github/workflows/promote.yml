@@ -51,7 +51,7 @@ jobs:
 
       - name: Validate promotion (dry run)
         if: ${{ inputs.dry_run }}
-        uses: GuyErreich/Action-Semver-Control@v1
+        uses: GuyErreich/Action-Semver-Control@1.6.15
         with:
           action: promote
           to_branch: ${{ inputs.to_branch }}
@@ -63,7 +63,7 @@ jobs:
 
       - name: Execute Promotion
         if: ${{ !inputs.dry_run }}
-        uses: GuyErreich/Action-Semver-Control@v1
+        uses: GuyErreich/Action-Semver-Control@1.6.15
         with:
           action: promote
           to_branch: ${{ inputs.to_branch }}

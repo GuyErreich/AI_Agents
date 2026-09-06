@@ -6,7 +6,7 @@ This repository is the portable Cursor plugin (`ai-agents`). Consuming apps keep
 
 - Base branch for branch/PR diffs: `dev` (feature work). Production consumers track `master`; staging tracks `staging`.
 - Plugin manifests: `uv run python scripts/validate_plugin.py` — must succeed.
-- Version sync: `uv run python scripts/sync_version.py --check` — must succeed (JSONs match `pyproject.toml`).
+- Version sync: `uv run python scripts/sync_version.py --check` — must succeed (JSONs match `pyproject.toml`; ASC bumps them via `version_files`).
 - Lint: `uv run ruff check plugins/ai-agents/hooks scripts` — 0 errors required.
 - Format: `uv run ruff format --check scripts` — must succeed.
 - Tests: `uv run pytest` — must succeed.

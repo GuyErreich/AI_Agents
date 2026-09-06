@@ -13,11 +13,11 @@ promotions:
     to_branch: master
     auto_promote: false
 
-# Only pyproject.toml — JSON manifests end with commas and are not updated by
-# VersionFileUpdater. scripts/sync_version.py keeps plugin.json / marketplace.json
-# in sync on release/** branches.
+# ASC VersionFileUpdater (1.6.15+) updates these; uv.lock is refreshed separately.
 version_files:
   - "pyproject.toml"
+  - "plugins/ai-agents/.cursor-plugin/plugin.json"
+  - ".cursor-plugin/marketplace.json"
 
 commit_groups:
   - title: "Breaking Changes"
