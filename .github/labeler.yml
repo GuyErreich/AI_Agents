@@ -55,4 +55,4 @@
           - "docs/**"
 
 "semver-bump":
-  - head-branch: ["^release/.*"]
+  - head-branch: ["^auto-semver/release/.*", "^release/.*"]
