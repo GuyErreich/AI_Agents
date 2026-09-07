@@ -307,39 +307,40 @@ def check_executable_bits(
     events: dict[str, Any],
     errors: list[str],
 ) -> None:
-    """Ensure direct hook script entrypoints are executable in the git index.
+    """Reject git ``100755`` hook files and require interpreter-prefixed commands.
 
-    Commands prefixed with an interpreter (``bash ./hooks/run-python.sh …``) do
-    not need the script bit — preferred for ASC signed commits, which cannot
-    publish ``100755`` files via ``createCommitOnBranch``.
+    ASC ``signed-commits`` uses GraphQL ``createCommitOnBranch``, which cannot
+    include executable files. Invoke scripts with ``bash ./hooks/run-python.sh``.
     """
-    scripts: set[Path] = set()
-    for entries in events.values():
+    hooks_dir = plugin_root / "hooks"
+    if hooks_dir.is_dir():
+        for path in sorted(hooks_dir.rglob("*")):
+            if not path.is_file():
+                continue
+            mode = _git_ls_files_mode(path)
+            if mode == "100755":
+                errors.append(
+                    f"{_rel(path)}: git mode 100755 (ASC signed promote "
+                    "cannot publish executables; use 100644)"
+                )
+
+    hooks_json = plugin_root / "hooks" / "hooks.json"
+    for event, entries in events.items():
         if not isinstance(entries, list):
             continue
-        for entry in entries:
+        for index, entry in enumerate(entries):
             if not isinstance(entry, dict):
                 continue
             command = str(entry.get("command") or "").strip()
             if not command:
                 continue
             parts = command.split()
-            if parts[0] in _INTERPRETERS:
-                continue
-            script = parts[0]
-            scripts.add((plugin_root / script).resolve())
-
-    for script_path in sorted(scripts):
-        if not script_path.is_file():
-            continue
-        mode = _git_ls_files_mode(script_path)
-        if mode is None:
-            # Fall back to filesystem bit when not in git (e.g. temp copy).
-            if not os.access(script_path, os.X_OK):
-                errors.append(f"{_rel(script_path)}: not executable")
-            continue
-        if mode != "100755":
-            errors.append(f"{_rel(script_path)}: git mode {mode} (expected 100755)")
+            if parts[0] not in _INTERPRETERS:
+                loc = f"hooks.{event}[{index}]"
+                errors.append(
+                    f"{_rel(hooks_json)}: {loc} must start with an interpreter "
+                    "(bash/sh/python) so the script can stay non-executable"
+                )
 
 
 def check_reference_links(plugin_root: Path, errors: list[str]) -> None:
