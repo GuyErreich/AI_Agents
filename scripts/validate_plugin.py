@@ -291,12 +291,28 @@ def check_hook_events(
             )
 
 
+_INTERPRETERS = frozenset(
+    {
+        "bash",
+        "sh",
+        "python",
+        "python3",
+        "uv",
+    }
+)
+
+
 def check_executable_bits(
     plugin_root: Path,
     events: dict[str, Any],
     errors: list[str],
 ) -> None:
-    """Ensure hook command scripts are executable in the git index."""
+    """Ensure direct hook script entrypoints are executable in the git index.
+
+    Commands prefixed with an interpreter (``bash ./hooks/run-python.sh …``) do
+    not need the script bit — preferred for ASC signed commits, which cannot
+    publish ``100755`` files via ``createCommitOnBranch``.
+    """
     scripts: set[Path] = set()
     for entries in events.values():
         if not isinstance(entries, list):
@@ -307,7 +323,10 @@ def check_executable_bits(
             command = str(entry.get("command") or "").strip()
             if not command:
                 continue
-            script = command.split()[0]
+            parts = command.split()
+            if parts[0] in _INTERPRETERS:
+                continue
+            script = parts[0]
             scripts.add((plugin_root / script).resolve())
 
     for script_path in sorted(scripts):
@@ -436,7 +455,7 @@ def check_pep723_scripts(
             parts = command.split()
             if len(parts) < 2:
                 continue
-            # ./hooks/run-python.sh review_loop_budget.py
+            # bash ./hooks/run-python.sh review_loop_budget.py
             script_name = parts[-1]
             if not script_name.endswith(".py"):
                 continue
@@ -538,7 +557,15 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
                 loc = f"hooks.{event}[{index}]"
                 errors.append(f"{_rel(hooks_path)}: {loc} missing command")
                 continue
-            script = command.split()[0]
+            parts = command.split()
+            script = parts[0]
+            if script in _INTERPRETERS:
+                # e.g. bash ./hooks/run-python.sh … — resolve the script path.
+                if len(parts) < 2:
+                    loc = f"hooks.{event}[{index}]"
+                    errors.append(f"{_rel(hooks_path)}: {loc} missing script after {script}")
+                    continue
+                script = parts[1]
             script_path = (plugin_root / script).resolve()
             if not script_path.is_file():
                 loc = f"hooks.{event}[{index}]"
