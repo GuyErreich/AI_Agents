@@ -563,7 +563,9 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
                 # e.g. bash ./hooks/run-python.sh … — resolve the script path.
                 if len(parts) < 2:
                     loc = f"hooks.{event}[{index}]"
-                    errors.append(f"{_rel(hooks_path)}: {loc} missing script after {script}")
+                    errors.append(
+                        f"{_rel(hooks_path)}: {loc} missing script after {script}"
+                    )
                     continue
                 script = parts[1]
             script_path = (plugin_root / script).resolve()
