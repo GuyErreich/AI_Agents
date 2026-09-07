@@ -114,9 +114,10 @@ def run_smoke(*, mode: str) -> int:
                 "*.pyc",
             ),
         )
-        # Ensure run-python.sh is executable in the copy.
+        # Interpreter-prefixed commands do not need +x on the script.
         run_py = plugin_dst / "hooks" / "run-python.sh"
-        run_py.chmod(run_py.stat().st_mode | 0o111)
+        if run_py.is_file():
+            run_py.chmod(0o644)
 
         workspace = tmp / "workspace"
         workspace.mkdir()
