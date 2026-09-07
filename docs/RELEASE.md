@@ -109,6 +109,8 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 **Concurrency:** `auto-semver.yml` must queue bump runs per target branch (`cancel-in-progress: false`). See [Action-Semver-Control SETUP — Concurrent merges](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/SETUP.md#concurrent-merges--bump-queue) and [TROUBLESHOOTING](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TROUBLESHOOTING.md).
 
+**Hook file modes:** GraphQL `createCommitOnBranch` cannot set the executable bit. Keep plugin hooks as `100644` and invoke them with `bash ./hooks/run-python.sh …`. `validate_plugin.py` fails if any file under `plugins/ai-agents/hooks/` is `100755`. Mode-only `755`→`644` changes do **not** survive ASC auto-promote; land those with a normal squash merge on the channel that still has `+x`.
+
 ## Version sync
 
 `Action-Semver-Control` updates (via `version_files` in `auto_semver_config.yml`):
