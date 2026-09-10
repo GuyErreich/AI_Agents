@@ -46,13 +46,13 @@ jobs:
         run: |
           set -euo pipefail
           TAG_SHA="$(git rev-parse HEAD)"
-          git fetch origin master
-          if ! git merge-base --is-ancestor "$TAG_SHA" origin/master; then
-            echo "Tag ${{ github.ref_name }} ($TAG_SHA) is not an ancestor of origin/master."
-            echo "Cursor indexes the master branch; production tags must land on master first."
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$TAG_SHA" origin/main; then
+            echo "Tag ${{ github.ref_name }} ($TAG_SHA) is not an ancestor of origin/main."
+            echo "Cursor indexes the main branch; production tags must land on main first."
             exit 1
           fi
-          echo "Published-ref guard passed: $TAG_SHA is on master."
+          echo "Published-ref guard passed: $TAG_SHA is on main."
 
       - name: Get GitHub App Token
         uses: ./.github/actions/app-authentication
@@ -96,7 +96,7 @@ jobs:
           https://cursor.com/marketplace/publish
 
           ### Checklist
-          - [ ] Repo is public and default branch is \`master\`
+          - [ ] Repo is public and production branch is \`main\`
           - [ ] \`.cursor-plugin/marketplace.json\` and \`plugins/ai-agents/.cursor-plugin/plugin.json\` validate
           - [ ] Logo committed and referenced by relative path
           - [ ] README documents usage
@@ -121,5 +121,5 @@ jobs:
             echo "**Public marketplace:** Cursor reviews every update. Re-submit or notify via"
             echo "[cursor.com/marketplace/publish](https://cursor.com/marketplace/publish) if required."
             echo ""
-            echo "**Team marketplace:** track \`master\` and refresh (Auto Refresh if the Cursor GitHub App is installed)."
+            echo "**Team marketplace:** Cursor loads \`main\`. Refresh (Auto Refresh if the Cursor GitHub App is installed)."
           } >> "$GITHUB_STEP_SUMMARY"

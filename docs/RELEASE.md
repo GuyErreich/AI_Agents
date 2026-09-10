@@ -8,16 +8,16 @@ Cursor has no artifact registry. This repo’s CD produces a **trustworthy git r
 |---|---|---|
 | Dev | `dev`, tags `X.Y.Z-dev` | Internal iteration |
 | Staging | `staging`, tags `X.Y.Z-rc` | Team marketplace |
-| Production | `master`, tags `X.Y.Z` | Public marketplace + team (stable) |
+| Production | `main`, tags `X.Y.Z` | Public marketplace + team (stable) |
 
-Default branch is **`dev`** (feature / CD entry). Production consumers track **`master`**; staging tracks **`staging`**.
+Default branch is **`dev`** (feature / CD entry). Production consumers track **`main`**; staging tracks **`staging`**.
 
 ## One-time GitHub setup
 
 ### 1. Channel branches
 
 ```bash
-git push -u origin dev staging
+git push -u origin dev staging main
 ```
 
 ### 2. GitHub App credentials
@@ -47,7 +47,7 @@ gh secret list --repo GuyErreich/AI_Agents
 | Environment | Deploy-from policy | Protection |
 |---|---|---|
 | `staging` | branch `staging` + tags `*.*.*-rc` | No required reviewers |
-| `production` | branch `master` + tags `*.*.*` | Required reviewer: `@GuyErreich` |
+| `production` | branch `main` + tags `*.*.*` | Required reviewer: `@GuyErreich` |
 
 Re-apply or inspect:
 
@@ -60,7 +60,7 @@ uv run python scripts/bootstrap_github.py --environments-only
 
 Two rulesets mirror [PersonalWebsite](https://github.com/GuyErreich/PersonalWebsite) with plugin-specific deviations:
 
-**Standard Flow (dev, staging & master)** — on `dev`, `staging`, `master`:
+**Standard Flow (dev, staging & main)** — on `dev`, `staging`, `main`:
 
 - Deletion / non-fast-forward blocked
 - **Required signed commits** (semver + sync workflows use verified API commits)
@@ -69,13 +69,13 @@ Two rulesets mirror [PersonalWebsite](https://github.com/GuyErreich/PersonalWebs
 - **Squash merge only** (rebase merges cannot be signed by GitHub)
 - Copilot review, code quality, CodeQL scanning, **90% coverage** (via `actions/upload-code-coverage`)
 
-**Linear history (dev only)** — squash-only integration on `dev`; omitted on `staging`/`master` because promotions are merge commits.
+**Linear history (dev only)** — squash-only integration on `dev`; omitted on `staging`/`main` because promotions are merge commits.
 
 **Bypass actors:** repository admins may bypass via pull request only. The Auto Semver Bot GitHub App (`Integration` `2720857`, same as Action-Semver-Control) has **always** bypass so finalize auto-promote and manual `promote.yml` can update `staging` without opening a PR for the direct ref update.
 
 `release/**` is intentionally **not** covered so Action-Semver-Control can force-push release branches.
 
-**Default branch note:** `workflow_dispatch` (e.g. `promote.yml`) registers from the repository default branch (`dev`). Channel tips (`dev` / `staging` / `master`) still own push/tag CD; production publish stays on `master` tags with a manual promote.
+**Default branch note:** `workflow_dispatch` (e.g. `promote.yml`) registers from the repository default branch (`dev`). Channel tips (`dev` / `staging` / `main`) still own push/tag CD; production publish stays on `main` tags with a manual promote.
 
 Re-apply:
 
@@ -96,7 +96,7 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 ### 6. Cursor marketplace
 
-- **Team marketplace:** import this repo; track `staging` or `master`; enable Auto Refresh (Cursor GitHub App).
+- **Team marketplace:** import this repo. Cursor's GitHub installer clones **`main`** (it ignores `/tree/…` paths). Enable Auto Refresh (Cursor GitHub App).
 - **Public marketplace:** submit once at https://cursor.com/marketplace/publish — every update is manually reviewed. Production publish workflow opens a tracking issue on the first release and attaches a plugin tarball to the GitHub Release.
 
 ## Verified commits
@@ -135,9 +135,9 @@ uv run pytest
 
 ## Coverage baseline
 
-CI uploads Cobertura XML via `actions/upload-code-coverage`. Land coverage on `master` before the ruleset’s `max_coverage_drop` rule can evaluate PRs. Measured surface omits CLI-only scripts (`hook_install_smoke.py`, `release_gate.py`) and thin hook entrypoints not exercised in unit tests.
+CI uploads Cobertura XML via `actions/upload-code-coverage`. Land coverage on `main` before the ruleset’s `max_coverage_drop` rule can evaluate PRs. Measured surface omits CLI-only scripts (`hook_install_smoke.py`, `release_gate.py`) and thin hook entrypoints not exercised in unit tests.
 
 ## Public marketplace checklist
 
-Production tag must be an ancestor of `master` (enforced by `publish-production.yml`). On first production release, a GitHub issue is opened with the submission URL and checklist. Staging publishes are automatic on `*.*.*-rc` tags; production stays **manual** (`staging→master` with `auto_promote: false` plus environment reviewer).
+Production tag must be an ancestor of `main` (enforced by `publish-production.yml`). On first production release, a GitHub issue is opened with the submission URL and checklist. Staging publishes are automatic on `*.*.*-rc` tags; production stays **manual** (`staging→main` with `auto_promote: false` plus environment reviewer).
 
