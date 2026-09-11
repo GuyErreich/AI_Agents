@@ -2,9 +2,9 @@ name: Semgrep
 
 on:
   push:
-    branches: ["master", "staging", "dev"]
+    branches: ["main", "staging", "dev"]
   pull_request:
-    branches: ["master", "staging", "dev"]
+    branches: ["main", "staging", "dev"]
   schedule:
     - cron: "0 5 * * 1"
   workflow_dispatch:

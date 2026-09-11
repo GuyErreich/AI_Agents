@@ -3,7 +3,7 @@ name: Auto Semver Bump
 on:
   pull_request:
     types: [closed]
-    branches: [dev, staging, master]
+    branches: [dev, staging, main]
 
 permissions:
   contents: write

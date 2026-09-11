@@ -20,16 +20,14 @@ Reload the Cursor window. The plugin shows up as **AI Agents**.
 1. Cursor **Dashboard → Settings → Plugins**
 2. **Team Marketplaces → Import from Repo**
 3. Paste `https://github.com/GuyErreich/AI_Agents`
-4. Track branch by channel:
-   - **staging** — pre-release (`X.Y.Z-rc`)
-   - **master** — production (`X.Y.Z`)
+4. Cursor's plugin loader clones **`main`** (it does not honor `/tree/staging` URLs). Production lives on `main`. GitHub's default branch stays **`dev`** for PRs and CD.
 5. Enable **Auto Refresh** (requires the [Cursor GitHub App](https://cursor.com/docs/integrations/github) on this repo)
 
 Cursor reads [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json). Mark **AI Agents** required or optional, then save.
 
 ### Public marketplace
 
-Submit the repo at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish). Updates are manually reviewed by Cursor; production tags on `master` are the publish surface (there is no upload package).
+Submit the repo at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish). Updates are manually reviewed by Cursor; production tags on `main` are the publish surface (there is no upload package).
 
 ## Release channels
 
@@ -37,7 +35,7 @@ Submit the repo at [cursor.com/marketplace/publish](https://cursor.com/marketpla
 |---|---|---|---|
 | Dev | `dev` | `X.Y.Z-dev` | Integration |
 | Staging | `staging` | `X.Y.Z-rc` | Team marketplace preview |
-| Production | `master` | `X.Y.Z` | Public + stable team |
+| Production | `main` | `X.Y.Z` | Public + stable team |
 
 Versioning and promotion use [Action-Semver-Control](https://github.com/GuyErreich/Action-Semver-Control). See [docs/RELEASE.md](docs/RELEASE.md) for GitHub App secrets, environments, and the release gate.
 
@@ -83,7 +81,7 @@ uv run python scripts/release_gate.py   # before promote / production tag
 pre-commit run --all-files   # gitleaks, JSON/YAML, ruff
 ```
 
-CI on `dev` / `staging` / `master` and pull requests runs Gitleaks, Ruff, pytest, plugin validation, `uv audit`, license headers, CodeQL, and Semgrep. Tag pushes run the full **release gate** before creating a GitHub Release.
+CI on `dev` / `staging` / `main` and pull requests runs Gitleaks, Ruff, pytest, plugin validation, `uv audit`, license headers, CodeQL, and Semgrep. Tag pushes run the full **release gate** before creating a GitHub Release.
 
 ## Inheritance
 
