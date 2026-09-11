@@ -309,8 +309,10 @@ def check_executable_bits(
 ) -> None:
     """Reject git ``100755`` hook files and require interpreter-prefixed commands.
 
-    ASC ``signed-commits`` uses GraphQL ``createCommitOnBranch``, which cannot
-    include executable files. Invoke scripts with ``bash ./hooks/run-python.sh``.
+    Repo convention: keep hooks as ``100644`` and invoke them with
+    ``bash ./hooks/run-python.sh``. ASC 1.6.17+ can publish executable modes via
+    a verified REST fallback, but this plugin still standardizes on non-executable
+    hooks so Cursor does not depend on ``+x``.
     """
     hooks_dir = plugin_root / "hooks"
     if hooks_dir.is_dir():
@@ -320,8 +322,8 @@ def check_executable_bits(
             mode = _git_ls_files_mode(path)
             if mode == "100755":
                 errors.append(
-                    f"{_rel(path)}: git mode 100755 (ASC signed promote "
-                    "cannot publish executables; use 100644)"
+                    f"{_rel(path)}: git mode 100755 (hooks stay non-executable; "
+                    "invoke via bash ./hooks/run-python.sh)"
                 )
 
     hooks_json = plugin_root / "hooks" / "hooks.json"

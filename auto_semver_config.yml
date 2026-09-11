@@ -14,6 +14,7 @@ promotions:
     auto_promote: false
 
 # ASC VersionFileUpdater (1.6.15+) updates these; uv.lock is refreshed separately.
+# Callers pin Action-Semver-Control@1.6.17 for mode-aware signed promote.
 version_files:
   - "pyproject.toml"
   - "plugins/ai-agents/.cursor-plugin/plugin.json"

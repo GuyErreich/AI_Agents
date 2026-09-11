@@ -103,13 +103,13 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 | Workflow | Mechanism |
 |---|---|
-| `auto-semver.yml` / `promote.yml` | Marketplace action `GuyErreich/Action-Semver-Control@1.6.15` + App token (`signed-commits: true`) |
+| `auto-semver.yml` / `promote.yml` | Marketplace action `GuyErreich/Action-Semver-Control@1.6.17` + App token (`signed-commits: true`) |
 
-**Pin:** `GuyErreich/Action-Semver-Control@1.6.15` (JSON trailing-comma `version_files` support from [ASC #284](https://github.com/GuyErreich/Action-Semver-Control/issues/284) / [#285](https://github.com/GuyErreich/Action-Semver-Control/pull/285)). Prefer floating `@v1` again once that major tag is past 1.6.15. Callers use the Docker action with local `app-authentication` (`vars.GH_APP_CLIENT_ID` + `secrets.GH_APP_PRIVATE_KEY`).
+**Pin:** `GuyErreich/Action-Semver-Control@1.6.17` (verified REST fallback for executable/symlink modes from [ASC #291](https://github.com/GuyErreich/Action-Semver-Control/pull/291); JSON trailing-comma `version_files` from [ASC #284](https://github.com/GuyErreich/Action-Semver-Control/issues/284) / [#285](https://github.com/GuyErreich/Action-Semver-Control/pull/285)). Prefer floating `@v1` again once that major tag is past 1.6.17. Callers use the Docker action with local `app-authentication` (`vars.GH_APP_CLIENT_ID` + `secrets.GH_APP_PRIVATE_KEY`).
 
 **Concurrency:** `auto-semver.yml` must queue bump runs per target branch (`cancel-in-progress: false`). See [Action-Semver-Control SETUP — Concurrent merges](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/SETUP.md#concurrent-merges--bump-queue) and [TROUBLESHOOTING](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TROUBLESHOOTING.md).
 
-**Hook file modes:** GraphQL `createCommitOnBranch` cannot set the executable bit. Keep plugin hooks as `100644` and invoke them with `bash ./hooks/run-python.sh …`. `validate_plugin.py` fails if any file under `plugins/ai-agents/hooks/` is `100755`. Mode-only `755`→`644` changes do **not** survive ASC auto-promote; land those with a normal squash merge on the channel that still has `+x`.
+**Hook file modes:** Keep plugin hooks as `100644` and invoke them with `bash ./hooks/run-python.sh …`. `validate_plugin.py` fails if any file under `plugins/ai-agents/hooks/` is `100755`. ASC 1.6.17+ can rewrite destination modes via a verified Git Database REST fallback when GraphQL `createCommitOnBranch` cannot represent them, so a promote can carry `100644` onto a tip that still has `+x`.
 
 ## Version sync
 
