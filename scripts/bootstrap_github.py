@@ -98,7 +98,7 @@ def apply_environments(repo: str, *, dry_run: bool) -> None:
         _gh_api(
             "POST",
             f"{base}/production/deployment-branch-policies",
-            {"name": "master", "type": "branch"},
+            {"name": "main", "type": "branch"},
             dry_run=dry_run,
         )
         _gh_api(
@@ -113,7 +113,7 @@ def apply_rulesets(repo: str, *, dry_run: bool) -> None:
     gh_actions = 15368
     codeql = 57789
     standard = {
-        "name": "Standard Flow (dev, staging & master)",
+        "name": "Standard Flow (dev, staging & main)",
         "target": "branch",
         "enforcement": "active",
         "conditions": {
@@ -121,7 +121,7 @@ def apply_rulesets(repo: str, *, dry_run: bool) -> None:
                 "include": [
                     "refs/heads/dev",
                     "refs/heads/staging",
-                    "refs/heads/master",
+                    "refs/heads/main",
                 ],
                 "exclude": [],
             }

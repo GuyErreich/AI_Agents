@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # pull_request_target has no workspace checkout by default; without one,
-      # actions/labeler falls back to the *default* branch (master) for
+      # actions/labeler falls back to the *default* branch (dev) for
       # configuration-path and 404s when labeler.yml only exists on dev/staging.
       - name: Checkout base branch config
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

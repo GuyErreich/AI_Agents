@@ -3,14 +3,14 @@ start_version: "1.0.0"
 suffixes:
   dev: "-dev"
   staging: "-rc"
-  master: ""
+  main: ""
 
 promotions:
   - from_branch: dev
     to_branch: staging
     auto_promote: true
   - from_branch: staging
-    to_branch: master
+    to_branch: main
     auto_promote: false
 
 # ASC VersionFileUpdater (1.6.15+) updates these; uv.lock is refreshed separately.

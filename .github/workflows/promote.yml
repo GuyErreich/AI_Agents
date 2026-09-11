@@ -14,7 +14,7 @@ on:
         type: choice
         options:
           - staging
-          - master
+          - main
       dry_run:
         description: "Validate without performing changes"
         required: false
