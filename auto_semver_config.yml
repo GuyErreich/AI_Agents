@@ -3,21 +3,22 @@ start_version: "1.0.0"
 suffixes:
   dev: "-dev"
   staging: "-rc"
-  master: ""
+  main: ""
 
 promotions:
   - from_branch: dev
     to_branch: staging
     auto_promote: true
   - from_branch: staging
-    to_branch: master
+    to_branch: main
     auto_promote: false
 
-# Only pyproject.toml — JSON manifests end with commas and are not updated by
-# VersionFileUpdater. scripts/sync_version.py keeps plugin.json / marketplace.json
-# in sync on release/** branches.
+# ASC VersionFileUpdater (1.6.15+) updates these; uv.lock is refreshed separately.
+# Callers pin Action-Semver-Control@1.6.17 for mode-aware signed promote.
 version_files:
   - "pyproject.toml"
+  - "plugins/ai-agents/.cursor-plugin/plugin.json"
+  - ".cursor-plugin/marketplace.json"
 
 commit_groups:
   - title: "Breaking Changes"

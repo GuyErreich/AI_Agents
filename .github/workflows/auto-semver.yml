@@ -3,7 +3,7 @@ name: Auto Semver Bump
 on:
   pull_request:
     types: [closed]
-    branches: [dev, staging, master]
+    branches: [dev, staging, main]
 
 permissions:
   contents: write
@@ -40,11 +40,12 @@ jobs:
           git config user.email "${{ steps.app-token.outputs.user-email }}"
           git remote set-url origin "https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git"
 
-      # Pin: floating major tag (force-updated on each ASC production release).
-      # Prefer @v1 over reusable workflow_call here — reusable calls were failing
-      # immediately with 0 jobs on this consumer ("workflow file may be broken").
+      # Pin ASC ≥1.6.17 for REST signed fallback on executable/symlink modes
+      # (ASC #291) and JSON trailing-comma version_files (ASC #284/#285).
+      # Floating @v1 still pointed at an older release when this landed; switch
+      # back to @v1 once the major tag is force-updated past 1.6.17.
       - name: Run Auto Semver Action
-        uses: GuyErreich/Action-Semver-Control@v1
+        uses: GuyErreich/Action-Semver-Control@1.6.17
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           signed-commits: "true"

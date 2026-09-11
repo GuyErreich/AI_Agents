@@ -39,6 +39,8 @@ One user “commit” / “commit this” request authorizes the whole planned s
 
 ## Message format
 
+Use the same subject-line prefixes as PR titles — see `skills/code/ci/pr/references/title-conventions.md` (`feat:`, `fix:`, etc.).
+
 ```bash
 git commit -m "$(cat <<'EOF'
 Concise imperative summary.

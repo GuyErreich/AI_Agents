@@ -1,0 +1,43 @@
+rules:
+  - id: ai-agents.hooks.no-network
+    languages: [python]
+    severity: ERROR
+    message: >
+      Plugin hooks must not perform network I/O. Hooks run on every install;
+      use only local state under .review-loop (or documented Cursor hook state).
+    paths:
+      - plugins/ai-agents/hooks/**/*.py
+    paths-ignore:
+      - plugins/ai-agents/hooks/tests/**
+    pattern-either:
+      - pattern: urllib.request.$METHOD(...)
+      - pattern: requests.$METHOD(...)
+      - pattern: httpx.$METHOD(...)
+      - pattern: aiohttp.$METHOD(...)
+      - pattern: socket.create_connection(...)
+      - pattern: socket.socket(...)
+      - pattern: import urllib.request
+      - pattern: import requests
+      - pattern: import httpx
+      - pattern: import aiohttp
+
+  - id: ai-agents.hooks.no-absolute-tmp-writes
+    languages: [python]
+    severity: ERROR
+    message: >
+      Hooks must not write durable state under /tmp, /var, or Path.home()
+      except under ~/.cursor (Cursor-owned). Prefer $REVIEW_LOOP_ROOT/.review-loop.
+    paths:
+      - plugins/ai-agents/hooks/**/*.py
+    paths-ignore:
+      - plugins/ai-agents/hooks/tests/**
+    pattern-either:
+      - pattern: open("/tmp/$PATH", ...)
+      - pattern: open("/var/$PATH", ...)
+      - pattern: Path("/tmp/$PATH").write_text(...)
+      - pattern: Path("/var/$PATH").write_text(...)
+      - pattern: Path("/tmp/$PATH").mkdir(...)
+      - pattern: Path("/var/$PATH").mkdir(...)
+      - pattern: (Path.home() / $REST).write_text(...)
+      - pattern: (Path.home() / $REST).mkdir(...)
+      - pattern: open(os.path.expanduser($PATH), ...)

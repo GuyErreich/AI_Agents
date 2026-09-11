@@ -7,3 +7,6 @@ __pycache__/
 .review-loop/
 plugins/**/hooks/state/
 actionlint
+.coverage
+coverage.xml
+htmlcov/
