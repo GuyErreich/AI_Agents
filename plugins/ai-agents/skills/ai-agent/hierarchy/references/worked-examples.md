@@ -12,7 +12,7 @@ Generic cleanup/security rules fail the nesting test for Node — they hold for 
 
 ## 2. CI milestone skills — short skills vs parent references
 
-**Candidates:** `code/ci/{commit,pr,push,local-review-loop}` and behavior rules `git-commit-consent`, `git-push-consent`.
+**Candidates:** `code/ci/{worktree,commit,pr,push,local-review-loop}` and behavior rules `worktree-first`, `git-commit-consent`, `git-push-consent`.
 
 - Each milestone has its own trigger and workflow → separate `SKILL.md` files are justified (step 3 of aggregation decision).
 - Repeated `git-*` prefixes on consent rules are a latent grouping signal; introduce `ci/git/` or `behaviors/git/` only when **3+** siblings share that context.
@@ -43,3 +43,12 @@ Generic cleanup/security rules fail the nesting test for Node — they hold for 
 Verdict: **keep the subfolders.** They also let `desktop/navigation-motion.md` and `mobile/navigation-motion.md` share a filename that reads correctly under its parent — flattening would force prefixes for no gain. `desktop/` sitting at one file is the only soft signal; it stays because the viewport axis is already routed and a second desktop reference is expected.
 
 **Rule applied:** link depth is the constraint, not folder depth. A flatten-everything rule would have caused churn and lost the axis in the path.
+
+## 5. Testing — universal skill, runner specifics under the language
+
+**Candidates:** `code/quality/testing/references/python-pytest.md` vs `code/languages/python/references/testing.md` (and the Node twin).
+
+Pytest, pyfakefs, and `mocker.patch` fail the nesting test for `quality/testing` — they are meaningless outside Python. The same is true of runner-less Node smoke scripts (`process.exit(1)`, shared JSON case files). Keep `quality/testing` for language-agnostic rules (seams, mocks vs fakes, table-driven cases, non-zero exit). Deepen each language skill with `references/testing.md`.
+
+**Rule applied:** same judgment as example 1 — do not file runner specifics under `quality/`.
+

@@ -1,0 +1,37 @@
+---
+description: Worktree-first gate — before editing on the AGENT.md base branch or in the primary checkout, create a wtp worktree; plans for branch-worthy work must open with a worktree Setup step; hard stop until that worktree is the Cursor workspace
+alwaysApply: true
+---
+
+# Worktree First
+
+Every new branch lives in its own worktree (prefer `wtp`). Never implement branch-worthy work in the **primary checkout** or **on the AGENT.md base branch** in place, unless the user **explicitly** waives.
+
+## Hard gate (non-negotiable)
+
+Before the **first file edit** on branch-worthy work (features, fixes, chores, refactors, issue/plan implementation, any task that will produce commits):
+
+1. Load `skills/code/ci/worktree/SKILL.md` and run **Detect checkout type** + **Preflight**.
+2. Read the base branch from the repository-root `AGENT.md` Validate block (do not hardcode `dev` / `master`).
+3. If the open workspace is the **primary checkout**, **or** `git branch --show-current` equals the base branch → **do not edit, commit, or push**. Create or reuse a worktree, print its absolute path, and **stop** until the user opens that path as the Cursor workspace.
+
+Plan approval alone is **not** a waiver.
+
+## Plan mode
+
+Planning stays write-free. A plan for branch-worthy work **must** open with a Setup step that names the branch (`<prefix>/<slug>`), the base from `AGENT.md`, and the target worktree path. A plan without that step is incomplete — amend it before the first edit.
+
+## Allowed without a new worktree
+
+- Read-only exploration, questions, reviews, and planning (no file writes).
+- Edits when the user explicitly says **work in place**, **skip worktree**, or **stay in this checkout**.
+- Edits when the open workspace is already the **correct linked worktree** for the target branch (reuse via `wtp list` / `git worktree list`).
+
+## Branch creation
+
+- Do not `git checkout -b` / branch in the primary checkout by default.
+- If a worktree for the target branch already exists, reuse it — do not create a duplicate.
+
+## After create
+
+Tell the user the worktree path and that implementation must continue there. Agent file writes are scoped to the open workspace root; creating a worktree elsewhere does not move edits from the primary checkout.
