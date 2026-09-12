@@ -9,7 +9,7 @@ alwaysApply: false
 When editing matching files:
 
 - Apply engineering foundations first (always-applied rule).
-- Load `skills/code/languages/nodejs/SKILL.md` for language rules.
+- Load `skills/nodejs/SKILL.md` for language rules.
 - Load its `references/` only when the skill directs (including `references/npm-tooling.md` when deps, lockfile, lint scripts, or audit come up).
 - Follow the nearest `AGENT.md` chain for Validate commands and type-alias conventions.
 

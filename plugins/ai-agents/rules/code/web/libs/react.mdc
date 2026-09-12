@@ -9,7 +9,7 @@ alwaysApply: false
 When editing React files:
 
 - Apply engineering foundations first (always-applied rule).
-- Load `skills/code/web/libs/react/SKILL.md` for hook, component, and animation patterns.
+- Load `skills/react/SKILL.md` for hook, component, and animation patterns.
 - Load its `references/` only when the skill directs.
 - Follow the nearest `AGENT.md` chain for project component conventions.
 

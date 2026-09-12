@@ -17,11 +17,11 @@ These do **not** count as commit consent on their own:
 - Finishing fixes or passing lint/build
 - Asking to push or open a PR (confirm the commit step explicitly)
 
-**Exception — pr-resolver / pr-review-loop:** approving the resolver plan, an explicit "resolve comments" request, or invoking the autonomous PR review loop grants scoped commit consent for approved fix commits only. See `skills/code/review/pr-resolver/SKILL.md` (`## Scoped consent`) and `skills/code/ci/pr-review-loop/SKILL.md` (`## Scoped consent`).
+**Exception — pr-resolver / pr-review-loop:** approving the resolver plan, an explicit "resolve comments" request, or invoking the autonomous PR review loop grants scoped commit consent for approved fix commits only. See `skills/pr-resolver/SKILL.md` (`## Scoped consent`) and `skills/ci-pr-review-loop/SKILL.md` (`## Scoped consent`).
 
 ## Workflow when committing is requested
 
-1. Run the commit workflow (`skills/code/ci/commit/SKILL.md`): consent confirmed, review at change tier, **split by logic into one or more commits**, draft messages, commit.
+1. Run the commit workflow (`skills/ci-commit/SKILL.md`): consent confirmed, review at change tier, **split by logic into one or more commits**, draft messages, commit.
 2. Do not stage files likely to contain secrets (`.env`, credentials, local MCP config). Warn if asked.
 3. Do not push afterward unless pr-resolver Step 6 applies — general pushes need separate explicit consent (`git-push-consent.mdc`).
 

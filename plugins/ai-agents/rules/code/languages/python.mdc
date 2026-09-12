@@ -9,7 +9,7 @@ alwaysApply: false
 When editing matching files:
 
 - Apply engineering foundations first (always-applied rule).
-- Load `skills/code/languages/python/SKILL.md` for language rules.
+- Load `skills/python/SKILL.md` for language rules.
 - Load its `references/` only when the skill directs.
 - Follow the nearest `AGENT.md` chain for Validate commands.
 

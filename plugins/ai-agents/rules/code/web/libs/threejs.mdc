@@ -9,7 +9,7 @@ alwaysApply: false
 When editing R3F/Three.js files:
 
 - Apply engineering foundations first (always-applied rule).
-- Load `skills/code/web/libs/threejs/SKILL.md` for render-loop, typing, shader, and disposal rules.
+- Load `skills/threejs/SKILL.md` for render-loop, typing, shader, and disposal rules.
 - Load its `references/` and `assets/r3f-component-template.tsx` only when the skill directs.
 - Follow the nearest `AGENT.md` chain for the project's 3D folder layout and orchestration wiring.
 

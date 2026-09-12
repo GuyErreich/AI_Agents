@@ -9,11 +9,11 @@ Before a git milestone, review the change with the reviewer skill. Do not commit
 
 | Milestone | Skill | Reviewer tier |
 |---|---|---|
-| Commit | `skills/code/ci/commit/SKILL.md` | change |
-| Open PR | `skills/code/ci/pr/SKILL.md` | pr |
-| Push | `skills/code/ci/push/SKILL.md` | pr |
+| Commit | `skills/ci-commit/SKILL.md` | change |
+| Open PR | `skills/ci-pr/SKILL.md` | pr |
+| Push | `skills/ci-push/SKILL.md` | pr |
 
-The reviewer is `skills/code/review/reviewer/SKILL.md`. For an iterative fix-until-clean pass, use `skills/code/ci/local-review-loop/SKILL.md`. For an autonomous PR review→fix loop, use `skills/code/ci/pr-review-loop/SKILL.md`.
+The reviewer is `skills/reviewer/SKILL.md`. For an iterative fix-until-clean pass, use `skills/ci-local-review-loop/SKILL.md`. For an autonomous PR review→fix loop, use `skills/ci-pr-review-loop/SKILL.md`.
 
 ## Consent and skipping
 

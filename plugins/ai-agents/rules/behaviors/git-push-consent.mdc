@@ -31,4 +31,4 @@ These do **not** count as push consent on their own:
 
 ## Exceptions
 
-**pr-resolver / pr-review-loop:** when running `code/review/pr-resolver` or `code/ci/pr-review-loop`, approving the resolver/loop plan or an explicit "resolve comments" / "run the PR review loop" request grants scoped push consent for approved fix commits on the current PR branch. See pr-resolver and pr-review-loop `## Scoped consent`. All other pushes still need explicit approval.
+**pr-resolver / pr-review-loop:** when running `pr-resolver` or `ci-pr-review-loop`, approving the resolver/loop plan or an explicit "resolve comments" / "run the PR review loop" request grants scoped push consent for approved fix commits on the current PR branch. See pr-resolver and pr-review-loop `## Scoped consent`. All other pushes still need explicit approval.

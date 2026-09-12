@@ -8,8 +8,8 @@ alwaysApply: false
 
 When editing files under `**/components/ui/**/desktop/**`:
 
-- Apply engineering foundations and `code/web/ui` first.
-- Load `skills/code/web/ux/SKILL.md` and **`references/desktop/*`** (not mobile refs).
+- Apply engineering foundations and `ui` first.
+- Load `skills/ux/SKILL.md` and **`references/desktop/*`** (not mobile refs).
 - Sidebar, hover, wide layout nav: `references/desktop/navigation-motion.md`.
 - Overlays, press feedback, motion libs: `references/shared/*`.
 - Unsure which viewport applies: `references/viewport-routing.md`.

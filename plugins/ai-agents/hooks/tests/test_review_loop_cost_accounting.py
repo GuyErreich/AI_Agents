@@ -23,13 +23,7 @@ from review_loop_round import decide_round_followup, record_round_cost  # noqa: 
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[2]
 PRICING_PATH = (
-    PLUGIN_ROOT
-    / "skills"
-    / "code"
-    / "ci"
-    / "pr-review-loop"
-    / "assets"
-    / "pricing.default.json"
+    PLUGIN_ROOT / "skills" / "ci-pr-review-loop" / "assets" / "pricing.default.json"
 )
 
 

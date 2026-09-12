@@ -46,7 +46,7 @@ Versioning and promotion use [Action-Semver-Control](https://github.com/GuyErrei
 plugins/ai-agents/
   .cursor-plugin/plugin.json
   assets/logo.svg
-  skills/                         # foundations, code, ai-agent
+  skills/                         # one folder per skill (name == folder)
   rules/                          # glob + always-on pointers
   agents/                         # pr-reviewer, pr-fixer
   hooks/                          # review-loop + npm dep gate
@@ -63,7 +63,7 @@ AGENT.md tree
 scripts/review-lock.py            # optional
 ```
 
-Do not copy portable `skills/code/**` or `rules/code/**` into app repos once this plugin is installed — they would load twice.
+Do not copy portable plugin `skills/**` or `rules/code/**` into app repos once this plugin is installed — they would load twice.
 
 ## Validate (local)
 
@@ -85,4 +85,4 @@ CI on `dev` / `staging` / `main` and pull requests runs Gitleaks, Ruff, pytest, 
 
 ## Inheritance
 
-Every skill under `code/` extends `skills/code/foundations/engineering`. Folder taxonomy lives in `skills/foundations/hierarchy`. Agent-library container tiers live in `skills/ai-agent/hierarchy`. Project skills may add stricter rules, never weaker ones.
+Every code skill extends `skills/engineering`. Folder taxonomy lives in `skills/hierarchy`. Agent-library container tiers live in `skills/agent-hierarchy`. `improve-code` routes non-diff improvement through the reviewer and `ci-local-review-loop`. Project skills may add stricter rules, never weaker ones.
