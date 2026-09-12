@@ -13,6 +13,8 @@ One reviewer, many specialist minds. **Do not** spawn nested Task/subagents for 
 |---|---|---|
 | **staff-bar** | Always (every review) | `lenses/staff-bar.md` |
 | **typescript** | `*.{ts,tsx,js,mjs,cjs}` | `lenses/typescript.md` |
+| **cpp** | `*.{h,hpp,hh,hxx,cc,cpp,cxx}` | `lenses/cpp.md` |
+| **unreal** | `Source/`, `*.Build.cs`, `*.Target.cs`, `*.uproject`, `*.uplugin` | `lenses/unreal.md` |
 | **frontend** | Components, pages, hooks, CSS, UI kits, a11y-sensitive UI | `lenses/frontend.md` |
 | **backend** | Supabase, SQL/migrations, edge functions, RLS, auth, API routes, env/secrets | `lenses/backend.md` |
 | **realtime-graphics** | `three` / R3F / WebGL / shaders / GPU buffers / canvases | `lenses/realtime-graphics.md` |
