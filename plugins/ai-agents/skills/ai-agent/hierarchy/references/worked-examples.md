@@ -12,7 +12,7 @@ Generic cleanup/security rules fail the nesting test for Node — they hold for 
 
 ## 2. CI milestone skills — short skills vs parent references
 
-**Candidates:** `code/ci/{commit,pr,push,local-review-loop}` and behavior rules `git-commit-consent`, `git-push-consent`.
+**Candidates:** `code/ci/{worktree,commit,pr,push,local-review-loop}` and behavior rules `worktree-first`, `git-commit-consent`, `git-push-consent`.
 
 - Each milestone has its own trigger and workflow → separate `SKILL.md` files are justified (step 3 of aggregation decision).
 - Repeated `git-*` prefixes on consent rules are a latent grouping signal; introduce `ci/git/` or `behaviors/git/` only when **3+** siblings share that context.
