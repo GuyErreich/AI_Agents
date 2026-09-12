@@ -4,6 +4,8 @@ Squash-merge uses the **PR title** as the git commit header. Repos using auto-se
 
 **Default:** use a conventional-commit prefix on the PR title (`gh pr create --title "..."`).
 
+**Bump vs grouping:** the **branch prefix** (`feature/`, `fix/`, …) selects the version bump — see `skills/code/ci/worktree/references/branch-naming.md`. The **PR title** selects the release-notes group under `summary_mode: header_only`. These are different jobs; do not drop the title prefix just because the branch already names the bump type.
+
 ## Prefix → release-notes group
 
 | Title prefix | Use when | Typical auto-semver group |

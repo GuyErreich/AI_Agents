@@ -1,6 +1,6 @@
 [project]
 name = "ai-agents"
-version = "1.1.12"
+version = "1.1.13"
 description = "Cursor plugin — portable agent skills, rules, and review-loop hooks."
 readme = "README.md"
 requires-python = ">=3.12"

@@ -20,6 +20,12 @@ CI and milestone skills read these commands and the base branch from this block.
 - Run the release gate at the release milestone (before promote to `main` / production tag).
 - Record pass/fail from raw shell exit codes.
 
+## Worktrees
+
+- Base branch for new worktrees: `dev` (same as Validate).
+- This repo has no `.wtp.yml`. Prefer `wtp` when configured elsewhere; otherwise use the `git worktree` fallback in `skills/code/ci/worktree/SKILL.md` (e.g. under `~/Development/worktrees/AI_Agents/<prefix>/<slug>`).
+- Project-specific `base_dir` and post-create hooks belong in consuming-repo `AGENT.md` / `.wtp.yml`, not here.
+
 ## Review scope
 
 When reviewing, materialize the full surface: the tier diff (for PR/push prefer `merge-base...HEAD` against `dev` for feature work, or against `main` for production release PRs), plus this `AGENT.md`, plus the skills routed by the changed file types.

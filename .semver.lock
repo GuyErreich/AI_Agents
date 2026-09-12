@@ -1,6 +1,6 @@
-version: 1.1.12
+version: 1.1.13
 source_branch: staging
 target_branch: main
-target_base_sha: eb0444f16dda0fe74b9bae124714c124bac48a01
+target_base_sha: 862e9ab9ce9cd1e30313b747cfa22f6b1d403d0c
 finalized: true
 managed_by: auto-semver

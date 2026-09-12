@@ -1,0 +1,16 @@
+---
+description: Python language standards
+globs: "**/*.{py,pyi}"
+alwaysApply: false
+---
+
+# Python
+
+When editing matching files:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/languages/python/SKILL.md` for language rules.
+- Load its `references/` only when the skill directs.
+- Follow the nearest `AGENT.md` chain for Validate commands.
+
+Key rules: builtin generics, no `Any` / bare `object`, Google docstrings, relative imports, `pathlib`, fail-fast semantic exceptions, keyword-only extras, uv/ruff/mypy.
