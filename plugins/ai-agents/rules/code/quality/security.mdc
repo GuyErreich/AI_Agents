@@ -1,6 +1,6 @@
 ---
 description: Security standards for auth, input, data access, and sensitive data
-globs: "**/*.{ts,tsx,js,mjs}"
+globs: "**/*.{ts,tsx,js,mjs,py}"
 alwaysApply: false
 ---
 

@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Engineering Foundations
 
-Language-agnostic principles that every `code/**` skill assumes and extends. This skill owns the *why* of good code; downstream skills (`languages/nodejs`, `web/ui`, `web/libs/*`, `quality/*`) own the *how* for their domain. Do not restate language syntax or framework rules here.
+Language-agnostic principles that every `code/**` skill assumes and extends. This skill owns the *why* of good code; downstream skills (`languages/nodejs`, `languages/python`, `web/ui`, `web/libs/*`, `quality/*`) own the *how* for their domain. Do not restate language syntax or framework rules here.
 
 This is the **base of the inheritance chain**. Load it first, then layer the domain skill on top.
 

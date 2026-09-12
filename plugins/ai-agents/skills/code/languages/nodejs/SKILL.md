@@ -31,6 +31,7 @@ Load `skills/code/foundations/engineering/SKILL.md` first. Do not contradict eng
 | Promise chains → async/await conversions, `useEffect` async patterns | `references/async-await.md` |
 | Empty catch, unused vars, fast-refresh exports, console rules, ESLint conventions | `references/lint-hygiene.md` |
 | npm scripts, lint/audit cadence, lockfile changes | `references/npm-tooling.md` |
+| Runner-less Node/Deno test scripts, shared JSON cases, exit-code contract | `references/testing.md` |
 
 Load a reference only when a rule above surfaces an issue you need patterns for. Do not preload.
 
