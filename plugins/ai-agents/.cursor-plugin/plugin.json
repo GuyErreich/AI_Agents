@@ -17,7 +17,9 @@
     "hooks",
     "code-review",
     "ci",
-    "engineering"
+    "engineering",
+    "cpp",
+    "unreal"
   ],
   "rules": "./rules/",
   "skills": "./skills/",

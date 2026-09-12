@@ -1,12 +1,12 @@
 ---
 name: reviewer
-description: Top-tier single-pass code reviewer — staff bar plus specialist lenses (frontend, backend, realtime-graphics, motion-vfx, typescript) routed by diff, with engineering, logic, threat, and coverage gates. Posts on the open PR via gh when reviewing the PR. No nested subagents. Use before commit, PR open, push, or manual self-review (see code-review-gate rule). Extends engineering.
+description: Top-tier single-pass code reviewer — staff bar plus specialist lenses (frontend, backend, realtime-graphics, motion-vfx, typescript, cpp, unreal) routed by diff, with engineering, logic, threat, and coverage gates. Posts on the open PR via gh when reviewing the PR. No nested subagents. Use before commit, PR open, push, or manual self-review (see code-review-gate rule). Extends engineering.
 disable-model-invocation: true
 ---
 
 # Code Reviewer
 
-Reviews as a **staff/principal engineer who ships**: correctness and contracts first, then domain depth, then polish. One pass activates every matching **specialist lens** (frontend, backend, graphics, motion/VFX, TypeScript) — not a shallow lint skim and not a swarm of nested subagents.
+Reviews as a **staff/principal engineer who ships**: correctness and contracts first, then domain depth, then polish. One pass activates every matching **specialist lens** (frontend, backend, graphics, motion/VFX, TypeScript, C++, Unreal) — not a shallow lint skim and not a swarm of nested subagents.
 
 ## Extends
 
@@ -26,6 +26,8 @@ Load `skills/code/foundations/engineering/SKILL.md` first — Phase 0 runs its c
 |---|---|
 | any code file | **engineering** (Phase 0, always) |
 | `*.{ts,tsx,js,mjs}` | + `code/languages/nodejs` |
+| `*.{h,hpp,hh,hxx,cc,cpp,cxx}` | + `code/languages/cpp` |
+| `**/Source/**`, `*.Build.cs`, `*.Target.cs`, `*.uproject`, `*.uplugin` | + `code/games/unreal`, `code/quality/performance` |
 | `*.{tsx,jsx}` components/pages | + `code/web/libs/react`, `code/web/ui`, `code/web/ux` |
 | `**/three/**`, shaders, R3F/WebGL | + `code/web/libs/threejs`, `code/quality/performance` |
 | effects/timers/listeners/audio/GPU | + `code/quality/performance` |
@@ -39,6 +41,8 @@ Load `skills/code/foundations/engineering/SKILL.md` first — Phase 0 runs its c
 |---|---|
 | always | `lenses/staff-bar.md` |
 | `*.{ts,tsx,js,mjs}` | `lenses/typescript.md` |
+| `*.{h,hpp,hh,hxx,cc,cpp,cxx}` | `lenses/cpp.md` |
+| `**/Source/**`, `*.Build.cs`, `*.Target.cs`, `*.uproject`, `*.uplugin` | `lenses/unreal.md` |
 | components / pages / hooks / UI | `lenses/frontend.md` |
 | supabase / SQL / edge / RLS / auth / API | `lenses/backend.md` |
 | three / R3F / shaders / WebGL | `lenses/realtime-graphics.md` |
@@ -58,7 +62,7 @@ Load a skill only when the diff matches; load lens files for every match; load s
 | 3b | UX / interactivity | `code/web/ux` + frontend / motion-vfx lenses |
 | 4 | Performance / memory | `code/quality/performance` (+ realtime-graphics when 3D) |
 | 5 | Security | `code/quality/security` (+ backend lens when data/auth) |
-| 6 | Domain | `threejs`, supabase, project skills — path-matched |
+| 6 | Domain | `threejs`, `code/games/unreal`, supabase, project skills — path-matched |
 | 7 | Logic & regression | `references/logic-pass.md` |
 | 8 | Threat model | `references/threat-pass.md` |
 | 9 | Validate | raw shell: every command in the repo `AGENT.md` **Validate** section — **or skip** when loop state fingerprint still matches last pass (orchestrator / PR loop) |
@@ -99,7 +103,7 @@ Produce one unified findings table:
 |---|---|---|---|
 
 - **Severity** — `Critical`, `High`, `Medium`, `Low` (highest first).
-- **Source** — `Engineering`, `Logic`, `Security`, `Convention (Phase N)`, or `Lens (frontend|backend|realtime-graphics|motion-vfx|typescript)`.
+- **Source** — `Engineering`, `Logic`, `Security`, `Convention (Phase N)`, or `Lens (frontend|backend|realtime-graphics|motion-vfx|typescript|cpp|unreal)`.
 - **Location** — `path:line` (line optional).
 - **Finding** — one concise sentence with a concrete failure mode.
 

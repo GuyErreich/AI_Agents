@@ -1,0 +1,16 @@
+---
+description: Unreal Engine 5 C++ and module standards
+globs: "**/Source/**/*.{h,cpp},**/*.{uproject,uplugin},**/*.Build.cs,**/*.Target.cs"
+alwaysApply: false
+---
+
+# Unreal Engine 5
+
+When editing UE5 source or module files:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/languages/cpp/SKILL.md`, then `skills/code/games/unreal/SKILL.md`.
+- Load unreal `references/` only when the skill directs.
+- Follow the nearest `AGENT.md` chain for target names, module layout, and naming overrides.
+
+Key rules: Epic naming (`F`/`U`/`A`/`E`/`I`/`T`, `b` bools, PascalCase), `UPROPERTY`/`TObjectPtr` for GC, no world access in constructors, Tick off by default, `HasAuthority` + validated Server RPCs, C++ owns systems / Blueprints compose.

@@ -1,0 +1,16 @@
+---
+description: C++20 language standards
+globs: "**/*.{h,hpp,hh,hxx,inl,ipp,cc,cpp,cxx}"
+alwaysApply: false
+---
+
+# C++
+
+When editing matching files:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/languages/cpp/SKILL.md` for language rules.
+- Load its `references/` only when the skill directs (including `references/tooling.md` when CMake, tidy, sanitizers, or the dependency manifest come up).
+- Follow the nearest `AGENT.md` chain for Validate commands and the project C++ standard.
+
+Key rules: honest types (no `void*` / C-style casts), no diagnostic suppression, RAII (no raw `new`/`delete`), explicit ownership at signatures, fail-fast status types, no `printf`/`std::cout` in shipped code.
