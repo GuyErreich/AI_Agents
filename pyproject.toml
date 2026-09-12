@@ -1,6 +1,6 @@
 [project]
 name = "ai-agents"
-version = "1.1.8"
+version = "1.1.12"
 description = "Cursor plugin — portable agent skills, rules, and review-loop hooks."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -9,7 +9,7 @@ license = { text = "MIT" }
 [dependency-groups]
 dev = [
     "pytest>=8.0",
-    "ruff>=0.16.5",
+    "ruff>=0.16.6",
     "pytest-cov>=5.0",
 ]
 

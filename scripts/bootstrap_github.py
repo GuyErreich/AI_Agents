@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+from typing import Any
 
 
 def _gh_api(
@@ -25,7 +26,7 @@ def _gh_api(
     payload: dict | None = None,
     *,
     dry_run: bool,
-) -> None:
+) -> Any | None:
     cmd = ["gh", "api", "-X", method, path]
     if payload is not None:
         cmd.extend(["--input", "-"])
@@ -33,17 +34,19 @@ def _gh_api(
         print(f"# {method} {path}")
         if payload is not None:
             print(json.dumps(payload, indent=2))
-        return
+        return None
     proc = subprocess.run(
         cmd,
         input=json.dumps(payload).encode() if payload is not None else None,
         check=False,
         capture_output=True,
-        text=payload is None,
     )
     if proc.returncode != 0:
-        stderr = proc.stderr.decode() if isinstance(proc.stderr, bytes) else proc.stderr
+        stderr = proc.stderr.decode()
         raise RuntimeError(f"gh api failed ({path}): {stderr}")
+    if not proc.stdout:
+        return None
+    return json.loads(proc.stdout.decode())
 
 
 def _user_id(*, dry_run: bool) -> int:
@@ -51,6 +54,46 @@ def _user_id(*, dry_run: bool) -> int:
         return 0
     out = subprocess.check_output(["gh", "api", "user", "--jq", ".id"], text=True)
     return int(out.strip())
+
+
+def _policy_key(policy: dict[str, Any]) -> tuple[str, str]:
+    return (str(policy.get("name") or ""), str(policy.get("type") or "branch"))
+
+
+def reconcile_deployment_policies(
+    repo: str,
+    environment: str,
+    desired: list[dict[str, str]],
+    *,
+    dry_run: bool,
+) -> None:
+    """Make live deployment policies match ``desired`` (add missing, delete stale)."""
+    base = f"repos/{repo}/environments/{environment}/deployment-branch-policies"
+    desired_keys = {_policy_key(item) for item in desired}
+    if dry_run:
+        print(f"# reconcile {environment} -> {sorted(desired_keys)}")
+        for item in desired:
+            print(f"# POST {base} {json.dumps(item)}")
+        return
+
+    listed = _gh_api("GET", base, dry_run=False) or {}
+    existing = list(listed.get("branch_policies") or [])
+    existing_by_key = {_policy_key(policy): policy for policy in existing}
+
+    for policy in existing:
+        key = _policy_key(policy)
+        if key in desired_keys:
+            continue
+        policy_id = policy["id"]
+        print(f"delete {environment} policy {key[0]!r} ({key[1]}) id={policy_id}")
+        _gh_api("DELETE", f"{base}/{policy_id}", dry_run=False)
+
+    for item in desired:
+        key = _policy_key(item)
+        if key in existing_by_key:
+            continue
+        print(f"create {environment} policy {key[0]!r} ({key[1]})")
+        _gh_api("POST", base, item, dry_run=False)
 
 
 def apply_environments(repo: str, *, dry_run: bool) -> None:
@@ -81,32 +124,25 @@ def apply_environments(repo: str, *, dry_run: bool) -> None:
         },
         dry_run=dry_run,
     )
-    if not dry_run:
-        # Branch tips (marketplace indexes branches) plus publish tags.
-        _gh_api(
-            "POST",
-            f"{base}/staging/deployment-branch-policies",
+    # Branch tips (marketplace indexes branches) plus publish tags.
+    reconcile_deployment_policies(
+        repo,
+        "staging",
+        [
             {"name": "staging", "type": "branch"},
-            dry_run=dry_run,
-        )
-        _gh_api(
-            "POST",
-            f"{base}/staging/deployment-branch-policies",
             {"name": "*.*.*-rc", "type": "tag"},
-            dry_run=dry_run,
-        )
-        _gh_api(
-            "POST",
-            f"{base}/production/deployment-branch-policies",
+        ],
+        dry_run=dry_run,
+    )
+    reconcile_deployment_policies(
+        repo,
+        "production",
+        [
             {"name": "main", "type": "branch"},
-            dry_run=dry_run,
-        )
-        _gh_api(
-            "POST",
-            f"{base}/production/deployment-branch-policies",
             {"name": "*.*.*", "type": "tag"},
-            dry_run=dry_run,
-        )
+        ],
+        dry_run=dry_run,
+    )
 
 
 def apply_rulesets(repo: str, *, dry_run: bool) -> None:
