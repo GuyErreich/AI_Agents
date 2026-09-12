@@ -13,7 +13,7 @@ alwaysApply: false
 When editing matching files:
 
 - Apply engineering foundations first (always-applied rule).
-- Load `skills/code/quality/testing/SKILL.md` for test-authoring rules.
-- Load its `references/` only when the skill directs (including `references/python-pytest.md` for pytest files).
+- Load `skills/code/quality/testing/SKILL.md` for language-agnostic test-authoring rules.
+- Load the matching language skill's `references/testing.md` for runner specifics (`code/languages/python` for pytest files, `code/languages/nodejs` for `.js`/`.mjs`/`.ts` scripts).
 
-Key rules: test behavior at seams; mock only true I/O; prefer fakes and real temp files; share fixtures; one regression test per bug.
+Key rules: test behavior at seams; mock only true I/O (except real-boundary smoke tests); prefer fakes and shared data files; table-driven cases; failing tests must exit non-zero.

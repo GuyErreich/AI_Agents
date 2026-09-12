@@ -26,7 +26,7 @@ Load `skills/code/foundations/engineering/SKILL.md` first — Phase 0 runs its c
 |---|---|
 | any code file | **engineering** (Phase 0, always) |
 | `*.{py,pyi}` | + `code/languages/python` |
-| `test_*.py`, `*_test.py`, `*.{test,spec}.{ts,tsx,js}`, `conftest.py` | + `code/quality/testing` |
+| `test_*.py`, `*_test.py`, `*.{test,spec}.{ts,tsx,js}`, `conftest.py` | + `code/quality/testing` + the matching language skill's `references/testing.md` |
 | `*.{ts,tsx,js,mjs}` | + `code/languages/nodejs` |
 | `*.{tsx,jsx}` components/pages | + `code/web/libs/react`, `code/web/ui`, `code/web/ux` |
 | `**/three/**`, shaders, R3F/WebGL | + `code/web/libs/threejs`, `code/quality/performance` |

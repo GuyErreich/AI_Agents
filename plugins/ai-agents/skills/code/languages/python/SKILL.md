@@ -30,6 +30,7 @@ Load `skills/code/foundations/engineering/SKILL.md` first. Do not contradict eng
 | Any-free patterns, `TypeAlias` / `NewType` / `Protocol`, dataclass vs Pydantic v2 | `references/typing-and-models.md` |
 | Relative imports, `__all__`, uv and `pyproject.toml` | `references/imports-and-packaging.md` |
 | Fail-fast validation, custom exceptions, logging severity, no `print` | `references/errors-and-logging.md` |
+| pytest, pytest-mock, pyfakefs, shared `tests/fixtures/` | `references/testing.md` |
 
 Load a reference only when a rule above surfaces an issue you need patterns for. Do not preload.
 

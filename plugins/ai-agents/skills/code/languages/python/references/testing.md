@@ -1,10 +1,13 @@
 # Python — pytest
 
+Universal test-authoring rules live in `code/quality/testing`. This file is the pytest *how*.
+
 - Use **pytest** and **pytest-mock** only. Do not import `unittest.mock`.
 - Prefer **`tmp_path`** or the **`pyfakefs` `fs` fixture** over creating real files in the repo tree.
-- Shared fixtures live under `tests/fixtures/` (or the path the repo already uses). Import or register them — do not paste setup into each file.
+- Shared setup lives under `tests/fixtures/` (or the path the repo already uses). Import or register them — do not paste setup into each file.
 - Use `@pytest.mark.parametrize` for edge cases (empty, quoted, prefixed, missing file).
 - Mock GitPython / subprocess / GitHub HTTP at the boundary with `mocker`. Do not mock the function you are testing.
+- Repeated `mocker.patch(...)` blocks across tests belong in a fixture that yields the configured fake.
 - Type-annotate test helpers and fixtures. Google-style docstrings on non-obvious fixtures.
 
 ```python
