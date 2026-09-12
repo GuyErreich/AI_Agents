@@ -33,28 +33,24 @@ LEGACY_RUNTIME_FILES = (
     "review-lock.json",
 )
 DEFAULT_PRICING_REL = Path(
-    "skills/code/ci/pr-review-loop/assets/pricing.default.json"
+    "skills/ci-pr-review-loop/assets/pricing.default.json"
 )
 DEFAULT_PRICING_PLUGIN = (
     Path(__file__).resolve().parent.parent
     / "skills"
-    / "code"
-    / "ci"
-    / "pr-review-loop"
+    / "ci-pr-review-loop"
     / "assets"
     / "pricing.default.json"
 )
 DEFAULT_PRICING_LEGACY_PROJECT = Path(
-    ".cursor/skills/code/ci/pr-review-loop/assets/pricing.default.json"
+    ".cursor/skills/ci-pr-review-loop/assets/pricing.default.json"
 )
 # User-level skills copy (~/.cursor/skills) — fallback before plugin install
 DEFAULT_PRICING_USER = (
     Path.home()
     / ".cursor"
     / "skills"
-    / "code"
-    / "ci"
-    / "pr-review-loop"
+    / "ci-pr-review-loop"
     / "assets"
     / "pricing.default.json"
 )

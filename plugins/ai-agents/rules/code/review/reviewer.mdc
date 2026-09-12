@@ -7,7 +7,7 @@ alwaysApply: false
 
 When the user asks to review code, self-review changes, inspect a diff before a commit/PR/push milestone, or review **the PR**:
 
-- Load `skills/code/review/reviewer/SKILL.md`.
+- Load `skills/reviewer/SKILL.md`.
 - It routes to engineering + matching domain skills by changed files and reads the `AGENT.md` chain.
 - Load its `references/` only when a phase needs them.
 

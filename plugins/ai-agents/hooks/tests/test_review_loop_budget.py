@@ -27,13 +27,7 @@ from review_loop_budget import decide_subagent_start  # noqa: E402
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[2]
 PRICING_PATH = (
-    PLUGIN_ROOT
-    / "skills"
-    / "code"
-    / "ci"
-    / "pr-review-loop"
-    / "assets"
-    / "pricing.default.json"
+    PLUGIN_ROOT / "skills" / "ci-pr-review-loop" / "assets" / "pricing.default.json"
 )
 
 

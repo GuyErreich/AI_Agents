@@ -16,7 +16,7 @@ The orchestrator includes a **Fix ledger** table in your prompt. **Refuse** to a
 ## When invoked
 
 1. Read the approved findings from the prompt (and the findings file path if given). Do **not** re-triage. Read the Fix ledger; block any reverse-shape row.
-2. Load `skills/code/review/pr-resolver/SKILL.md` for reply/resolve mechanics only. **Skip** its interactive Plan-mode gate — the orchestrator already triaged.
+2. Load `skills/pr-resolver/SKILL.md` for reply/resolve mechanics only. **Skip** its interactive Plan-mode gate — the orchestrator already triaged.
 3. Fix **only** the handed rows that are not ledger-blocked. Minimal root-cause edits. Stay inside the PR diff unless a finding requires otherwise (those should have been escalated).
 4. Before editing a file, read it and the nearest `AGENT.md`. Load matching domain skills from the reviewer routing table only as needed.
 5. Validate with every command in the repo `AGENT.md` **Validate** section using **raw** shell (not `rtk` for exit-code decisions). Non-zero exit ⇒ fail. Do not commit if any command fails — return the failure and stop. Never report Validate `pass` when a command failed.

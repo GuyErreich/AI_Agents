@@ -17,7 +17,7 @@
     "beforeShellExecution": [
       {
         "command": "bash ./hooks/run-python.sh review_loop_git_guard.py",
-        "matcher": "git",
+        "matcher": "(^|[;&|]\\s*)git\\s",
         "failClosed": true
       }
     ],

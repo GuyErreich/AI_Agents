@@ -23,7 +23,7 @@ CI and milestone skills read these commands and the base branch from this block.
 ## Worktrees
 
 - Base branch for new worktrees: `dev` (same as Validate).
-- This repo has no `.wtp.yml`. Prefer `wtp` when configured elsewhere; otherwise use the `git worktree` fallback in `skills/code/ci/worktree/SKILL.md` (e.g. under `~/Development/worktrees/AI_Agents/<prefix>/<slug>`).
+- This repo has no `.wtp.yml`. Prefer `wtp` when configured elsewhere; otherwise use the `git worktree` fallback in `skills/ci-worktree/SKILL.md` (e.g. under `~/Development/worktrees/AI_Agents/<prefix>/<slug>`).
 - Project-specific `base_dir` and post-create hooks belong in consuming-repo `AGENT.md` / `.wtp.yml`, not here.
 
 ## Review scope

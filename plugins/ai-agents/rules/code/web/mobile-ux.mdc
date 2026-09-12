@@ -8,8 +8,8 @@ alwaysApply: false
 
 When editing files under `**/components/ui/**/mobile/**`:
 
-- Apply engineering foundations and `code/web/ui` first.
-- Load `skills/code/web/ux/SKILL.md` and **`references/mobile/*`** (not desktop refs).
+- Apply engineering foundations and `ui` first.
+- Load `skills/ux/SKILL.md` and **`references/mobile/*`** (not desktop refs).
 - Edge list entrance and clip-boundary: `references/mobile/navigation-motion.md`.
 - Pickers and snap scrollers: `references/mobile/pickers-and-scrollers.md`.
 - Overlays, press feedback, motion libs: `references/shared/*`.

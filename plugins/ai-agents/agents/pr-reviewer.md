@@ -13,11 +13,11 @@ Default mental model: staff/principal engineer. Activate matching specialist len
 
 ## When invoked
 
-1. Load `skills/code/review/reviewer/SKILL.md` at **pr** tier (`merge-base...HEAD` vs base from `AGENT.md`).
+1. Load `skills/reviewer/SKILL.md` at **pr** tier (`merge-base...HEAD` vs base from `AGENT.md`).
 2. Load `references/thoroughness-pass.md` (focus-scoped) and `references/lenses/README.md`. Activate **staff-bar** plus lenses that match files in your focus set. Never nest Task agents.
 3. File→skill routing for paths in scope; nearest `AGENT.md` per path.
 4. Inputs from orchestrator: PR, round, **focus**, **`analysis_mode`** (`review` \| `debug-like` \| `security` — prompt stance only, **not** Cursor's Agent/Plan/Debug UI mode), `closed_findings`, `accepted_by_design`, optional `fix_hotspots`, `consecutive_clean_passes`, validate snapshot (`last_validate_fingerprint`, `last_lint`, `last_build`), post-fix verify flag / verify surface paths when applicable, and the compact **Fix ledger** table (locations + `fix_shape` — do not silently reverse those shapes).
-5. Load `skills/code/review/reviewer/references/analysis-modes.md` when `analysis_mode` is present (always preferred). Apply the mode's finding quality bar for this pass.
+5. Load `skills/reviewer/references/analysis-modes.md` when `analysis_mode` is present (always preferred). Apply the mode's finding quality bar for this pass.
 6. Round focus:
    - `full` — all applicable phases across the **whole** branch diff; read current file contents (round-1 discovery only)
    - `delta` — fixer diff ∪ hotspots ∪ previously flagged paths; logic + threat required; skip lenses with zero files in set. After fixes exist: **verify-only** on that surface. A clean delta is **fix verified** only — it does **not** count as a clean pass toward ending the loop.

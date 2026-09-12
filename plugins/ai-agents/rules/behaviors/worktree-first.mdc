@@ -11,7 +11,7 @@ Every new branch lives in its own worktree (prefer `wtp`). Never implement branc
 
 Before the **first file edit** on branch-worthy work (features, fixes, chores, refactors, issue/plan implementation, any task that will produce commits):
 
-1. Load `skills/code/ci/worktree/SKILL.md` and run **Detect checkout type** + **Preflight**.
+1. Load `skills/ci-worktree/SKILL.md` and run **Detect checkout type** + **Preflight**.
 2. Read the base branch from the repository-root `AGENT.md` Validate block (do not hardcode `dev` / `master`).
 3. If the open workspace is the **primary checkout**, **or** `git branch --show-current` equals the base branch → **do not edit, commit, or push**. Create or reuse a worktree, print its absolute path, and **stop** until the user opens that path as the Cursor workspace.
 

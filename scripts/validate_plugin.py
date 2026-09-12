@@ -100,7 +100,10 @@ def _frontmatter(path: Path) -> dict[str, str]:
 
 
 def _rel(path: Path) -> str:
-    return str(path.relative_to(REPO_ROOT))
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _pyproject_version() -> str:
@@ -143,6 +146,27 @@ def _expect_tag_version() -> str | None:
         if re.fullmatch(r"\d+\.\d+\.\d+(?:-(?:dev|rc))?", tag):
             return tag
     return None
+
+
+def check_skill_identity(skill_files: list[Path], errors: list[str]) -> None:
+    """Require unique skill folders and frontmatter ``name`` == parent folder."""
+    seen: dict[str, Path] = {}
+    for skill in skill_files:
+        meta = _frontmatter(skill)
+        folder = skill.parent.name
+        name = meta.get("name") or ""
+        if name and name != folder:
+            errors.append(
+                f"{_rel(skill)}: frontmatter name {name!r} != parent folder {folder!r}"
+            )
+        previous = seen.get(folder)
+        if previous is not None:
+            errors.append(
+                f"{_rel(skill.parent)}: duplicate skill folder name {folder!r} "
+                f"(also {_rel(previous)})"
+            )
+            continue
+        seen[folder] = skill.parent
 
 
 def check_version_consistency(plugin_root: Path, errors: list[str]) -> None:
@@ -504,6 +528,7 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
             errors.append(f"{_rel(skill)}: missing frontmatter name")
         if not meta.get("description"):
             errors.append(f"{_rel(skill)}: missing frontmatter description")
+    check_skill_identity(skill_files, errors)
 
     rules_dir = plugin_root / "rules"
     rule_files = sorted(rules_dir.rglob("*.mdc")) if rules_dir.is_dir() else []

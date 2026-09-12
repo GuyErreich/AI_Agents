@@ -14,4 +14,4 @@ Before writing or reviewing code, apply these universal principles:
 - Separate data, orchestration, presentation, and I/O; one module, one reason to change.
 - Couple what changes together; decouple what changes for different reasons — avoid both duplication and premature abstraction.
 
-Load `skills/code/foundations/engineering/SKILL.md` for decisions, and its `references/` only when a principle needs deep guidance. Glob-specific rules and downstream skills must not repeat these bullets — they reference this foundation instead.
+Load `skills/engineering/SKILL.md` for decisions, and its `references/` only when a principle needs deep guidance. Glob-specific rules and downstream skills must not repeat these bullets — they reference this foundation instead.

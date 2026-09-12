@@ -8,12 +8,12 @@ alwaysApply: false
 
 When building or editing interactive surfaces (buttons, chips, sheets, dialogs, tabs, pickers, page/panel transitions):
 
-- Apply engineering foundations and `code/web/ui` first (primitives, reuse, semantic elements).
-- Load `skills/code/web/ux/SKILL.md` for behavior, motion, library choice, and generative sound.
+- Apply engineering foundations and `ui` first (primitives, reuse, semantic elements).
+- Load `skills/ux/SKILL.md` for behavior, motion, library choice, and generative sound.
 - Load `references/library-selection.md` before adding animation or overlay dependencies.
 - Load `references/shared/generative-sound.md` when wiring hover/click/dismiss audio (when repo adopts).
 - Cancel and backdrop dismiss must run the full exit animation — no instant unmount.
-- Reuse shared primitives from `code/web/ui` → `standard-primitives.md`.
+- Reuse shared primitives from `ui` → `standard-primitives.md`.
 
 Under `**/components/ui/**/mobile/**` or `**/desktop/**`, also follow **`mobile-ux.mdc`** / **`desktop-ux.mdc`** for viewport-specific references.
 
