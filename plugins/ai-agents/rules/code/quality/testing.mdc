@@ -1,0 +1,19 @@
+---
+description: Test-authoring standards
+globs:
+  - "**/test_*.py"
+  - "**/*_test.py"
+  - "**/*.{test,spec}.{ts,tsx,js,mjs}"
+  - "**/conftest.py"
+alwaysApply: false
+---
+
+# Testing
+
+When editing matching files:
+
+- Apply engineering foundations first (always-applied rule).
+- Load `skills/code/quality/testing/SKILL.md` for test-authoring rules.
+- Load its `references/` only when the skill directs (including `references/python-pytest.md` for pytest files).
+
+Key rules: test behavior at seams; mock only true I/O; prefer fakes and real temp files; share fixtures; one regression test per bug.
