@@ -8,19 +8,19 @@
 
 "skills":
   - changed-files:
-      - any-glob-to-any-file: "plugins/ai-agents/skills/**"
+      - any-glob-to-any-file: "plugins/*/skills/**"
 
 "rules":
   - changed-files:
-      - any-glob-to-any-file: "plugins/ai-agents/rules/**"
+      - any-glob-to-any-file: "plugins/*/rules/**"
 
 "hooks":
   - changed-files:
-      - any-glob-to-any-file: "plugins/ai-agents/hooks/**"
+      - any-glob-to-any-file: "plugins/ankyr/hooks/**"
 
 "agents":
   - changed-files:
-      - any-glob-to-any-file: "plugins/ai-agents/agents/**"
+      - any-glob-to-any-file: "plugins/ankyr/agents/**"
 
 "scripts":
   - changed-files:

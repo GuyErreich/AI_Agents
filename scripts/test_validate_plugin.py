@@ -51,3 +51,61 @@ def test_matching_unique_skill_names_pass(tmp_path: Path) -> None:
     errors: list[str] = []
     validate_plugin.check_skill_identity([python, nodejs], errors)
     assert errors == []
+
+
+def test_hard_extends_heading_fails(tmp_path: Path) -> None:
+    """An Extends heading is a hard cross-skill dependency."""
+    skill = tmp_path / "python" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: python\ndescription: test skill\n---\n"
+        "# Test\n\n## Extends\n\nPreferred if installed.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_no_hard_skill_deps([skill], errors)
+    assert any("## Extends" in item for item in errors)
+
+
+def test_hard_skill_load_fails(tmp_path: Path) -> None:
+    """Load skills/<name>/SKILL.md first is a hard dependency."""
+    skill = tmp_path / "python" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: python\ndescription: test skill\n---\n"
+        "# Test\n\n## Foundation\n\n"
+        "Load `skills/engineering/SKILL.md` first.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_no_hard_skill_deps([skill], errors)
+    assert any("hard Load" in item for item in errors)
+
+
+def test_foundation_pointer_passes(tmp_path: Path) -> None:
+    """A Foundation resolution pointer is not a hard dependency."""
+    skill = tmp_path / "python" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: python\ndescription: test skill\n---\n"
+        "# Test\n\n## Foundation\n\n"
+        "Resolve standards project-first, then this plugin if installed.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_no_hard_skill_deps([skill], errors)
+    assert errors == []
+
+
+def test_extends_in_description_fails(tmp_path: Path) -> None:
+    """Frontmatter must not say Extends <skill>."""
+    skill = tmp_path / "python" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: python\ndescription: Python rules. Extends engineering.\n---\n"
+        "# Test\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_no_extends_in_description([skill], errors)
+    assert any("Extends " in item for item in errors)

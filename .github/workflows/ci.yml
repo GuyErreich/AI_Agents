@@ -35,7 +35,7 @@ jobs:
         run: uv audit --frozen
 
       - name: Ruff lint
-        run: uv run ruff check plugins/ai-agents/hooks scripts
+        run: uv run ruff check plugins/ankyr/hooks scripts
 
       - name: Ruff format
         run: uv run ruff format --check scripts

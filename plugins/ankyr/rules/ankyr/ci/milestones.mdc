@@ -1,0 +1,22 @@
+---
+description: Use the CI skills when starting work off base, committing, opening a PR, pushing, or releasing
+alwaysApply: false
+---
+
+# CI Milestones
+
+When the user asks to start new work, commit, open a PR, push, or release/promote, run the matching CI skill (each reviews before the git action and respects consent):
+
+| Intent | Skill |
+|---|---|
+| Start new work / new branch / implement off base | `skills/ankyr-ci-worktree/SKILL.md` |
+| Create / switch branch | `skills/ankyr-ci-worktree/SKILL.md` (`references/branch-naming.md`) |
+| Commit | `skills/ankyr-ci-commit/SKILL.md` |
+| Open / create a PR | `skills/ankyr-ci-pr/SKILL.md` |
+| Update an existing PR body | `skills/ankyr-ci-pr/SKILL.md` (`references/body-refresh.md`) |
+| Push | `skills/ankyr-ci-push/SKILL.md` |
+| Release / promote / publish | `skills/ankyr-ci-release/SKILL.md` |
+| Fix-until-clean self-review | `skills/ankyr-ci-local-review-loop/SKILL.md` |
+| Autonomous PR review-fix loop | `skills/ankyr-ci-pr-review-loop/SKILL.md` |
+
+See `rules/ankyr/behaviors/worktree-first.mdc` for the worktree gate, `rules/ankyr/behaviors/code-review-gate.mdc` for the review gate, and `rules/ankyr/behaviors/git-*-consent.mdc` for consent rules.

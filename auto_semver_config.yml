@@ -17,7 +17,10 @@ promotions:
 # Callers pin Action-Semver-Control@1.6.17 for mode-aware signed promote.
 version_files:
   - "pyproject.toml"
-  - "plugins/ai-agents/.cursor-plugin/plugin.json"
+  - "plugins/ankyr/.cursor-plugin/plugin.json"
+  - "plugins/ankyr-python/.cursor-plugin/plugin.json"
+  - "plugins/ankyr-node/.cursor-plugin/plugin.json"
+  - "plugins/ankyr-web/.cursor-plugin/plugin.json"
   - ".cursor-plugin/marketplace.json"
 
 commit_groups:

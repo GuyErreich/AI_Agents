@@ -6,9 +6,9 @@ rules:
       Plugin hooks must not perform network I/O. Hooks run on every install;
       use only local state under .review-loop (or documented Cursor hook state).
     paths:
-      - plugins/ai-agents/hooks/**/*.py
+      - plugins/ankyr/hooks/**/*.py
     paths-ignore:
-      - plugins/ai-agents/hooks/tests/**
+      - plugins/ankyr/hooks/tests/**
     pattern-either:
       - pattern: urllib.request.$METHOD(...)
       - pattern: requests.$METHOD(...)
@@ -28,9 +28,9 @@ rules:
       Hooks must not write durable state under /tmp, /var, or Path.home()
       except under ~/.cursor (Cursor-owned). Prefer $REVIEW_LOOP_ROOT/.review-loop.
     paths:
-      - plugins/ai-agents/hooks/**/*.py
+      - plugins/ankyr/hooks/**/*.py
     paths-ignore:
-      - plugins/ai-agents/hooks/tests/**
+      - plugins/ankyr/hooks/tests/**
     pattern-either:
       - pattern: open("/tmp/$PATH", ...)
       - pattern: open("/var/$PATH", ...)

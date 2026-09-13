@@ -109,19 +109,31 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 **Concurrency:** `auto-semver.yml` must queue bump runs per target branch (`cancel-in-progress: false`). See [Action-Semver-Control SETUP — Concurrent merges](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/SETUP.md#concurrent-merges--bump-queue) and [TROUBLESHOOTING](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TROUBLESHOOTING.md).
 
-**Hook file modes:** Keep plugin hooks as `100644` and invoke them with `bash ./hooks/run-python.sh …`. `validate_plugin.py` fails if any file under `plugins/ai-agents/hooks/` is `100755`. ASC 1.6.17+ can rewrite destination modes via a verified Git Database REST fallback when GraphQL `createCommitOnBranch` cannot represent them, so a promote can carry `100644` onto a tip that still has `+x`.
+**Hook file modes:** Keep plugin hooks as `100644` and invoke them with `bash ./hooks/run-python.sh …`. `validate_plugin.py` fails if any file under `plugins/ankyr/hooks/` is `100755`. ASC 1.6.17+ can rewrite destination modes via a verified Git Database REST fallback when GraphQL `createCommitOnBranch` cannot represent them, so a promote can carry `100644` onto a tip that still has `+x`.
 
 ## Version sync
 
 `Action-Semver-Control` updates (via `version_files` in `auto_semver_config.yml`):
 
 - `pyproject.toml`
-- `plugins/ai-agents/.cursor-plugin/plugin.json`
+- `plugins/ankyr/.cursor-plugin/plugin.json`
+- `plugins/ankyr-python/.cursor-plugin/plugin.json`
+- `plugins/ankyr-node/.cursor-plugin/plugin.json`
+- `plugins/ankyr-web/.cursor-plugin/plugin.json`
 - `.cursor-plugin/marketplace.json`
 
 `uv.lock` is **not** in `version_files` — after a version bump, run `uv lock` (or let Dependabot refresh) so the editable package version matches `pyproject.toml`.
 
-`scripts/sync_version.py --check` and `validate_plugin.py` remain local/CI guards if manifests ever drift.
+`scripts/sync_version.py --check` and `validate_plugin.py` remain local/CI guards if manifests ever drift. All four plugin manifests share the `pyproject.toml` version.
+
+## Migration from `ai-agents`
+
+This is a breaking rename. Consumers who installed the old single plugin must:
+
+1. Disable **AI Agents** (`ai-agents`) in Cursor.
+2. Enable **Ankyr** plus the language plugins they need (`ankyr-python`, `ankyr-node`, `ankyr-web`).
+3. Replace local links: `~/.cursor/plugins/local/ai-agents` → `~/.cursor/plugins/local/ankyr` (and the other plugin dirs if used).
+4. Skill invocations are now prefixed (`/ankyr-python`, `/ankyr-reviewer`). Project overlays under `.cursor/skills/project/**` are unchanged and still win.
 
 ## Local validation
 

@@ -1,0 +1,26 @@
+{
+  "name": "ankyr",
+  "displayName": "Ankyr",
+  "version": "1.1.13-dev",
+  "description": "Ankyr core — engineering defaults, review loops, CI skills, subagents, and review-loop hooks. Project standards win; this plugin is the fallback.",
+  "author": {
+    "name": "Guy Erreich"
+  },
+  "homepage": "https://github.com/GuyErreich/AI_Agents",
+  "repository": "https://github.com/GuyErreich/AI_Agents",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "skills",
+    "rules",
+    "agents",
+    "hooks",
+    "code-review",
+    "ci",
+    "engineering"
+  ],
+  "rules": "./rules/",
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json"
+}
