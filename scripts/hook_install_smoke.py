@@ -5,7 +5,7 @@
 
 """Clean-clone hook install smoke test.
 
-Copies only ``plugins/ai-agents`` into a scratch local-plugins dir (no repo
+Copies only ``plugins/ankyr-review`` into a scratch local-plugins dir (no repo
 root pyproject/uv.lock/.venv) and drives each hooks.json command with sample
 stdin JSON. Modes:
 
@@ -26,7 +26,7 @@ import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_SRC = REPO_ROOT / "plugins" / "ai-agents"
+PLUGIN_SRC = REPO_ROOT / "plugins" / "ankyr-review"
 
 SAMPLE_PAYLOADS: dict[str, dict] = {
     "review_loop_budget.py": {
@@ -99,9 +99,9 @@ def _run_hook(
 
 def run_smoke(*, mode: str) -> int:
     """Execute the smoke test; return process exit code."""
-    with tempfile.TemporaryDirectory(prefix="ai-agents-smoke-") as raw:
+    with tempfile.TemporaryDirectory(prefix="ankyr-smoke-") as raw:
         tmp = Path(raw)
-        plugin_dst = tmp / "local" / "ai-agents"
+        plugin_dst = tmp / "local" / "ankyr"
         plugin_dst.parent.mkdir(parents=True)
         shutil.copytree(
             PLUGIN_SRC,

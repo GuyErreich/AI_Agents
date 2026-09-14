@@ -20,7 +20,6 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PYPROJECT = REPO_ROOT / "pyproject.toml"
-PLUGIN_JSON = REPO_ROOT / "plugins" / "ai-agents" / ".cursor-plugin" / "plugin.json"
 MARKETPLACE_JSON = REPO_ROOT / ".cursor-plugin" / "marketplace.json"
 
 VERSION_RE = re.compile(
@@ -53,17 +52,36 @@ def _write_json(path: Path, data: dict[str, Any]) -> None:
     )
 
 
-def sync_plugin_json(version: str, *, check_only: bool) -> bool:
-    """Update ``plugin.json`` version. Return True if a change was needed."""
-    data = _load_json(PLUGIN_JSON)
-    current = str(data.get("version") or "")
-    if current == version:
-        return False
-    if check_only:
-        return True
-    data["version"] = version
-    _write_json(PLUGIN_JSON, data)
-    return True
+def plugin_json_paths() -> list[Path]:
+    """Return every ``plugin.json`` listed in marketplace.json."""
+    marketplace = _load_json(MARKETPLACE_JSON)
+    prefix = Path(str((marketplace.get("metadata") or {}).get("pluginRoot") or "."))
+    paths: list[Path] = []
+    plugins = marketplace.get("plugins")
+    if not isinstance(plugins, list):
+        return paths
+    for entry in plugins:
+        if not isinstance(entry, dict):
+            continue
+        source = str(entry.get("source") or "").strip()
+        if source:
+            paths.append(REPO_ROOT / prefix / source / ".cursor-plugin" / "plugin.json")
+    return paths
+
+
+def sync_plugin_jsons(version: str, *, check_only: bool) -> list[Path]:
+    """Update each plugin.json version. Return paths that needed a change."""
+    dirty: list[Path] = []
+    for path in plugin_json_paths():
+        data = _load_json(path)
+        current = str(data.get("version") or "")
+        if current == version:
+            continue
+        if not check_only:
+            data["version"] = version
+            _write_json(path, data)
+        dirty.append(path)
+    return dirty
 
 
 def sync_marketplace_json(version: str, *, check_only: bool) -> bool:
@@ -100,7 +118,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        plugin_dirty = sync_plugin_json(version, check_only=args.check)
+        plugin_dirty = sync_plugin_jsons(version, check_only=args.check)
         market_dirty = sync_marketplace_json(version, check_only=args.check)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(exc, file=sys.stderr)
@@ -116,9 +134,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"version sync ok ({version})")
         return 0
 
-    changed = []
-    if plugin_dirty:
-        changed.append(_display_path(PLUGIN_JSON))
+    changed = [_display_path(path) for path in plugin_dirty]
     if market_dirty:
         changed.append(_display_path(MARKETPLACE_JSON))
     if changed:
