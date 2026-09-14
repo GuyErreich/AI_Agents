@@ -1,0 +1,16 @@
+---
+description: TypeScript and JavaScript language standards
+globs: "**/*.{ts,tsx,js,mjs,cjs}"
+alwaysApply: false
+---
+
+# Node.js / TypeScript
+
+When editing matching files:
+
+- Apply engineering foundations first (always-applied rule).
+- Prefer the project's TypeScript/JavaScript skill; if none, load this plugin's `skills/ankyr-nodejs/SKILL.md` if installed.
+- Load its `references/` only when the skill directs (including `references/npm-tooling.md` when deps, lockfile, lint scripts, or audit come up).
+- Follow the nearest `AGENT.md` chain for Validate commands and type-alias conventions.
+
+Key rules: no `any`, no `@ts-nocheck`, async/await only, no empty bound catch, only `console.error/warn`, prefer canonical/`@types/*` types over workarounds.

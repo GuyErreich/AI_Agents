@@ -36,6 +36,15 @@ ALWAYS_APPLY_RE = re.compile(
     r"^alwaysApply:\s*(true|false)\s*$",
     re.MULTILINE | re.IGNORECASE,
 )
+EXTENDS_HEADING_RE = re.compile(r"^## Extends\s*$", re.MULTILINE)
+HARD_SKILL_LOAD_RE = re.compile(
+    r"^Load `skills/[^`]+/SKILL\.md` first",
+    re.MULTILINE,
+)
+LOCAL_SKILL_CLAIM_RE = re.compile(
+    r"this plugin's `skills/([a-z0-9][a-z0-9.-]*)(?:/SKILL\.md)?`",
+    re.IGNORECASE,
+)
 
 # Cursor-documented hook events (plugins reference).
 KNOWN_HOOK_EVENTS = frozenset(
@@ -100,7 +109,10 @@ def _frontmatter(path: Path) -> dict[str, str]:
 
 
 def _rel(path: Path) -> str:
-    return str(path.relative_to(REPO_ROOT))
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def _pyproject_version() -> str:
@@ -143,6 +155,73 @@ def _expect_tag_version() -> str | None:
         if re.fullmatch(r"\d+\.\d+\.\d+(?:-(?:dev|rc))?", tag):
             return tag
     return None
+
+
+def check_skill_identity(skill_files: list[Path], errors: list[str]) -> None:
+    """Require unique skill folders and frontmatter ``name`` == parent folder."""
+    seen: dict[str, Path] = {}
+    for skill in skill_files:
+        meta = _frontmatter(skill)
+        folder = skill.parent.name
+        name = meta.get("name") or ""
+        if name and name != folder:
+            errors.append(
+                f"{_rel(skill)}: frontmatter name {name!r} != parent folder {folder!r}"
+            )
+        previous = seen.get(folder)
+        if previous is not None:
+            errors.append(
+                f"{_rel(skill.parent)}: duplicate skill folder name {folder!r} "
+                f"(also {_rel(previous)})"
+            )
+            continue
+        seen[folder] = skill.parent
+
+
+def check_no_hard_skill_deps(skill_files: list[Path], errors: list[str]) -> None:
+    """Reject ``## Extends`` and hard first-step skill loads."""
+    for skill in skill_files:
+        text = skill.read_text(encoding="utf-8")
+        if EXTENDS_HEADING_RE.search(text):
+            errors.append(f"{_rel(skill)}: hard ## Extends heading (use ## Foundation)")
+        if HARD_SKILL_LOAD_RE.search(text):
+            errors.append(
+                f"{_rel(skill)}: hard Load skills/.../SKILL.md first "
+                "(use a Foundation resolution pointer)"
+            )
+
+
+def check_no_extends_in_description(skill_files: list[Path], errors: list[str]) -> None:
+    """Reject leftover ``Extends <x>.`` in skill frontmatter descriptions."""
+    for skill in skill_files:
+        description = _frontmatter(skill).get("description") or ""
+        if "Extends " in description:
+            errors.append(
+                f"{_rel(skill)}: frontmatter description must not contain 'Extends '"
+            )
+
+
+def check_local_skill_claims(
+    plugin_root: Path,
+    text_files: list[Path],
+    errors: list[str],
+) -> None:
+    """Reject ``this plugin's skills/<name>`` when ``<name>`` is not in this plugin."""
+    skills_dir = plugin_root / "skills"
+    local_names: set[str] = set()
+    if skills_dir.is_dir():
+        for child in skills_dir.iterdir():
+            if child.is_dir() and (child / "SKILL.md").is_file():
+                local_names.add(child.name)
+    for path in text_files:
+        text = path.read_text(encoding="utf-8")
+        for match in LOCAL_SKILL_CLAIM_RE.finditer(text):
+            claimed = match.group(1)
+            if claimed not in local_names:
+                errors.append(
+                    f"{_rel(path)}: claims this plugin's skills/{claimed} "
+                    f"but that skill is not in {_rel(plugin_root)}"
+                )
 
 
 def check_version_consistency(plugin_root: Path, errors: list[str]) -> None:
@@ -504,6 +583,9 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
             errors.append(f"{_rel(skill)}: missing frontmatter name")
         if not meta.get("description"):
             errors.append(f"{_rel(skill)}: missing frontmatter description")
+    check_skill_identity(skill_files, errors)
+    check_no_hard_skill_deps(skill_files, errors)
+    check_no_extends_in_description(skill_files, errors)
 
     rules_dir = plugin_root / "rules"
     rule_files = sorted(rules_dir.rglob("*.mdc")) if rules_dir.is_dir() else []
@@ -515,15 +597,26 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
             errors.append(f"{_rel(rule)}: missing frontmatter description")
 
     agents_dir = plugin_root / "agents"
+    agent_files: list[Path] = []
     if agents_dir.is_dir():
         for agent in sorted(agents_dir.glob("*.md")):
+            agent_files.append(agent)
             meta = _frontmatter(agent)
             if not meta.get("name"):
                 errors.append(f"{_rel(agent)}: missing frontmatter name")
             if not meta.get("description"):
                 errors.append(f"{_rel(agent)}: missing frontmatter description")
 
-    hooks_rel = str(manifest.get("hooks") or "hooks/hooks.json")
+    claim_files = [*skill_files, *rule_files, *agent_files]
+    check_local_skill_claims(plugin_root, claim_files, errors)
+
+    hooks_rel = str(manifest.get("hooks") or "").strip()
+    if not hooks_rel:
+        check_version_consistency(plugin_root, errors)
+        check_reference_links(plugin_root, errors)
+        check_stray_artifacts(plugin_root, errors)
+        check_context_budget(plugin_root, errors)
+        return
     hooks_path = (plugin_root / hooks_rel).resolve()
     if not hooks_path.is_file():
         errors.append(f"{_rel(plugin_root)}: hooks file missing ({hooks_rel})")
