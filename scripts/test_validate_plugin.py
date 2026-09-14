@@ -51,3 +51,99 @@ def test_matching_unique_skill_names_pass(tmp_path: Path) -> None:
     errors: list[str] = []
     validate_plugin.check_skill_identity([python, nodejs], errors)
     assert errors == []
+
+
+def test_hard_extends_heading_fails(tmp_path: Path) -> None:
+    """An Extends heading is a hard cross-skill dependency."""
+    skill = tmp_path / "python" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: python\ndescription: test skill\n---\n"
+        "# Test\n\n## Extends\n\nPreferred if installed.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_no_hard_skill_deps([skill], errors)
+    assert any("## Extends" in item for item in errors)
+
+
+def test_hard_skill_load_fails(tmp_path: Path) -> None:
+    """Load skills/<name>/SKILL.md first is a hard dependency."""
+    skill = tmp_path / "python" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: python\ndescription: test skill\n---\n"
+        "# Test\n\n## Foundation\n\n"
+        "Load `skills/engineering/SKILL.md` first.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_no_hard_skill_deps([skill], errors)
+    assert any("hard Load" in item for item in errors)
+
+
+def test_foundation_pointer_passes(tmp_path: Path) -> None:
+    """A Foundation resolution pointer is not a hard dependency."""
+    skill = tmp_path / "python" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: python\ndescription: test skill\n---\n"
+        "# Test\n\n## Foundation\n\n"
+        "Resolve standards project-first, then this plugin if installed.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_no_hard_skill_deps([skill], errors)
+    assert errors == []
+
+
+def test_extends_in_description_fails(tmp_path: Path) -> None:
+    """Frontmatter must not say Extends <skill>."""
+    skill = tmp_path / "python" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\nname: python\ndescription: Python rules. Extends engineering.\n---\n"
+        "# Test\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_no_extends_in_description([skill], errors)
+    assert any("Extends " in item for item in errors)
+
+
+def test_local_skill_claim_fails_when_missing(tmp_path: Path) -> None:
+    """this plugin's skills/X fails when X is not a local skill folder."""
+    plugin = tmp_path / "plugin"
+    local = _write_skill(
+        plugin / "skills" / "ankyr-engineering" / "SKILL.md",
+        name="ankyr-engineering",
+    )
+    rule = plugin / "rules" / "gate.mdc"
+    rule.parent.mkdir(parents=True)
+    rule.write_text(
+        "---\ndescription: gate\n---\n"
+        "Load this plugin's `skills/ankyr-reviewer/SKILL.md` if installed.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_local_skill_claims(plugin, [local, rule], errors)
+    assert any("ankyr-reviewer" in item and "not in" in item for item in errors)
+
+
+def test_local_skill_claim_passes_when_present(tmp_path: Path) -> None:
+    """this plugin's skills/X is fine when X lives in the same plugin."""
+    plugin = tmp_path / "plugin"
+    skill = _write_skill(
+        plugin / "skills" / "ankyr-reviewer" / "SKILL.md",
+        name="ankyr-reviewer",
+    )
+    rule = plugin / "rules" / "reviewer.mdc"
+    rule.parent.mkdir(parents=True)
+    rule.write_text(
+        "---\ndescription: reviewer\n---\n"
+        "Load this plugin's `skills/ankyr-reviewer/SKILL.md` if installed.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_local_skill_claims(plugin, [skill, rule], errors)
+    assert errors == []
