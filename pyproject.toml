@@ -1,6 +1,6 @@
 [project]
 name = "ai-agents"
-version = "1.1.13-rc"
+version = "1.1.14-rc"
 description = "Cursor plugin — portable agent skills, rules, and review-loop hooks."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -16,21 +16,21 @@ dev = [
 [tool.ruff]
 target-version = "py312"
 line-length = 88
-src = ["plugins/ai-agents/hooks", "scripts"]
+src = ["plugins/ankyr-review/hooks", "scripts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
-"plugins/ai-agents/hooks/**" = ["E501", "SIM114", "I001"]
+"plugins/ankyr-review/hooks/**" = ["E501", "SIM114", "I001"]
 
 [tool.ruff.format]
 quote-style = "double"
 
 [tool.pytest.ini_options]
-testpaths = ["plugins/ai-agents/hooks/tests", "scripts"]
-pythonpath = ["plugins/ai-agents/hooks", "scripts"]
-addopts = "-q --cov=plugins/ai-agents/hooks --cov=scripts --cov-report=term --cov-report=xml"
+testpaths = ["plugins/ankyr-review/hooks/tests", "scripts"]
+pythonpath = ["plugins/ankyr-review/hooks", "scripts"]
+addopts = "-q --cov=plugins/ankyr-review/hooks --cov=scripts --cov-report=term --cov-report=xml"
 
 [tool.coverage.run]
 branch = false
@@ -38,8 +38,8 @@ omit = [
     "**/tests/**",
     "scripts/hook_install_smoke.py",
     "scripts/release_gate.py",
-    "plugins/ai-agents/hooks/review_loop_git_guard.py",
-    "plugins/ai-agents/hooks/review_loop_init.py",
+    "plugins/ankyr-review/hooks/review_loop_git_guard.py",
+    "plugins/ankyr-review/hooks/review_loop_init.py",
 ]
 
 [tool.coverage.report]

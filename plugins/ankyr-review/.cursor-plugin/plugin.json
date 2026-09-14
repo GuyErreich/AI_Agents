@@ -1,0 +1,25 @@
+{
+  "name": "ankyr-review",
+  "displayName": "Ankyr Review",
+  "version": "1.1.14-rc",
+  "description": "Ankyr review — reviewer, PR resolver, improve-code, local and PR review loops, subagents, and review-loop hooks. Install with the Ankyr core plugin.",
+  "author": {
+    "name": "Guy Erreich"
+  },
+  "homepage": "https://github.com/GuyErreich/AI_Agents",
+  "repository": "https://github.com/GuyErreich/AI_Agents",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "skills",
+    "rules",
+    "agents",
+    "hooks",
+    "code-review",
+    "ankyr"
+  ],
+  "rules": "./rules/",
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json"
+}

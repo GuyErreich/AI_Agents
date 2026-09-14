@@ -1,0 +1,17 @@
+---
+description: Web UI structure, reuse, and accessibility standards
+globs: "**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# Web UI
+
+When editing UI files:
+
+- Apply engineering foundations first (always-applied rule).
+- Prefer the project's UI skill; if none, load this plugin's `skills/ankyr-ui/SKILL.md` if installed.
+- Load its `references/` only when the skill directs.
+- For motion, overlays, pickers, press feedback, or library choice → prefer the project's UX skill; if none, load this plugin's `skills/ankyr-ux/SKILL.md` if installed.
+- Follow the nearest `AGENT.md` chain for the project's layout/viewport contract.
+
+Key rules: reuse before creating, minimal wrappers, data/view separation via hooks, no magic values, hierarchy-first sizing, interactive behavior on semantic elements.

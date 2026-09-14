@@ -1,0 +1,21 @@
+{
+  "name": "ankyr",
+  "displayName": "Ankyr",
+  "version": "1.1.14-rc",
+  "description": "Ankyr core — engineering and hierarchy defaults, quality skills, and always-on consent/review floor rules. Project standards win; this plugin is the fallback.",
+  "author": {
+    "name": "Guy Erreich"
+  },
+  "homepage": "https://github.com/GuyErreich/AI_Agents",
+  "repository": "https://github.com/GuyErreich/AI_Agents",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "skills",
+    "rules",
+    "engineering",
+    "ankyr"
+  ],
+  "rules": "./rules/",
+  "skills": "./skills/"
+}

@@ -1,18 +1,48 @@
 {
-  "name": "ai-agents",
+  "name": "ankyr",
   "owner": {
     "name": "Guy Erreich"
   },
   "metadata": {
-    "description": "Portable Cursor agent skills, rules, subagents, and review-loop hooks.",
-    "version": "1.1.13-rc",
+    "description": "Ankyr — portable Cursor agent skills, rules, subagents, and review-loop hooks. Project standards first; plugin defaults as fallback.",
+    "version": "1.1.14-rc",
     "pluginRoot": "plugins"
   },
   "plugins": [
     {
-      "name": "ai-agents",
-      "source": "ai-agents",
-      "description": "Portable Cursor agent skills, rules, subagents, and review-loop hooks for engineering, web UI/UX, review, and CI."
+      "name": "ankyr",
+      "source": "ankyr",
+      "description": "Ankyr core: engineering and hierarchy defaults, quality skills, and always-on consent/review floor rules."
+    },
+    {
+      "name": "ankyr-review",
+      "source": "ankyr-review",
+      "description": "Ankyr review: reviewer, PR resolver, improve-code, review loops, subagents, and hooks."
+    },
+    {
+      "name": "ankyr-git",
+      "source": "ankyr-git",
+      "description": "Ankyr git milestones: worktree, commit, PR, push, and release workflows."
+    },
+    {
+      "name": "ankyr-authoring",
+      "source": "ankyr-authoring",
+      "description": "Ankyr authoring: agent-library hierarchy and improvement protocol."
+    },
+    {
+      "name": "ankyr-python",
+      "source": "ankyr-python",
+      "description": "Ankyr Python language skill and glob rule."
+    },
+    {
+      "name": "ankyr-node",
+      "source": "ankyr-node",
+      "description": "Ankyr TypeScript/JavaScript language skill and glob rule."
+    },
+    {
+      "name": "ankyr-web",
+      "source": "ankyr-web",
+      "description": "Ankyr UI, UX, React, and Three.js skills plus web glob rules."
     }
   ]
 }
