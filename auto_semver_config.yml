@@ -18,6 +18,9 @@ promotions:
 version_files:
   - "pyproject.toml"
   - "plugins/ankyr/.cursor-plugin/plugin.json"
+  - "plugins/ankyr-review/.cursor-plugin/plugin.json"
+  - "plugins/ankyr-git/.cursor-plugin/plugin.json"
+  - "plugins/ankyr-authoring/.cursor-plugin/plugin.json"
   - "plugins/ankyr-python/.cursor-plugin/plugin.json"
   - "plugins/ankyr-node/.cursor-plugin/plugin.json"
   - "plugins/ankyr-web/.cursor-plugin/plugin.json"

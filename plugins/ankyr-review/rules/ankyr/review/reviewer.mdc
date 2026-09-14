@@ -13,4 +13,4 @@ When the user asks to review code, self-review changes, inspect a diff before a 
 
 When reviewing **the open PR**, also load `references/pr-comments.md`: table in chat only; post on GitHub only when there is ≥1 finding (concise inline comments + one-sentence body). Never post clean-pass status reviews, Verdict/Lint checklists, or “intended event” footnotes on the PR. Clean verdicts require `references/thoroughness-pass.md` and every matching `references/lenses/*` specialist lens.
 
-The reviewer reports findings; it does not fix them unless the user asks. See `rules/ankyr/behaviors/code-review-gate.mdc` for milestone wiring.
+The reviewer reports findings; it does not fix them unless the user asks. See the `ankyr` core plugin's `rules/ankyr/behaviors/code-review-gate.mdc` if installed for milestone wiring.

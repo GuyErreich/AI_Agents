@@ -1,8 +1,8 @@
 {
-  "name": "ankyr",
-  "displayName": "Ankyr",
+  "name": "ankyr-authoring",
+  "displayName": "Ankyr Authoring",
   "version": "1.1.13-dev",
-  "description": "Ankyr core — engineering and hierarchy defaults, quality skills, and always-on consent/review floor rules. Project standards win; this plugin is the fallback.",
+  "description": "Ankyr authoring — agent-library hierarchy and improvement protocol for skills and rules. Install with the Ankyr core plugin.",
   "author": {
     "name": "Guy Erreich"
   },
@@ -13,7 +13,7 @@
   "keywords": [
     "skills",
     "rules",
-    "engineering",
+    "authoring",
     "ankyr"
   ],
   "rules": "./rules/",

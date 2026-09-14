@@ -29,13 +29,13 @@ One user “commit” / “commit this” request authorizes the whole planned s
 
 ## Workflow
 
-1. **Confirm consent.** Only commit when the user explicitly asked to commit (see `rules/ankyr/behaviors/git-commit-consent.mdc`). **Exception:** pr-resolver scoped consent when executing an approved fix plan — see pr-resolver `## Scoped consent`.
+1. **Confirm consent.** Only commit when the user explicitly asked to commit (see the `ankyr` core plugin's `rules/ankyr/behaviors/git-commit-consent.mdc` if installed). **Exception:** pr-resolver scoped consent when executing an approved fix plan — see the `ankyr-review` plugin's pr-resolver `## Scoped consent` if installed.
 2. **Optional dedup.** If the repo provides the review-lock helper, `check change`; skip the scan if the tree is already reviewed.
-3. **Review at change tier.** Run `skills/ankyr-reviewer/SKILL.md` (tier: change) on the **full** working-tree change set. If findings exist, run the local review loop (`skills/ankyr-ci-local-review-loop/SKILL.md`) until the verdict is clean or the user explicitly skips. Record the verdict if using the lockfile.
+3. **Review at change tier.** Prefer the project's reviewer; if none, load the `ankyr-review` plugin's `skills/ankyr-reviewer/SKILL.md` if installed (tier: change) on the **full** working-tree change set. If findings exist, run the local review loop (`ankyr-review` plugin's `skills/ankyr-ci-local-review-loop/SKILL.md` if installed) until the verdict is clean or the user explicitly skips. Record the verdict if using the lockfile.
 4. **Plan the split.** Group files/hunks by logic (above). Draft one imperative message per group (`add` / `update` / `fix` focused on the why).
 5. **Commit each group** in dependency order, only after the review passed or was explicitly skipped. For each: stage only that group’s paths, commit via HEREDOC, then `git status`. Do not stage files that may contain secrets (`.env`, credentials, local MCP config); warn if the user asks to.
 6. **Verify** the tree is clean (or only intentional leftovers remain) after the last commit.
-7. **Do not push** unless pr-resolver Step 6 applies. General pushes need separate explicit consent (`rules/ankyr/behaviors/git-push-consent.mdc`).
+7. **Do not push** unless pr-resolver Step 6 applies. General pushes need separate explicit consent (the `ankyr` core plugin's `rules/ankyr/behaviors/git-push-consent.mdc` if installed).
 
 ## Message format
 

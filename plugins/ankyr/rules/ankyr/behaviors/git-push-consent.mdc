@@ -31,4 +31,6 @@ These do **not** count as push consent on their own:
 
 ## Exceptions
 
-**pr-resolver / pr-review-loop:** when running `ankyr-pr-resolver` or `ankyr-ci-pr-review-loop`, approving the resolver/loop plan or an explicit "resolve comments" / "run the PR review loop" request grants scoped push consent for approved fix commits on the current PR branch. See pr-resolver and pr-review-loop `## Scoped consent`. All other pushes still need explicit approval.
+**pr-resolver / pr-review-loop:** when running the `ankyr-review` plugin's `ankyr-pr-resolver` or `ankyr-ci-pr-review-loop` (if installed), approving the resolver/loop plan or an explicit "resolve comments" / "run the PR review loop" request grants scoped push consent for approved fix commits on the current PR branch. See those skills' `## Scoped consent`. All other pushes still need explicit approval.
+
+Prefer the project's push skill; if none, load the `ankyr-git` plugin's `skills/ankyr-ci-push/SKILL.md` if installed when the user asks to push.

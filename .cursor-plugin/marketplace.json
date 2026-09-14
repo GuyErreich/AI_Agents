@@ -12,7 +12,22 @@
     {
       "name": "ankyr",
       "source": "ankyr",
-      "description": "Core Ankyr plugin: engineering defaults, review, CI, subagents, and review-loop hooks."
+      "description": "Ankyr core: engineering and hierarchy defaults, quality skills, and always-on consent/review floor rules."
+    },
+    {
+      "name": "ankyr-review",
+      "source": "ankyr-review",
+      "description": "Ankyr review: reviewer, PR resolver, improve-code, review loops, subagents, and hooks."
+    },
+    {
+      "name": "ankyr-git",
+      "source": "ankyr-git",
+      "description": "Ankyr git milestones: worktree, commit, PR, push, and release workflows."
+    },
+    {
+      "name": "ankyr-authoring",
+      "source": "ankyr-authoring",
+      "description": "Ankyr authoring: agent-library hierarchy and improvement protocol."
     },
     {
       "name": "ankyr-python",

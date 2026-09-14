@@ -41,6 +41,10 @@ HARD_SKILL_LOAD_RE = re.compile(
     r"^Load `skills/[^`]+/SKILL\.md` first",
     re.MULTILINE,
 )
+LOCAL_SKILL_CLAIM_RE = re.compile(
+    r"this plugin's `skills/([a-z0-9][a-z0-9.-]*)(?:/SKILL\.md)?`",
+    re.IGNORECASE,
+)
 
 # Cursor-documented hook events (plugins reference).
 KNOWN_HOOK_EVENTS = frozenset(
@@ -195,6 +199,29 @@ def check_no_extends_in_description(skill_files: list[Path], errors: list[str]) 
             errors.append(
                 f"{_rel(skill)}: frontmatter description must not contain 'Extends '"
             )
+
+
+def check_local_skill_claims(
+    plugin_root: Path,
+    text_files: list[Path],
+    errors: list[str],
+) -> None:
+    """Reject ``this plugin's skills/<name>`` when ``<name>`` is not in this plugin."""
+    skills_dir = plugin_root / "skills"
+    local_names: set[str] = set()
+    if skills_dir.is_dir():
+        for child in skills_dir.iterdir():
+            if child.is_dir() and (child / "SKILL.md").is_file():
+                local_names.add(child.name)
+    for path in text_files:
+        text = path.read_text(encoding="utf-8")
+        for match in LOCAL_SKILL_CLAIM_RE.finditer(text):
+            claimed = match.group(1)
+            if claimed not in local_names:
+                errors.append(
+                    f"{_rel(path)}: claims this plugin's skills/{claimed} "
+                    f"but that skill is not in {_rel(plugin_root)}"
+                )
 
 
 def check_version_consistency(plugin_root: Path, errors: list[str]) -> None:
@@ -570,13 +597,18 @@ def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
             errors.append(f"{_rel(rule)}: missing frontmatter description")
 
     agents_dir = plugin_root / "agents"
+    agent_files: list[Path] = []
     if agents_dir.is_dir():
         for agent in sorted(agents_dir.glob("*.md")):
+            agent_files.append(agent)
             meta = _frontmatter(agent)
             if not meta.get("name"):
                 errors.append(f"{_rel(agent)}: missing frontmatter name")
             if not meta.get("description"):
                 errors.append(f"{_rel(agent)}: missing frontmatter description")
+
+    claim_files = [*skill_files, *rule_files, *agent_files]
+    check_local_skill_claims(plugin_root, claim_files, errors)
 
     hooks_rel = str(manifest.get("hooks") or "").strip()
     if not hooks_rel:

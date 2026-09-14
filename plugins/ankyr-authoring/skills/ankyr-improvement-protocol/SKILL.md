@@ -73,13 +73,13 @@ or one or more flags using the template below.
 
 | Layer | Path |
 |---|---|
-| System behaviors | this plugin `rules/ankyr/behaviors/*.mdc` |
-| Portable foundations rules | this plugin `rules/ankyr/foundations/**/*.mdc` |
-| Portable foundations skills | this plugin `skills/ankyr-hierarchy/SKILL.md` |
+| System behaviors | `ankyr` core plugin `rules/ankyr/behaviors/*.mdc` |
+| Portable foundations rules | `ankyr` core plugin `rules/ankyr/foundations/**/*.mdc` |
+| Portable foundations skills | `ankyr` core plugin `skills/ankyr-hierarchy/SKILL.md` |
 | Portable ai-agent rules | this plugin `rules/ankyr/ai-agent/**/*.mdc` |
 | Portable ai-agent skills | this plugin `skills/ankyr-agent-hierarchy/SKILL.md`, `skills/ankyr-improvement-protocol/SKILL.md` |
 | Portable code rules | sibling plugins `rules/ankyr/{languages,web,quality}/**/*.mdc` |
-| Portable skills | this plugin `skills/<name>/SKILL.md` |
+| Portable skills | Ankyr plugins `skills/<name>/SKILL.md` |
 | Project skills | `<repo>/.cursor/skills/project/**/SKILL.md` |
 | Project rules | `<repo>/.cursor/rules/project/*.mdc` |
 | Agent entry | `<repo>/AGENTS.md`, `AGENT.md` chain |

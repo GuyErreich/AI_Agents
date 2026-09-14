@@ -26,13 +26,13 @@ Load `title-conventions.md` before choosing the PR title. Copy/adapt `pr-templat
 
 PR creation must **not** create commits or modify repository files. Describe the branch as it already is.
 
-**Exception:** `pr-resolver` and `pr-review-loop` hold scoped consent to commit and push approved fixes — that is a different workflow, not this one.
+**Exception:** the `ankyr-review` plugin's `ankyr-pr-resolver` and `ankyr-ci-pr-review-loop` (if installed) hold scoped consent to commit and push approved fixes — that is a different workflow, not this one.
 
 ## Workflow
 
 1. **Existing-PR check.** `gh pr list --head <branch> --base <base> --state all` (base from `AGENT.md`). If a PR exists, print the URL and **stop** — or, if the user asked to refresh the body, follow `references/body-refresh.md`. Never attempt a duplicate create.
 2. **Understand the full branch.** Inspect status, the full diff since the branch diverged from the base, and the commit history — not just the latest commit.
-3. **Review at PR tier.** Run the reviewer (tier: pr, `merge-base...HEAD`). Require a clean verdict or an explicit skip before opening the PR.
+3. **Review at PR tier.** Prefer the project's reviewer; if none, load the `ankyr-review` plugin's `skills/ankyr-reviewer/SKILL.md` if installed (tier: pr, `merge-base...HEAD`). Require a clean verdict or an explicit skip before opening the PR.
 4. **Ensure the branch is pushed.** Opening a PR requires the branch on the remote — but pushing requires explicit push consent (see `git-push-consent.mdc` and the push skill). Ask before pushing if needed.
 5. **Open the PR:**
    - **Title** — one line; prefix from `references/title-conventions.md` matching the primary change type (prefer `feat:` / `fix:` for auto-semver repos).

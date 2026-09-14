@@ -16,7 +16,7 @@ When the user asks to start new work, commit, open a PR, push, or release/promot
 | Update an existing PR body | `skills/ankyr-ci-pr/SKILL.md` (`references/body-refresh.md`) |
 | Push | `skills/ankyr-ci-push/SKILL.md` |
 | Release / promote / publish | `skills/ankyr-ci-release/SKILL.md` |
-| Fix-until-clean self-review | `skills/ankyr-ci-local-review-loop/SKILL.md` |
-| Autonomous PR review-fix loop | `skills/ankyr-ci-pr-review-loop/SKILL.md` |
+| Fix-until-clean self-review | `ankyr-review` plugin `skills/ankyr-ci-local-review-loop/SKILL.md` if installed |
+| Autonomous PR review-fix loop | `ankyr-review` plugin `skills/ankyr-ci-pr-review-loop/SKILL.md` if installed |
 
-See `rules/ankyr/behaviors/worktree-first.mdc` for the worktree gate, `rules/ankyr/behaviors/code-review-gate.mdc` for the review gate, and `rules/ankyr/behaviors/git-*-consent.mdc` for consent rules.
+See the `ankyr` core plugin's `rules/ankyr/behaviors/worktree-first.mdc` for the worktree gate, `rules/ankyr/behaviors/code-review-gate.mdc` for the review gate, and `rules/ankyr/behaviors/git-*-consent.mdc` for consent rules (if installed).

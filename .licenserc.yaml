@@ -7,9 +7,9 @@ header:
 
       SPDX-License-Identifier: MIT
   paths:
-    - plugins/ankyr/hooks
+    - plugins/ankyr-review/hooks
     - scripts
   paths-ignore:
     - '**/*.json'
-    - plugins/ankyr/hooks/tests
-    - plugins/ankyr/hooks/state
+    - plugins/ankyr-review/hooks/tests
+    - plugins/ankyr-review/hooks/state

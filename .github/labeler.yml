@@ -16,11 +16,11 @@
 
 "hooks":
   - changed-files:
-      - any-glob-to-any-file: "plugins/ankyr/hooks/**"
+      - any-glob-to-any-file: "plugins/ankyr-review/hooks/**"
 
 "agents":
   - changed-files:
-      - any-glob-to-any-file: "plugins/ankyr/agents/**"
+      - any-glob-to-any-file: "plugins/ankyr-review/agents/**"
 
 "scripts":
   - changed-files:

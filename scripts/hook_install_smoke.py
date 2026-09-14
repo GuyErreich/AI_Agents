@@ -5,7 +5,7 @@
 
 """Clean-clone hook install smoke test.
 
-Copies only ``plugins/ankyr`` into a scratch local-plugins dir (no repo
+Copies only ``plugins/ankyr-review`` into a scratch local-plugins dir (no repo
 root pyproject/uv.lock/.venv) and drives each hooks.json command with sample
 stdin JSON. Modes:
 
@@ -26,7 +26,7 @@ import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_SRC = REPO_ROOT / "plugins" / "ankyr"
+PLUGIN_SRC = REPO_ROOT / "plugins" / "ankyr-review"
 
 SAMPLE_PAYLOADS: dict[str, dict] = {
     "review_loop_budget.py": {

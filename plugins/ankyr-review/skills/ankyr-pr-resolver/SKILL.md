@@ -90,8 +90,8 @@ Run every command in the repo `AGENT.md` **Validate** section when the approved 
 
 When the approved plan changed code:
 
-1. **Commit** — follow `skills/ankyr-ci-commit/SKILL.md` (change-tier review). Scoped consent from Step 3 applies.
-2. **Push** — follow `skills/ankyr-ci-push/SKILL.md` (PR-tier review), then `git push -u origin HEAD` if needed. Scoped consent from Step 3 applies.
+1. **Commit** — prefer the project's commit skill; if none, follow the `ankyr-git` plugin's `skills/ankyr-ci-commit/SKILL.md` if installed (change-tier review). Scoped consent from Step 3 applies.
+2. **Push** — prefer the project's push skill; if none, follow the `ankyr-git` plugin's `skills/ankyr-ci-push/SKILL.md` if installed (PR-tier review), then `git push -u origin HEAD` if needed. Scoped consent from Step 3 applies.
 
 Skip commit and push when the plan was replies-only (by design / blocked only). If push fails, stop: post replies noting the blocker, leave fix threads unresolved, and report in chat.
 

@@ -7,13 +7,13 @@ alwaysApply: true
 
 Before a git milestone, review the change with the reviewer skill. Do not commit, push, or open a PR until the required tier passed or the user explicitly skips review.
 
-| Milestone | Skill | Reviewer tier |
+| Milestone | Skill (ankyr-git if installed) | Reviewer tier |
 |---|---|---|
 | Commit | `skills/ankyr-ci-commit/SKILL.md` | change |
 | Open PR | `skills/ankyr-ci-pr/SKILL.md` | pr |
 | Push | `skills/ankyr-ci-push/SKILL.md` | pr |
 
-The reviewer is `skills/ankyr-reviewer/SKILL.md`. For an iterative fix-until-clean pass, use `skills/ankyr-ci-local-review-loop/SKILL.md`. For an autonomous PR review→fix loop, use `skills/ankyr-ci-pr-review-loop/SKILL.md`.
+The reviewer is `skills/ankyr-reviewer/SKILL.md` in the `ankyr-review` plugin if installed. For an iterative fix-until-clean pass, use `skills/ankyr-ci-local-review-loop/SKILL.md`. For an autonomous PR review→fix loop, use `skills/ankyr-ci-pr-review-loop/SKILL.md` (both in `ankyr-review` if installed).
 
 ## Consent and skipping
 

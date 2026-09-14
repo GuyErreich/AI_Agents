@@ -109,3 +109,41 @@ def test_extends_in_description_fails(tmp_path: Path) -> None:
     errors: list[str] = []
     validate_plugin.check_no_extends_in_description([skill], errors)
     assert any("Extends " in item for item in errors)
+
+
+def test_local_skill_claim_fails_when_missing(tmp_path: Path) -> None:
+    """this plugin's skills/X fails when X is not a local skill folder."""
+    plugin = tmp_path / "plugin"
+    local = _write_skill(
+        plugin / "skills" / "ankyr-engineering" / "SKILL.md",
+        name="ankyr-engineering",
+    )
+    rule = plugin / "rules" / "gate.mdc"
+    rule.parent.mkdir(parents=True)
+    rule.write_text(
+        "---\ndescription: gate\n---\n"
+        "Load this plugin's `skills/ankyr-reviewer/SKILL.md` if installed.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_local_skill_claims(plugin, [local, rule], errors)
+    assert any("ankyr-reviewer" in item and "not in" in item for item in errors)
+
+
+def test_local_skill_claim_passes_when_present(tmp_path: Path) -> None:
+    """this plugin's skills/X is fine when X lives in the same plugin."""
+    plugin = tmp_path / "plugin"
+    skill = _write_skill(
+        plugin / "skills" / "ankyr-reviewer" / "SKILL.md",
+        name="ankyr-reviewer",
+    )
+    rule = plugin / "rules" / "reviewer.mdc"
+    rule.parent.mkdir(parents=True)
+    rule.write_text(
+        "---\ndescription: reviewer\n---\n"
+        "Load this plugin's `skills/ankyr-reviewer/SKILL.md` if installed.\n",
+        encoding="utf-8",
+    )
+    errors: list[str] = []
+    validate_plugin.check_local_skill_claims(plugin, [skill, rule], errors)
+    assert errors == []

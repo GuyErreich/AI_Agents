@@ -1,13 +1,13 @@
 # Workspace Agent Notes
 
-This repository is the Ankyr Cursor plugin family (`ankyr`, `ankyr-python`, `ankyr-node`, `ankyr-web`). Consuming apps keep only a project overlay (`.cursor/skills/project/**`, `.cursor/rules/project/**`, `AGENT.md`).
+This repository is the Ankyr Cursor plugin family (`ankyr`, `ankyr-review`, `ankyr-git`, `ankyr-authoring`, `ankyr-python`, `ankyr-node`, `ankyr-web`). Consuming apps keep only a project overlay (`.cursor/skills/project/**`, `.cursor/rules/project/**`, `AGENT.md`).
 
 ## Validate
 
 - Base branch for branch/PR diffs: `dev` (feature work). Production consumers track `main`; staging tracks `staging`.
 - Plugin manifests: `uv run python scripts/validate_plugin.py` — must succeed.
 - Version sync: `uv run python scripts/sync_version.py --check` — must succeed (JSONs match `pyproject.toml`; ASC bumps them via `version_files`).
-- Lint: `uv run ruff check plugins/ankyr/hooks scripts` — 0 errors required.
+- Lint: `uv run ruff check plugins/ankyr-review/hooks scripts` — 0 errors required.
 - Format: `uv run ruff format --check scripts` — must succeed.
 - Tests: `uv run pytest` — must succeed.
 - Dependency audit: `uv audit --frozen` — must succeed; remediate with `uv audit --upgrade` when appropriate, then re-check.
