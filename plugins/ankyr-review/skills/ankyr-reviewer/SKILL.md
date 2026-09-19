@@ -27,6 +27,7 @@ A finding must trace to a standard that **applies to this project**. Do not cite
 | Signal | Capability | Default if installed |
 |---|---|---|
 | any code file | engineering foundations | `ankyr-engineering` (Phase 0) |
+| named path is a directory; or caller passed breadth `module` / `package`; or the tier diff `--name-status` includes `A`, `D`, `R`, or `C` | folder taxonomy + code layout | `ankyr-hierarchy`, `ankyr-engineering` → `references/folder-structure.md` (Phase 0c) |
 | `*.{py,pyi}` | Python language | `ankyr-python` |
 | `test_*.py`, `*_test.py`, `*.{test,spec}.{ts,tsx,js}`, `conftest.py` | tests + language testing refs | `ankyr-testing` + the matching language skill's `references/testing.md` |
 | `*.{ts,tsx,js,mjs}` | TypeScript / JavaScript | `ankyr-nodejs` |
@@ -56,6 +57,7 @@ Load a provider only when the diff matches and that standard applies; load lens 
 |---|---|---|
 | 0 | Project standards, then engineering as default | `AGENT.md` + project rules/skills, then `ankyr-engineering` if installed and silent |
 | 0b | Staff bar + specialist lenses | `references/lenses/*` (all matches) |
+| 0c | Structure / hierarchy (when the folder-taxonomy routing row matches) | `ankyr-hierarchy` + `ankyr-engineering` → `references/folder-structure.md` |
 | 1 | Language | path-matched language skill + lens |
 | 2 | React structure | `ankyr-react` if installed + frontend lens |
 | 3 | UI / a11y | `ankyr-ui` if installed + frontend lens |
@@ -69,6 +71,14 @@ Load a provider only when the diff matches and that standard applies; load lens 
 | 10 | Coverage gate | `references/thoroughness-pass.md` — **required before any clean verdict** |
 
 Run all applicable phases in one session. Do not fix findings unless the user explicitly asked. If there is no diff at all, report one sentence and stop.
+
+### Phase 0c — when and how
+
+- **Run** only when the folder-taxonomy capability row matches. Content-only modifications of existing files (for example a three-file bugfix with no `A`/`D`/`R`/`C`) skip it.
+- **Load** `ankyr-hierarchy` and `ankyr-engineering` → `references/folder-structure.md` only when installed and applicable; skip if uninstalled (same “Default if installed” contract as other rows).
+- **Hunt** with hierarchy’s nesting, retrieval, and one-axis tests plus `folder-structure.md` shared-vs-feature-local. Do not copy those checklists into this skill.
+- **Scope** to the named directory, or the directories touched by `A`/`R`/`D`/`C` paths — not a whole-repo taxonomy audit.
+- **Source** findings as `Convention (Phase 0c)`. Deduplicate with Engineering when it is the same defect.
 
 **False cleans are a defect in the review.** Validate green and “looks fine after the fixer” are not enough. Obey `thoroughness-pass.md` and the staff-bar lens before **Review passed**.
 
