@@ -1,7 +1,7 @@
 {
   "name": "ankyr-web",
   "displayName": "Ankyr Web",
-  "version": "1.1.14-dev",
+  "version": "1.2.1-dev",
   "description": "Ankyr UI, UX, React, and Three.js skills plus web glob rules. Install with the Ankyr core plugin.",
   "author": {
     "name": "Guy Erreich"

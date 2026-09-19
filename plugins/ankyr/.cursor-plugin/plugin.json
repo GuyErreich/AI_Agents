@@ -1,7 +1,7 @@
 {
   "name": "ankyr",
   "displayName": "Ankyr",
-  "version": "1.1.14-dev",
+  "version": "1.2.1-dev",
   "description": "Ankyr core — engineering and hierarchy defaults, quality skills, and always-on consent/review floor rules. Project standards win; this plugin is the fallback.",
   "author": {
     "name": "Guy Erreich"
