@@ -25,6 +25,9 @@ STATE_PATH = STATE_DIR / "state.json"
 PRICING_PATH = STATE_DIR / "pricing.json"
 PREFERENCES_PATH = STATE_DIR / "preferences.json"
 CLOSED_LEDGER_PATH = STATE_DIR / "closed-ledger.json"
+# Soft uncapped values for first-run wizard when only one budget axis is active.
+UNCAPPED_TOKENS_EST = 1_000_000_000_000  # 1e12
+UNCAPPED_USD_EST = 1_000_000.0  # $1M — effectively uncapped for loop budgets
 LEGACY_RUNTIME_FILES = (
     "state.json",
     "pricing.json",
@@ -230,11 +233,65 @@ def save_state(data: dict[str, Any], root: Path | None = None) -> None:
         print(f"review-loop: could not write state.json: {exc}", file=sys.stderr)
 
 
-def preferences_path(root: Path | None = None) -> Path:
-    """Return absolute path to preferences.json (durable caps across runs)."""
+def project_preferences_path(root: Path | None = None) -> Path:
+    """Return absolute path to the project-layer preferences.json."""
     migrate_legacy_runtime_dir(root)
     base = root or repo_root()
     return base / PREFERENCES_PATH
+
+
+def preferences_path(root: Path | None = None) -> Path:
+    """Return absolute path to project preferences.json (durable caps).
+
+    Prefer :func:`resolve_preferences_path` when exclusive system/project
+    lookup is required. This helper remains the project-layer path for
+    callers that write a new project file by default.
+    """
+    return project_preferences_path(root)
+
+
+def system_preferences_path() -> Path:
+    """Return absolute path to the system-layer preferences.json.
+
+    Override with ``REVIEW_LOOP_SYSTEM_PREFS`` (tests / custom installs).
+    Default: ``~/.cursor/review-loop/preferences.json``.
+    """
+    env = os.environ.get("REVIEW_LOOP_SYSTEM_PREFS", "").strip()
+    if env:
+        return Path(env)
+    return Path.home() / ".cursor" / "review-loop" / "preferences.json"
+
+
+def resolve_preferences_path(root: Path | None = None) -> Path | None:
+    """Exclusive search: project file if present, else system, else None.
+
+    Does not create files. Project wins when both exist.
+    """
+    project = project_preferences_path(root)
+    if project.is_file():
+        return project
+    system = system_preferences_path()
+    if system.is_file():
+        return system
+    return None
+
+
+def preferences_layer_info(root: Path | None = None) -> tuple[str, Path | None]:
+    """Return ``(config_layer, config_path)`` for the exclusive active prefs.
+
+    ``config_layer`` is ``project`` | ``system`` | ``defaults``.
+    """
+    path = resolve_preferences_path(root)
+    if path is None:
+        return "defaults", None
+    system = system_preferences_path()
+    try:
+        if path.resolve() == system.resolve():
+            return "system", path
+    except OSError:
+        if path == system:
+            return "system", path
+    return "project", path
 
 
 def ledger_path(root: Path | None = None) -> Path:
@@ -608,10 +665,15 @@ def severity_meets_floor(severity: Any, floor: Any) -> bool:
 def load_preferences(root: Path | None = None) -> dict[str, Any]:
     """Load durable loop preferences; fill missing keys from defaults.
 
-    Explicit ``null`` for ``max_rounds`` is preserved (budget-only / unlimited).
+    Exclusive lookup via :func:`resolve_preferences_path` (project, then
+    system). When neither file exists, return factory defaults **without
+    writing**. Explicit ``null`` for ``max_rounds`` is preserved
+    (budget-only / unlimited).
     """
     prefs = default_preferences()
-    path = preferences_path(root)
+    path = resolve_preferences_path(root)
+    if path is None:
+        return prefs
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError, OSError):
@@ -641,9 +703,24 @@ def load_preferences(root: Path | None = None) -> dict[str, Any]:
     return prefs
 
 
-def save_preferences(data: dict[str, Any], root: Path | None = None) -> None:
-    """Persist preference keys only (never wipe with a full state dump)."""
-    path = preferences_path(root)
+def save_preferences(
+    data: dict[str, Any],
+    root: Path | None = None,
+    *,
+    path: Path | None = None,
+) -> None:
+    """Persist preference keys only (never wipe with a full state dump).
+
+    Writes to ``path`` when given; otherwise to the active exclusive layer
+    from :func:`resolve_preferences_path`. If no layer exists yet, defaults
+    to the **project** path (tests / first persist after wizard on project).
+    Never creates a project file when the active layer is system.
+    """
+    target = path
+    if target is None:
+        target = resolve_preferences_path(root)
+    if target is None:
+        target = project_preferences_path(root)
     merged = default_preferences()
     for key in PREFERENCE_KEYS:
         if key in data:
@@ -663,8 +740,8 @@ def save_preferences(data: dict[str, Any], root: Path | None = None) -> None:
     )
     merged["analysis_mode"] = normalize_analysis_mode(merged.get("analysis_mode"))
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(merged, indent=2) + "\n", encoding="utf-8")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(merged, indent=2) + "\n", encoding="utf-8")
     except OSError as exc:
         print(
             f"review-loop: could not write preferences.json: {exc}",
@@ -741,14 +818,28 @@ def start_loop_state(
     """Create a fresh run state from durable preferences + this-run overrides.
 
     Does **not** reset preferences to factory defaults. Invocation overrides
-    (e.g. budget-only → ``max_rounds: null``) are written into both
-    ``preferences.json`` and the new ``state.json``.
+    (e.g. budget-only → ``max_rounds: null``) are written into both the
+    active preferences layer and the new ``state.json``.
 
     Seeds ``closed_findings`` / ``accepted_by_design`` from the PR closed
     ledger so a new loop run retains prior fixes and does not rediscover them.
+
+    Stamps ``config_layer`` (``project`` | ``system`` | ``defaults``) and
+    ``config_path`` on state. When no prefs file exists yet, persists to the
+    project path (tests / post-wizard) and stamps ``project``.
     """
+    layer, resolved_path = preferences_layer_info(root)
     prefs = apply_preference_overrides(load_preferences(root), overrides or {})
-    save_preferences(prefs, root)
+    # Persist to the active layer; if none, default to project (do not create
+    # a project file when the active layer is already system).
+    if resolved_path is not None:
+        save_preferences(prefs, root, path=resolved_path)
+        config_layer = layer
+        config_path = str(resolved_path)
+    else:
+        save_preferences(prefs, root)
+        config_layer = "project"
+        config_path = str(project_preferences_path(root))
 
     memory = load_pr_closed_memory(pr_number, root)
     seeded_closed = list(memory.get("closed_findings") or [])
@@ -761,6 +852,8 @@ def start_loop_state(
         "pr_url": pr_url,
         "branch": branch,
         "started_at": now_iso(),
+        "config_layer": config_layer,
+        "config_path": config_path,
         "pricing_mode": prefs.get("pricing_mode", "auto"),
         "reviewer_model": prefs.get("reviewer_model", "inherit"),
         "fixer_model": prefs.get("fixer_model", "inherit"),

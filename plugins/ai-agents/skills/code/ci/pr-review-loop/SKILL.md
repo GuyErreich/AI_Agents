@@ -55,11 +55,34 @@ Hard rules, not defaults:
 5. Resolve **role models** (default both **`inherit`**):
    - Aliases: `auto`/`inherit` → `inherit`; `opus`/`opus-5` → `claude-opus-5-thinking-high`; `sonnet`/`sonnet-5` → `claude-sonnet-5-thinking-high`; see `references/loop-state.md`
 6. Detect **pricing mode** for loop caps (`auto` default; `api` only when user says so).
-7. Initialize state via **`hooks/run-python.sh review_loop_init.py`**. Overrides: `max 2 rounds`, `budget $1.50`, `budget-only` → `max_rounds: null`, `manage high`, `post_fix_focus=full`, `diminishing after round 3`, `diminishing_returns_floor=high`, `analysis debug` / `analysis_mode=security` / `debug-like review`.
-8. **Baseline validate (required once):** run every command in the repo `AGENT.md` **Validate** section via **raw** shell. Store `last_validate_fingerprint`, `last_lint`, `last_build` on `state.json` (`last_lint` / `last_build` are opaque pass/fail slots for the Validate suite — success means **all** listed commands passed). Fingerprint via `python3 scripts/review-lock.py fingerprint pr --json`.
-9. **Cold budget gate** before round 1. If over cap → escalate and stop; do not set `active: true`.
-10. Set `active: true`. Print: `pricing_mode`, models, `analysis_mode`, `manage_severity`, `post_fix_focus`, `diminishing_returns_round`, `diminishing_returns_floor`, `max_rounds`, caps, cold projection, validate status, and whether `seeded_from_ledger` / short-circuit confirm applies. Note: `analysis_mode` is **prompt-level reviewer behavior**, not Cursor's Agent/Plan/Debug UI mode.
-11. **Short-circuit check:** if `should_short_circuit_confirm(state, current_fingerprint)` → round 1 focus = `confirm` (see Focus progression).
+7. **Config resolve (before init):** search for an exclusive preferences file — project `.review-loop/preferences.json` first, then system `~/.cursor/review-loop/preferences.json`.
+   - Project exists → use it (ignore system; if both exist, note that system was ignored). Skip wizard.
+   - Only system exists → use it. Do **not** create a project copy. Skip wizard.
+   - Neither exists → **stop**. Do **not** call `review_loop_init.py` yet. Run the **first-run wizard** (below), write **only** the chosen file, then continue.
+8. Initialize state via **`hooks/run-python.sh review_loop_init.py`**. Overrides: `max 2 rounds`, `budget $1.50`, `budget-only` → `max_rounds: null`, `manage high`, `post_fix_focus=full`, `diminishing after round 3`, `diminishing_returns_floor=high`, `analysis debug` / `analysis_mode=security` / `debug-like review`.
+9. **Baseline validate (required once):** run every command in the repo `AGENT.md` **Validate** section via **raw** shell. Store `last_validate_fingerprint`, `last_lint`, `last_build` on `state.json` (`last_lint` / `last_build` are opaque pass/fail slots for the Validate suite — success means **all** listed commands passed). Fingerprint via `python3 scripts/review-lock.py fingerprint pr --json`.
+10. **Cold budget gate** before round 1. If over cap → escalate and stop; do not set `active: true`.
+11. Set `active: true`. Print: `config_layer`, `config_path`, `pricing_mode`, models, `analysis_mode`, `manage_severity`, `post_fix_focus`, `diminishing_returns_round`, `diminishing_returns_floor`, `max_rounds`, caps, cold projection, validate status, and whether `seeded_from_ledger` / short-circuit confirm applies. Note: `analysis_mode` is **prompt-level reviewer behavior**, not Cursor's Agent/Plan/Debug UI mode.
+12. **Short-circuit check:** if `should_short_circuit_confirm(state, current_fingerprint)` → round 1 focus = `confirm` (see Focus progression).
+
+### First-run wizard
+
+Use `AskQuestion` (not freeform chat). Unasked keys stay factory (`manage_severity`, `post_fix_focus`, `analysis_mode`, …). Soft uncapped axis: tokens `1_000_000_000_000` / USD `$1_000_000` (`UNCAPPED_*` in `_loop_state`).
+
+1. **Where to save**
+   - System — all repos (`~/.cursor/review-loop/preferences.json`)
+   - Project — this repo only (`.review-loop/preferences.json`)
+2. **How the loop should stop**
+   - Unlimited rounds, USD budget only (`max_rounds: null`, `max_usd_est` set, `max_tokens_est` → uncapped)
+   - Unlimited rounds, token budget only (`max_rounds: null`, `max_tokens_est` set, `max_usd_est` → uncapped)
+   - Unlimited rounds, whichever budget hits first (both caps set)
+   - Fixed max rounds (ask the number; optional $ / token caps keep factory unless also set)
+3. **Amounts** matching the choice — suggest factory defaults (`$2`, `1_000_000` tokens, `3` rounds).
+4. **Subagents** — reviewer and fixer models: `inherit` (parent / cheap), `opus`, `sonnet`, `fast` (aliases in `references/loop-state.md`).
+
+Write the JSON to the chosen path only, then resume preflight at step 8.
+
+**Reconfigure later:** phrases like `reconfigure review loop` / `reset loop prefs` re-run this wizard. Ask location again if switching layers; overwrite the chosen file. Do not leave a stale file at the other layer unless the user asks to keep both.
 
 ## Focus progression
 

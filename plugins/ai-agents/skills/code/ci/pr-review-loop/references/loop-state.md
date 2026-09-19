@@ -12,6 +12,41 @@ Runtime files under `.review-loop/` at the repo root (gitignored — **not** und
 
 On first access, files under the legacy `.cursor/review-loop/` (and `.cursor/review-lock.json`) are copied into `.review-loop/` when the new path is missing.
 
+`state.json`, `pricing.json`, and `closed-ledger.json` are always **project-local**. Only **preferences** may live at the system layer.
+
+## Preferences layers (exclusive)
+
+| Layer | Path | Scope |
+|---|---|---|
+| Project | `<repo>/.review-loop/preferences.json` | This repo only |
+| System | `~/.cursor/review-loop/preferences.json` | All repos (override path with `REVIEW_LOOP_SYSTEM_PREFS` for tests) |
+
+**Search order (exclusive — never merge):** project file if present → else system file if present → else none. When both exist, project wins and system is ignored.
+
+| Situation | Action |
+|---|---|
+| Project exists | Use project. Skip wizard. |
+| Only system exists | Use system. Do **not** create a project copy. Skip wizard. |
+| Both exist | Project wins. Print that system was ignored. |
+| Neither exists | Orchestrator runs the first-run wizard, writes **only** the chosen file, **then** calls `review_loop_init.py`. |
+
+Real preflight **must not** call `review_loop_init.py` / `start_loop_state` until a preferences file exists (found or just written by the wizard). That prevents a silent factory write from creating a project file that would shadow a later system config.
+
+Hooks: `resolve_preferences_path`, `preferences_layer_info`, `load_preferences`, `save_preferences`. When the active layer is system, saves go to the system path only. When neither file exists and a caller still persists (unit tests), `save_preferences` / `start_loop_state` default to the **project** path.
+
+Soft uncapped axes for the wizard: `UNCAPPED_TOKENS_EST` (`1e12`) and `UNCAPPED_USD_EST` (`$1_000_000`) in `_loop_state`.
+
+### First-run wizard (orchestrator)
+
+Use `AskQuestion`. See `SKILL.md` Preflight. Summary:
+
+1. Where to save (system vs project)
+2. Stop policy (USD-only / tokens-only / both / fixed rounds)
+3. Amounts (suggest factory `$2` / `1_000_000` tokens / `3` rounds)
+4. Reviewer + fixer models (`inherit` / `opus` / `sonnet` / `fast`)
+
+Unasked keys stay factory. Reconfigure via `reconfigure review loop` / `reset loop prefs`.
+
 ## Preferences (durable)
 
 ```json
@@ -39,7 +74,7 @@ On first access, files under the legacy `.cursor/review-loop/` (and `.cursor/rev
 | `diminishing_returns_floor` | one tier above `manage_severity` (capped at `critical`) | Minimum severity still fixed/escalated after the ratchet round. Fully overridable. |
 | `analysis_mode` | `review` | Prompt-level reviewer stance (`review` \| `debug-like` \| `security`). **Not** Cursor's Agent/Plan/Debug UI mode. See `code/review/reviewer` → `analysis-modes.md`. |
 
-Preflight **must** call `review_loop_init.py` (or `start_loop_state`) so a prior `max_rounds: null` (budget-only) is not overwritten with `3`. Only missing keys take factory defaults; invocation `overrides` update both preferences and the new state.
+Preflight **must** call `review_loop_init.py` (or `start_loop_state`) **after** a preferences file exists so a prior `max_rounds: null` (budget-only) is not overwritten with `3`. Only missing keys take factory defaults; invocation `overrides` update both the active preferences layer and the new state.
 
 Invocation overrides: `manage medium` / `manage high` / `only critical` / `manage_severity=high` / `post_fix_focus=full` / `focus delta` / `diminishing after round 3` / `diminishing_returns_round=5` / `diminishing_returns_floor=high` / `analysis debug` / `analysis_mode=security` / `debug-like review`.
 
@@ -48,6 +83,8 @@ Invocation overrides: `manage medium` / `manage high` / `only critical` / `manag
 ```json
 {
   "active": false,
+  "config_layer": "project",
+  "config_path": "/abs/path/.review-loop/preferences.json",
   "pr_number": 0,
   "pr_url": "",
   "branch": "",
@@ -95,6 +132,8 @@ Invocation overrides: `manage medium` / `manage high` / `only critical` / `manag
 
 | Field | Meaning |
 |---|---|
+| `config_layer` | Active prefs layer: `project` \| `system` \| `defaults` (stamped at init; after persist without prior file → `project`) |
+| `config_path` | Absolute path to the preferences file used (or written) |
 | `last_validate_fingerprint` | PR fingerprint from last successful Validate suite |
 | `last_lint` / `last_build` | Opaque Validate-suite pass/fail slots (`pass` \| `fail` \| `""`). Success means **all** `AGENT.md` Validate commands passed. |
 

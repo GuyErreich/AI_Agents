@@ -1372,3 +1372,170 @@ class TestRuntimeDirOutsideCursor:
         migrate_legacy_runtime_dir(tmp_path)
         text = (dest / "preferences.json").read_text(encoding="utf-8")
         assert '"max_rounds": 99' in text
+
+
+class TestPreferencesLayersExclusive:
+    """Project vs system preferences: exclusive search, no merge."""
+
+    def test_neither_returns_defaults_without_write(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from _loop_state import (
+            STATE_DIR,
+            default_preferences,
+            load_preferences,
+            preferences_layer_info,
+            resolve_preferences_path,
+        )
+
+        system = tmp_path / "system-prefs.json"
+        monkeypatch.setenv("REVIEW_LOOP_SYSTEM_PREFS", str(system))
+        root = tmp_path / "repo"
+        root.mkdir()
+
+        assert resolve_preferences_path(root) is None
+        layer, path = preferences_layer_info(root)
+        assert layer == "defaults"
+        assert path is None
+        prefs = load_preferences(root)
+        assert prefs["max_rounds"] == default_preferences()["max_rounds"]
+        assert not (root / STATE_DIR / "preferences.json").exists()
+        assert not system.exists()
+
+    def test_project_only(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from _loop_state import (
+            STATE_DIR,
+            load_preferences,
+            preferences_layer_info,
+            start_loop_state,
+        )
+
+        system = tmp_path / "system-prefs.json"
+        monkeypatch.setenv("REVIEW_LOOP_SYSTEM_PREFS", str(system))
+        root = tmp_path / "repo"
+        root.mkdir()
+        proj = root / STATE_DIR
+        proj.mkdir(parents=True)
+        (proj / "preferences.json").write_text(
+            '{"max_rounds": 7, "max_usd_est": 4.5}\n',
+            encoding="utf-8",
+        )
+
+        layer, path = preferences_layer_info(root)
+        assert layer == "project"
+        assert path == proj / "preferences.json"
+        prefs = load_preferences(root)
+        assert prefs["max_rounds"] == 7
+        assert prefs["max_usd_est"] == 4.5
+
+        state = start_loop_state(
+            pr_number=1, pr_url="u", branch="b", root=root
+        )
+        assert state["config_layer"] == "project"
+        assert state["max_rounds"] == 7
+        assert not system.exists()
+
+    def test_system_only_no_project_write(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from _loop_state import (
+            STATE_DIR,
+            load_preferences,
+            preferences_layer_info,
+            start_loop_state,
+        )
+
+        system = tmp_path / "system-prefs.json"
+        monkeypatch.setenv("REVIEW_LOOP_SYSTEM_PREFS", str(system))
+        system.write_text(
+            '{"max_rounds": null, "max_usd_est": 9.0, "reviewer_model": "opus"}\n',
+            encoding="utf-8",
+        )
+        root = tmp_path / "repo"
+        root.mkdir()
+
+        layer, path = preferences_layer_info(root)
+        assert layer == "system"
+        assert path == system
+        prefs = load_preferences(root)
+        assert prefs["max_rounds"] is None
+        assert prefs["max_usd_est"] == 9.0
+
+        state = start_loop_state(
+            pr_number=1,
+            pr_url="u",
+            branch="b",
+            root=root,
+            overrides={"fixer_model": "fast"},
+        )
+        assert state["config_layer"] == "system"
+        assert state["config_path"] == str(system)
+        assert state["max_rounds"] is None
+        assert state["fixer_model"] == "fast"
+        # Overrides persist to system only — no project preferences file.
+        assert not (root / STATE_DIR / "preferences.json").exists()
+        system_data = json.loads(system.read_text(encoding="utf-8"))
+        assert system_data["fixer_model"] == "fast"
+        assert system_data["max_usd_est"] == 9.0
+
+    def test_both_present_project_wins(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from _loop_state import (
+            STATE_DIR,
+            load_preferences,
+            preferences_layer_info,
+            start_loop_state,
+        )
+
+        system = tmp_path / "system-prefs.json"
+        monkeypatch.setenv("REVIEW_LOOP_SYSTEM_PREFS", str(system))
+        system.write_text(
+            '{"max_rounds": 1, "max_usd_est": 99.0}\n',
+            encoding="utf-8",
+        )
+        root = tmp_path / "repo"
+        root.mkdir()
+        proj = root / STATE_DIR
+        proj.mkdir(parents=True)
+        (proj / "preferences.json").write_text(
+            '{"max_rounds": 5, "max_usd_est": 1.25}\n',
+            encoding="utf-8",
+        )
+
+        layer, path = preferences_layer_info(root)
+        assert layer == "project"
+        prefs = load_preferences(root)
+        assert prefs["max_rounds"] == 5
+        assert prefs["max_usd_est"] == 1.25
+
+        start_loop_state(pr_number=1, pr_url="u", branch="b", root=root)
+        # System file untouched.
+        system_data = json.loads(system.read_text(encoding="utf-8"))
+        assert system_data["max_rounds"] == 1
+        assert system_data["max_usd_est"] == 99.0
+
+    def test_start_without_file_defaults_to_project_write(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Unit-test path: start_loop_state may persist to project when empty.
+
+        Real orchestrator must run the first-run wizard and write a file
+        *before* calling init so a silent project write cannot shadow a
+        later system config.
+        """
+        from _loop_state import STATE_DIR, start_loop_state
+
+        system = tmp_path / "system-prefs.json"
+        monkeypatch.setenv("REVIEW_LOOP_SYSTEM_PREFS", str(system))
+        root = tmp_path / "repo"
+        root.mkdir()
+
+        state = start_loop_state(
+            pr_number=1, pr_url="u", branch="b", root=root
+        )
+        assert state["config_layer"] == "project"
+        assert (root / STATE_DIR / "preferences.json").is_file()
+        assert not system.exists()
