@@ -1,7 +1,7 @@
 {
   "name": "ankyr-review",
   "displayName": "Ankyr Review",
-  "version": "1.1.14-dev",
+  "version": "1.2.0-dev",
   "description": "Ankyr review — reviewer, PR resolver, improve-code, local and PR review loops, subagents, and review-loop hooks. Install with the Ankyr core plugin.",
   "author": {
     "name": "Guy Erreich"
