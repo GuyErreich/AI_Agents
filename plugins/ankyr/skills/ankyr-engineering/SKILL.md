@@ -27,7 +27,7 @@ This skill is the **default** for those principles when the project is silent. T
 2. **Decide the boundary first.** Before writing implementation detail, state where shared logic, feature-local logic, and composition each live.
 3. **Write to the principles above.** Keep each unit single-responsibility and named for what it does.
 4. **Extract on the second occurrence.** When a pattern repeats, extract it in the same change rather than leaving duplication.
-5. **Review against the principles.** Reviewer Phase 0 runs these checks before any domain phase.
+5. **Review against the principles.** Reviewer Phase 0 runs these checks before any domain phase. Folder taxonomy and `references/folder-structure.md` belong to reviewer Phase 0c when the folder-taxonomy capability row matches — Phase 0 does not preload that reference.
 
 ## When to load references
 
