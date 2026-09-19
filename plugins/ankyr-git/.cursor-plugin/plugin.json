@@ -1,7 +1,7 @@
 {
   "name": "ankyr-git",
   "displayName": "Ankyr Git",
-  "version": "1.1.14-dev",
+  "version": "1.2.2-dev",
   "description": "Ankyr git milestones — worktree, commit, PR, push, and release workflows. Install with the Ankyr core plugin.",
   "author": {
     "name": "Guy Erreich"
