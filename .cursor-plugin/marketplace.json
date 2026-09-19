@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Ankyr — portable Cursor agent skills, rules, subagents, and review-loop hooks. Project standards first; plugin defaults as fallback.",
-    "version": "1.1.14-rc",
+    "version": "1.2.3-rc",
     "pluginRoot": "plugins"
   },
   "plugins": [

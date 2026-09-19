@@ -80,22 +80,32 @@ When `analysis_mode` is `debug-like` or `security` (see `analysis-modes.md`):
 
 Activate staff-bar plus every specialist lens that matches **at least one file in M**. Skip lenses with zero files in the focus set (especially on `delta`).
 
+## 6b. Structure / hierarchy (Phase 0c)
+
+When the folder-taxonomy capability routing row matched (named directory, breadth `module`/`package`, or tier diff `--name-status` includes `A`/`D`/`R`/`C`):
+
+1. Phase 0c is an **applicable phase** for this review.
+2. Report `structure: 0c` in the coverage fragment.
+3. If the row matched and Phase 0c did not run → coverage fails (cannot claim Review passed).
+
+When the row did **not** match (content-only edits of existing files), report `structure: skip` — that is expected, not a coverage failure.
+
 ## 7. Clean verdict requires evidence
 
 **Review passed** only if:
 
-1. Applicable phases for this focus were run (validate may be `skip` when fingerprint-matched).
+1. Applicable phases for this focus were run (validate may be `skip` when fingerprint-matched; Phase 0c must run when the folder-taxonomy row matched — see §6b).
 2. Every non-trivial file in **M** was opened and checked (§3).
 3. Hotspots verified when provided (§4).
 4. Every matching in-scope lens was activated (§6).
-5. You can report N/M and lenses.
+5. You can report N/M, lenses, and `structure: 0c|skip`.
 
 If you would skim M, do not claim clean — report unreviewed surface or fail coverage.
 
 ## 8. Report fragment
 
 ```markdown
-**Coverage:** N/M changed code files reviewed (focus=…) · hotspots checked: K · phases: … · lenses: staff-bar+… · validate: pass|fail|skip
+**Coverage:** N/M changed code files reviewed (focus=…) · hotspots checked: K · phases: … · lenses: staff-bar+… · structure: 0c|skip · validate: pass|fail|skip
 ```
 
-If `N < M` for non-trivial code files in M, or an in-scope lens was skipped, verdict cannot be Review passed.
+If `N < M` for non-trivial code files in M, an in-scope lens was skipped, or Phase 0c was owed and skipped (§6b), verdict cannot be Review passed.
