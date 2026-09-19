@@ -11,5 +11,5 @@ header:
     - scripts
   paths-ignore:
     - '**/*.json'
-    - plugins/ai-agents/hooks/tests
     - plugins/ai-agents/hooks/state
+    - tests

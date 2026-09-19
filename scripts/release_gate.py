@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
+
+# /// script
+# requires-python = ">=3.12"
+# ///
+
 """Local release-gate orchestrator (mirrors CI release-gate checks).
 
 Runs: uv audit, sync --check, validate_plugin, hook install smoke (with uv),

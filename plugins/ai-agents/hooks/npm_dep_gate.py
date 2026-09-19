@@ -7,6 +7,7 @@
 # requires-python = ">=3.12"
 # ///
 
+
 """Dependency audit gate — npm and uv; force audit on stop after dep edits.
 
 Marks pending when real package manifests/lockfiles change, or when a primary
@@ -24,10 +25,11 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from _types import HookEvent, JsonObject, as_int, as_json, as_list, as_str  # noqa: E402
 from _loop_state import emit, now_iso, read_stdin_json, repo_root  # noqa: E402
 
 Ecosystem = Literal["npm", "uv"]
@@ -112,7 +114,7 @@ def state_path() -> Path:
     return repo_root() / STATE_REL
 
 
-def load_gate_state() -> dict[str, Any]:
+def load_gate_state() -> JsonObject:
     """Load gate state; missing or corrupt → empty defaults."""
     path = state_path()
     if not path.is_file():
@@ -136,7 +138,7 @@ def load_gate_state() -> dict[str, Any]:
     }
 
 
-def save_gate_state(state: dict[str, Any]) -> None:
+def save_gate_state(state: JsonObject) -> None:
     """Persist gate state under the workspace hooks state dir."""
     path = state_path()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -145,7 +147,7 @@ def save_gate_state(state: dict[str, Any]) -> None:
         eco = ""
     payload = {
         "pending": bool(state.get("pending")),
-        "paths": list(state.get("paths") or []),
+        "paths": [as_str(p) for p in as_list(state.get("paths"))],
         "audit_ok": bool(state.get("audit_ok")),
         "ecosystem": eco,
         "updated_at": now_iso(),
@@ -200,22 +202,20 @@ def is_dep_path(file_path: str) -> bool:
 def mark_pending(paths: list[str], *, ecosystem: Ecosystem) -> None:
     """Mark that dep files changed and audit is required before stop."""
     state = load_gate_state()
-    existing = {str(p) for p in state.get("paths") or []}
+    existing = {as_str(p) for p in as_list(state.get("paths"))}
     existing.update(paths)
-    prev = str(state.get("ecosystem") or "")
+    as_str(state.get("ecosystem"))
     # Prefer the newly observed ecosystem; keep prior if same family.
-    state["ecosystem"] = ecosystem if ecosystem else prev
+    state["ecosystem"] = ecosystem
     state["pending"] = True
     state["audit_ok"] = False
-    state["paths"] = sorted(existing)
+    state["paths"] = as_json(sorted(existing))
     save_gate_state(state)
 
 
 def clear_pending() -> None:
     """Clear the pending gate after a successful audit."""
-    save_gate_state(
-        {"pending": False, "paths": [], "audit_ok": True, "ecosystem": ""}
-    )
+    save_gate_state({"pending": False, "paths": [], "audit_ok": True, "ecosystem": ""})
 
 
 def npm_audit_succeeded(command: str, output: str) -> bool:
@@ -248,7 +248,7 @@ def audit_succeeded(command: str, output: str) -> bool:
     return npm_audit_succeeded(command, output) or uv_audit_succeeded(command, output)
 
 
-def handle_after_file_edit(event: dict[str, Any]) -> None:
+def handle_after_file_edit(event: HookEvent) -> None:
     """Mark pending when npm/uv dep files are edited in a matching project."""
     file_path = str(event.get("file_path") or "")
     if not file_path:
@@ -261,7 +261,7 @@ def handle_after_file_edit(event: dict[str, Any]) -> None:
         mark_pending([name], ecosystem="uv")
 
 
-def handle_after_shell(event: dict[str, Any]) -> None:
+def handle_after_shell(event: HookEvent) -> None:
     """Mark pending on primary npm/uv mutators; clear on successful audit."""
     command = str(event.get("command") or "")
     output = str(event.get("output") or "")
@@ -276,7 +276,7 @@ def handle_after_shell(event: dict[str, Any]) -> None:
         mark_pending(["shell:" + command.strip()[:80]], ecosystem="uv")
 
 
-def _resolve_ecosystem(state: dict[str, Any]) -> Ecosystem | None:
+def _resolve_ecosystem(state: JsonObject) -> Ecosystem | None:
     """Pick follow-up ecosystem; drop stale npm pending on non-npm repos."""
     eco = str(state.get("ecosystem") or "")
     if eco == "npm":
@@ -295,7 +295,7 @@ def _resolve_ecosystem(state: dict[str, Any]) -> Ecosystem | None:
     return None
 
 
-def handle_stop(event: dict[str, Any]) -> str | None:
+def handle_stop(event: HookEvent) -> str | None:
     """Return a follow-up message when pending audit has not passed."""
     if str(event.get("status") or "") != "completed":
         return None
@@ -307,17 +307,13 @@ def handle_stop(event: dict[str, Any]) -> str | None:
         # Stale false-positive (e.g. heredoc npm text on a uv-only repo).
         clear_pending()
         return None
-    loop_count = event.get("loop_count")
-    try:
-        loops = int(loop_count)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        loops = 0
+    loops = as_int(event.get("loop_count"), 0)
     if loops >= 2:
         return None
     return FOLLOWUP_NPM if ecosystem == "npm" else FOLLOWUP_UV
 
 
-def dispatch(event: dict[str, Any]) -> dict[str, Any]:
+def dispatch(event: HookEvent) -> JsonObject:
     """Route by hook payload shape; always return a JSON-serializable object."""
     if "file_path" in event and "edits" in event:
         handle_after_file_edit(event)

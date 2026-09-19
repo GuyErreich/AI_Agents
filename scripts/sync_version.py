@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
+
+# /// script
+# requires-python = ">=3.12"
+# ///
+
 """Sync plugin/marketplace JSON versions from pyproject.toml.
 
 Action-Semver-Control's VersionFileUpdater cannot update JSON lines that end
@@ -16,7 +21,10 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any
+
+type JsonPrimitive = str | int | float | bool | None
+type JsonValue = JsonPrimitive | list["JsonValue"] | dict[str, "JsonValue"]
+type JsonObject = dict[str, JsonValue]
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PYPROJECT = REPO_ROOT / "pyproject.toml"
@@ -39,14 +47,14 @@ def read_pyproject_version(path: Path | None = None) -> str:
     return match.group(1)
 
 
-def _load_json(path: Path) -> dict[str, Any]:
+def _load_json(path: Path) -> JsonObject:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"{path}: root must be an object")
     return data
 
 
-def _write_json(path: Path, data: dict[str, Any]) -> None:
+def _write_json(path: Path, data: JsonObject) -> None:
     path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",

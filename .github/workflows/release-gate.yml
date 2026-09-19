@@ -72,7 +72,13 @@ jobs:
         run: uv run ruff check plugins/ai-agents/hooks scripts
 
       - name: Ruff format
-        run: uv run ruff format --check scripts
+        run: uv run ruff format --check plugins/ai-agents/hooks scripts
+
+      - name: Type check (ty)
+        run: >-
+          uv run ty check
+          --extra-search-path plugins/ai-agents/hooks
+          --extra-search-path scripts
 
       - name: Pytest
         run: uv run pytest

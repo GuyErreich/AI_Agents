@@ -3,6 +3,10 @@
 #
 # SPDX-License-Identifier: MIT
 
+# /// script
+# requires-python = ">=3.12"
+# ///
+
 """Validate Cursor marketplace and plugin manifests against the on-disk tree.
 
 Exit 0 when every listed plugin has a manifest, required fields, and
@@ -20,7 +24,10 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+
+type JsonPrimitive = str | int | float | bool | None
+type JsonValue = JsonPrimitive | list["JsonValue"] | dict[str, "JsonValue"]
+type JsonObject = dict[str, JsonValue]
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MARKETPLACE_PATH = REPO_ROOT / ".cursor-plugin" / "marketplace.json"
@@ -71,7 +78,7 @@ MAX_ALWAYS_APPLY_BYTES = 48_000
 STRAY_SUFFIXES = (".pyc",)
 
 
-def _load_json(path: Path) -> Any:
+def _load_json(path: Path) -> JsonValue:
     """Parse JSON or raise a tagged error string."""
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -100,7 +107,11 @@ def _frontmatter(path: Path) -> dict[str, str]:
 
 
 def _rel(path: Path) -> str:
-    return str(path.relative_to(REPO_ROOT))
+    """Return a path relative to the repo root when possible."""
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return path.as_posix()
 
 
 def _pyproject_version() -> str:
@@ -108,7 +119,7 @@ def _pyproject_version() -> str:
     match = VERSION_RE.search(text)
     if not match:
         raise ValueError(f"{_rel(PYPROJECT_PATH)}: missing version")
-    return match.group(1)
+    return match.group(1) or ""
 
 
 def _git_ls_files_mode(path: Path) -> str | None:
@@ -155,10 +166,14 @@ def check_version_consistency(plugin_root: Path, errors: list[str]) -> None:
 
     manifest_path = plugin_root / ".cursor-plugin" / "plugin.json"
     try:
-        manifest = _load_json(manifest_path)
+        manifest_raw = _load_json(manifest_path)
     except ValueError as exc:
         errors.append(str(exc))
         return
+    if not isinstance(manifest_raw, dict):
+        errors.append(f"{_rel(manifest_path)}: root must be an object")
+        return
+    manifest: JsonObject = manifest_raw
     plugin_ver = str(manifest.get("version") or "")
     if plugin_ver != expected:
         errors.append(
@@ -195,7 +210,9 @@ def _is_unsafe_path(value: str) -> bool:
     return ".." in parts
 
 
-def _collect_path_like_strings(node: Any, *, prefix: str = "") -> list[tuple[str, str]]:
+def _collect_path_like_strings(
+    node: JsonValue, *, prefix: str = ""
+) -> list[tuple[str, str]]:
     """Walk JSON and collect string values that look like file paths."""
     found: list[tuple[str, str]] = []
     if isinstance(node, dict):
@@ -224,7 +241,7 @@ def _collect_path_like_strings(node: Any, *, prefix: str = "") -> list[tuple[str
 
 def check_manifest_paths(
     label: str,
-    document: dict[str, Any],
+    document: JsonObject,
     errors: list[str],
 ) -> None:
     """Reject absolute paths and ``..`` segments in manifest path fields."""
@@ -245,7 +262,7 @@ def check_readme(errors: list[str]) -> None:
         errors.append("README.md: empty (required for marketplace submission)")
 
 
-def check_logo(plugin_root: Path, manifest: dict[str, Any], errors: list[str]) -> None:
+def check_logo(plugin_root: Path, manifest: JsonObject, errors: list[str]) -> None:
     """Require a committed logo referenced by relative path."""
     logo = str(manifest.get("logo") or "").strip()
     if not logo:
@@ -279,7 +296,7 @@ def check_logo(plugin_root: Path, manifest: dict[str, Any], errors: list[str]) -
 
 def check_hook_events(
     hooks_path: Path,
-    events: dict[str, Any],
+    events: JsonObject,
     errors: list[str],
 ) -> None:
     """Reject unknown hook event names."""
@@ -304,7 +321,7 @@ _INTERPRETERS = frozenset(
 
 def check_executable_bits(
     plugin_root: Path,
-    events: dict[str, Any],
+    events: JsonObject,
     errors: list[str],
 ) -> None:
     """Reject git ``100755`` hook files and require interpreter-prefixed commands.
@@ -386,13 +403,18 @@ def _git_ignored(path: Path) -> bool:
     if not (REPO_ROOT / ".git").exists():
         return False
     try:
+        rel = str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        # Paths outside the repo (unit-test fixtures) are never gitignored.
+        return False
+    try:
         result = subprocess.run(
             [
                 "git",
                 "check-ignore",
                 "-q",
                 "--",
-                str(path.relative_to(REPO_ROOT)),
+                rel,
             ],
             cwd=REPO_ROOT,
             check=False,
@@ -404,7 +426,13 @@ def _git_ignored(path: Path) -> bool:
 
 
 def check_stray_artifacts(plugin_root: Path, errors: list[str]) -> None:
-    """Reject cache / state paths that would ship (tracked / not gitignored)."""
+    """Reject cache / state / test paths that would ship (tracked / not gitignored)."""
+    hooks_tests = plugin_root / "hooks" / "tests"
+    if hooks_tests.is_dir():
+        errors.append(
+            f"{_rel(hooks_tests)}: hooks/tests must not ship — keep tests under "
+            "repo tests/ only"
+        )
     for path in plugin_root.rglob("*"):
         if _git_ignored(path):
             continue
@@ -444,10 +472,26 @@ def check_context_budget(plugin_root: Path, errors: list[str]) -> None:
 
 def check_pep723_scripts(
     plugin_root: Path,
-    events: dict[str, Any],
+    events: JsonObject,
     errors: list[str],
 ) -> None:
-    """Hook Python entrypoints via uv run --script need PEP 723 metadata."""
+    """Runnable hook entrypoints need PEP 723 metadata for ``uv run --script``.
+
+    Library modules (``_*.py``) are imported by entrypoints and must NOT use
+    isolated PEP 723 script mode — that breaks sibling imports under ``ty``.
+    Always require metadata for ``hooks.json`` targets plus ``review_loop_init.py``.
+    """
+    hooks_dir = plugin_root / "hooks"
+    required: set[Path] = set()
+    if hooks_dir.is_dir():
+        init_script = hooks_dir / "review_loop_init.py"
+        if init_script.is_file():
+            required.add(init_script.resolve())
+        for script_path in hooks_dir.glob("*.py"):
+            # Skip private library modules.
+            if script_path.name.startswith("_"):
+                continue
+            required.add(script_path.resolve())
     for entries in events.values():
         if not isinstance(entries, list):
             continue
@@ -458,19 +502,24 @@ def check_pep723_scripts(
             parts = command.split()
             if len(parts) < 2:
                 continue
-            # bash ./hooks/run-python.sh review_loop_budget.py
             script_name = parts[-1]
             if not script_name.endswith(".py"):
                 continue
             script_path = (plugin_root / "hooks" / script_name).resolve()
             if not script_path.is_file():
-                continue
-            text = script_path.read_text(encoding="utf-8")
-            if "# /// script" not in text:
                 errors.append(
-                    f"{_rel(script_path)}: missing PEP 723 script metadata "
-                    "(required for uv run --script)"
+                    f"{_rel(plugin_root / 'hooks' / script_name)}: "
+                    "referenced in hooks.json but missing"
                 )
+                continue
+            required.add(script_path)
+    for script_path in sorted(required):
+        text = script_path.read_text(encoding="utf-8")
+        if "# /// script" not in text:
+            errors.append(
+                f"{_rel(script_path)}: missing PEP 723 script metadata "
+                "(required for uv run --script)"
+            )
 
 
 def validate_plugin(plugin_root: Path, errors: list[str]) -> None:
@@ -602,9 +651,9 @@ def main() -> int:
 
     check_manifest_paths(_rel(MARKETPLACE_PATH), marketplace, errors)
 
-    plugin_root_prefix = Path(
-        str((marketplace.get("metadata") or {}).get("pluginRoot") or ".")
-    )
+    metadata_raw = marketplace.get("metadata")
+    metadata: JsonObject = metadata_raw if isinstance(metadata_raw, dict) else {}
+    plugin_root_prefix = Path(str(metadata.get("pluginRoot") or "."))
     plugins = marketplace.get("plugins")
     if not isinstance(plugins, list) or not plugins:
         errors.append(f"{_rel(MARKETPLACE_PATH)}: plugins must be a non-empty list")

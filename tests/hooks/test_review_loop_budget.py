@@ -7,15 +7,10 @@ block) before a subagent starts.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 
 import pytest
-
-HOOKS = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(HOOKS))
-
-from _cost import (  # noqa: E402
+from _cost import (
     cold_projection,
     estimate_transcript,
     normalize_loop_model,
@@ -23,9 +18,11 @@ from _cost import (  # noqa: E402
     resolve_pricing_mode,
     segment_pricing_mode,
 )
-from review_loop_budget import decide_subagent_start  # noqa: E402
+from review_loop_budget import decide_subagent_start
 
-PLUGIN_ROOT = Path(__file__).resolve().parents[2]
+PLUGIN_ROOT = (
+    Path(__file__).resolve().parents[2] / "plugins" / "ai-agents"
+)
 PRICING_PATH = (
     PLUGIN_ROOT
     / "skills"

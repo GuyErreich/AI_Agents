@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
+
+# /// script
+# requires-python = ">=3.12"
+# ///
+
 """Clean-clone hook install smoke test.
 
 Copies only ``plugins/ai-agents`` into a scratch local-plugins dir (no repo

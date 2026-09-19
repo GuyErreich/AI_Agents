@@ -3,9 +3,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-# /// script
-# requires-python = ">=3.12"
-# ///
 
 """Estimate tokens and dollars from Cursor agent-transcript JSONL files.
 
@@ -24,7 +21,9 @@ import json
 import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+from typing import cast
+
+from _types import JsonObject, as_float, as_object, as_str
 
 
 @dataclass
@@ -43,9 +42,9 @@ class CostEstimate:
     known_model: bool
     pricing_mode: str = "auto"
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> JsonObject:
         """Serialize for state.json."""
-        return asdict(self)
+        return cast(JsonObject, asdict(self))
 
 
 # User-facing aliases → Task `model` slugs (keep `inherit` as the cheap default).
@@ -76,9 +75,9 @@ MODEL_ALIASES: dict[str, str] = {
 }
 
 
-def normalize_loop_model(raw: str | None) -> str:
+def normalize_loop_model(raw: object | None) -> str:
     """Map a user/model hint to a Task ``model`` slug. Default: ``inherit``."""
-    text = (raw or "").strip().lower()
+    text = as_str(raw).strip().lower()
     if not text:
         return "inherit"
     if text in MODEL_ALIASES:
@@ -107,9 +106,9 @@ def segment_pricing_mode(model: str | None) -> str:
 
 
 def resolve_pricing_mode(
-    pricing: dict[str, Any],
+    pricing: JsonObject,
     *,
-    state: dict[str, Any] | None = None,
+    state: JsonObject | None = None,
     model: str | None = None,
     explicit: str | None = None,
 ) -> str:
@@ -134,15 +133,13 @@ def resolve_pricing_mode(
     return default if default in {"auto", "api"} else "auto"
 
 
-def _as_dict(value: object) -> dict[str, Any]:
+def _as_dict(value: object) -> JsonObject:
     """Narrow an unknown value to a plain dict, else empty."""
-    if isinstance(value, dict):
-        return {str(k): v for k, v in value.items()}
-    return {}
+    return as_object(value)
 
 
 def resolve_model_key(
-    pricing: dict[str, Any],
+    pricing: JsonObject,
     model: str,
     pricing_mode: str,
 ) -> str:
@@ -180,30 +177,26 @@ def resolve_model_key(
     return "default"
 
 
-def mode_budget_defaults(
-    pricing: dict[str, Any], pricing_mode: str
-) -> dict[str, float]:
+def mode_budget_defaults(pricing: JsonObject, pricing_mode: str) -> dict[str, float]:
     """Return recommended caps / cold-start projection for a pricing mode."""
     modes = _as_dict(pricing.get("modes"))
     cfg = _as_dict(modes.get(pricing_mode))
     if pricing_mode == "auto":
         return {
-            "max_tokens_est": float(cfg.get("max_tokens_est", 1_000_000) or 1_000_000),
-            "max_usd_est": float(cfg.get("max_usd_est", 2.0) or 2.0),
-            "cold_project_tokens": float(
-                cfg.get("cold_project_tokens", 120_000) or 120_000
-            ),
-            "cold_project_usd": float(cfg.get("cold_project_usd", 0.15) or 0.15),
+            "max_tokens_est": as_float(cfg.get("max_tokens_est"), 1_000_000),
+            "max_usd_est": as_float(cfg.get("max_usd_est"), 2.0),
+            "cold_project_tokens": as_float(cfg.get("cold_project_tokens"), 120_000),
+            "cold_project_usd": as_float(cfg.get("cold_project_usd"), 0.15),
         }
     return {
-        "max_tokens_est": float(cfg.get("max_tokens_est", 400_000) or 400_000),
-        "max_usd_est": float(cfg.get("max_usd_est", 3.0) or 3.0),
-        "cold_project_tokens": float(cfg.get("cold_project_tokens", 80_000) or 80_000),
-        "cold_project_usd": float(cfg.get("cold_project_usd", 0.75) or 0.75),
+        "max_tokens_est": as_float(cfg.get("max_tokens_est"), 400_000),
+        "max_usd_est": as_float(cfg.get("max_usd_est"), 3.0),
+        "cold_project_tokens": as_float(cfg.get("cold_project_tokens"), 80_000),
+        "cold_project_usd": as_float(cfg.get("cold_project_usd"), 0.75),
     }
 
 
-def _message_text(message: dict[str, Any]) -> str:
+def _message_text(message: JsonObject) -> str:
     """Flatten a transcript message content into plain text for sizing."""
     content = message.get("content")
     if isinstance(content, str):
@@ -223,7 +216,7 @@ def _message_text(message: dict[str, Any]) -> str:
     return "\n".join(parts)
 
 
-def _count_tool_calls(message: dict[str, Any]) -> int:
+def _count_tool_calls(message: JsonObject) -> int:
     """Count tool-call content blocks in a message."""
     content = message.get("content")
     if not isinstance(content, list):
@@ -239,9 +232,9 @@ def _count_tool_calls(message: dict[str, Any]) -> int:
     return count
 
 
-def read_transcript(path: Path) -> list[dict[str, Any]]:
+def read_transcript(path: Path) -> list[JsonObject]:
     """Load a JSONL transcript into a list of message objects."""
-    rows: list[dict[str, Any]] = []
+    rows: list[JsonObject] = []
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
@@ -260,11 +253,11 @@ def read_transcript(path: Path) -> list[dict[str, Any]]:
 
 def estimate_transcript(
     path: Path,
-    pricing: dict[str, Any],
+    pricing: JsonObject,
     model: str = "default",
     *,
     pricing_mode: str | None = None,
-    state: dict[str, Any] | None = None,
+    state: JsonObject | None = None,
 ) -> CostEstimate:
     """Estimate cost for a single transcript with context re-send modelling."""
     mode = resolve_pricing_mode(
@@ -272,26 +265,26 @@ def estimate_transcript(
     )
     model_key = resolve_model_key(pricing, model, mode)
 
-    chars_per_token = float(pricing.get("chars_per_token", 3.9) or 3.9)
+    chars_per_token = as_float(pricing.get("chars_per_token"), 3.9)
     if chars_per_token <= 0:
         chars_per_token = 3.9
-    discount = float(pricing.get("cached_prefix_discount", 0.5) or 0.5)
+    discount = as_float(pricing.get("cached_prefix_discount"), 0.5)
     discount = min(max(discount, 0.0), 1.0)
 
     models = _as_dict(pricing.get("models"))
     model_rates = models.get(model_key)
-    rates: dict[str, Any]
+    rates: JsonObject
     if isinstance(model_rates, dict):
-        rates = model_rates
+        rates = as_object(model_rates)
         known_model = True
     else:
         rates = _as_dict(models.get("default"))
         known_model = False
-    input_rate = float(rates.get("input_per_mtok", 2.0) or 2.0)
-    output_rate = float(rates.get("output_per_mtok", 10.0) or 10.0)
+    input_rate = as_float(rates.get("input_per_mtok"), 2.0)
+    output_rate = as_float(rates.get("output_per_mtok"), 10.0)
 
     mode_cfg = _as_dict(_as_dict(pricing.get("modes")).get(mode))
-    usd_multiplier = float(mode_cfg.get("usd_multiplier", 1.0) or 1.0)
+    usd_multiplier = as_float(mode_cfg.get("usd_multiplier"), 1.0)
 
     rows = read_transcript(path)
     cumulative_chars = 0
@@ -407,12 +400,12 @@ def find_subagent_transcripts(
 
 
 def estimate_since(
-    pricing: dict[str, Any],
+    pricing: JsonObject,
     started_at_iso: str,
     model: str = "default",
     transcripts_root: Path | None = None,
     *,
-    state: dict[str, Any] | None = None,
+    state: JsonObject | None = None,
     pricing_mode: str | None = None,
     transcript_path: str | Path | None = None,
 ) -> CostEstimate:
@@ -484,7 +477,7 @@ def estimate_since(
 
 
 def cold_projection(
-    state: dict[str, Any],
+    state: JsonObject,
     *,
     model: str | None = None,
 ) -> tuple[float, float]:
@@ -509,7 +502,7 @@ def cold_projection(
 
 
 def project_next_cost(
-    state: dict[str, Any],
+    state: JsonObject,
     *,
     model: str | None = None,
 ) -> tuple[float, float]:
@@ -532,8 +525,8 @@ def project_next_cost(
             continue
         costs.append(
             (
-                float(cost.get("tokens_est", 0) or 0),
-                float(cost.get("usd_est", 0) or 0),
+                as_float(cost.get("tokens_est"), 0.0),
+                as_float(cost.get("usd_est"), 0.0),
             )
         )
     if not costs:

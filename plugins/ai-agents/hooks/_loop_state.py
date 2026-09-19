@@ -3,9 +3,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-# /// script
-# requires-python = ">=3.12"
-# ///
 
 """Shared state and JSON helpers for review-loop hooks."""
 
@@ -17,7 +14,16 @@ import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from _types import (
+    HookEvent,
+    JsonObject,
+    JsonValue,
+    as_int,
+    as_json,
+    as_list,
+    as_object,
+    as_str,
+)
 
 STATE_DIR = Path(".review-loop")
 LEGACY_STATE_DIR = Path(".cursor/review-loop")
@@ -32,9 +38,7 @@ LEGACY_RUNTIME_FILES = (
     "closed-ledger.json",
     "review-lock.json",
 )
-DEFAULT_PRICING_REL = Path(
-    "skills/code/ci/pr-review-loop/assets/pricing.default.json"
-)
+DEFAULT_PRICING_REL = Path("skills/code/ci/pr-review-loop/assets/pricing.default.json")
 DEFAULT_PRICING_PLUGIN = (
     Path(__file__).resolve().parent.parent
     / "skills"
@@ -210,17 +214,17 @@ def state_path(root: Path | None = None) -> Path:
     return base / STATE_PATH
 
 
-def load_state(root: Path | None = None) -> dict[str, Any]:
+def load_state(root: Path | None = None) -> JsonObject:
     """Load loop state; return empty dict if missing or invalid."""
     path = state_path(root)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError, OSError):
         return {}
-    return data if isinstance(data, dict) else {}
+    return as_object(data)
 
 
-def save_state(data: dict[str, Any], root: Path | None = None) -> None:
+def save_state(data: JsonObject, root: Path | None = None) -> None:
     """Write state.json; never raise — hooks must always emit JSON."""
     path = state_path(root)
     try:
@@ -244,7 +248,7 @@ def ledger_path(root: Path | None = None) -> Path:
     return base / CLOSED_LEDGER_PATH
 
 
-def load_closed_ledger(root: Path | None = None) -> dict[str, Any]:
+def load_closed_ledger(root: Path | None = None) -> JsonObject:
     """Load the durable closed-findings ledger; empty dict on missing/invalid."""
     path = ledger_path(root)
     try:
@@ -253,19 +257,23 @@ def load_closed_ledger(root: Path | None = None) -> dict[str, Any]:
         return {"by_pr": {}}
     if not isinstance(data, dict):
         return {"by_pr": {}}
-    by_pr = data.get("by_pr")
-    if not isinstance(by_pr, dict):
-        data["by_pr"] = {}
-    return data
+    obj = as_object(data)
+    if not isinstance(obj.get("by_pr"), dict):
+        obj["by_pr"] = {}
+    return obj
 
 
-def save_closed_ledger(data: dict[str, Any], root: Path | None = None) -> None:
+def save_closed_ledger(data: JsonObject, root: Path | None = None) -> None:
     """Persist closed-ledger.json; never raise."""
     path = ledger_path(root)
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         if "by_pr" not in data or not isinstance(data.get("by_pr"), dict):
-            data = {"by_pr": data.get("by_pr") if isinstance(data.get("by_pr"), dict) else {}}
+            data = {
+                "by_pr": data.get("by_pr")
+                if isinstance(data.get("by_pr"), dict)
+                else {}
+            }
         path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     except OSError as exc:
         print(
@@ -274,12 +282,10 @@ def save_closed_ledger(data: dict[str, Any], root: Path | None = None) -> None:
         )
 
 
-def load_pr_closed_memory(
-    pr_number: int, root: Path | None = None
-) -> dict[str, Any]:
+def load_pr_closed_memory(pr_number: int, root: Path | None = None) -> JsonObject:
     """Return the ledger entry for one PR, or an empty template."""
     ledger = load_closed_ledger(root)
-    by_pr = ledger.get("by_pr") if isinstance(ledger.get("by_pr"), dict) else {}
+    by_pr = as_object(ledger.get("by_pr"))
     key = str(int(pr_number))
     raw = by_pr.get(key)
     if not isinstance(raw, dict):
@@ -293,25 +299,21 @@ def load_pr_closed_memory(
             "accepted_by_design": [],
         }
     return {
-        "pr_number": int(raw.get("pr_number") or pr_number),
-        "branch": str(raw.get("branch") or ""),
-        "updated_at": str(raw.get("updated_at") or ""),
-        "last_clean_fingerprint": str(raw.get("last_clean_fingerprint") or ""),
-        "last_outcome": str(raw.get("last_outcome") or ""),
-        "closed_findings": list(raw.get("closed_findings") or [])
-        if isinstance(raw.get("closed_findings"), list)
-        else [],
-        "accepted_by_design": list(raw.get("accepted_by_design") or [])
-        if isinstance(raw.get("accepted_by_design"), list)
-        else [],
+        "pr_number": as_int(raw.get("pr_number"), pr_number),
+        "branch": as_str(raw.get("branch")),
+        "updated_at": as_str(raw.get("updated_at")),
+        "last_clean_fingerprint": as_str(raw.get("last_clean_fingerprint")),
+        "last_outcome": as_str(raw.get("last_outcome")),
+        "closed_findings": as_list(raw.get("closed_findings")),
+        "accepted_by_design": as_list(raw.get("accepted_by_design")),
     }
 
 
 def _merge_closed_lists(
-    existing: list[Any], incoming: list[Any]
-) -> list[dict[str, Any]]:
+    existing: list[JsonValue], incoming: list[JsonValue]
+) -> list[JsonObject]:
     """Merge closed/accepted entries idempotently by signature."""
-    by_sig: dict[str, dict[str, Any]] = {}
+    by_sig: dict[str, JsonObject] = {}
     for row in existing + incoming:
         if not isinstance(row, dict):
             continue
@@ -335,32 +337,25 @@ def _merge_closed_lists(
     return list(by_sig.values())
 
 
-def merge_closed_memory(
-    state: dict[str, Any], root: Path | None = None
-) -> dict[str, Any]:
+def merge_closed_memory(state: JsonObject, root: Path | None = None) -> JsonObject:
     """Write state closed/accepted into the durable PR ledger (idempotent)."""
-    try:
-        pr_number = int(state.get("pr_number") or 0)
-    except (TypeError, ValueError):
-        pr_number = 0
+    pr_number = as_int(state.get("pr_number"), 0)
     if pr_number <= 0:
         return state
 
     ledger = load_closed_ledger(root)
-    by_pr = ledger.setdefault("by_pr", {})
-    if not isinstance(by_pr, dict):
-        by_pr = {}
-        ledger["by_pr"] = by_pr
+    by_pr = as_object(ledger.get("by_pr"))
+    ledger["by_pr"] = by_pr
 
     key = str(pr_number)
     prior = load_pr_closed_memory(pr_number, root)
     closed = _merge_closed_lists(
-        prior.get("closed_findings") or [],
-        list(state.get("closed_findings") or []),
+        as_list(prior.get("closed_findings")),
+        as_list(state.get("closed_findings")),
     )
     accepted = _merge_closed_lists(
-        prior.get("accepted_by_design") or [],
-        list(state.get("accepted_by_design") or []),
+        as_list(prior.get("accepted_by_design")),
+        as_list(state.get("accepted_by_design")),
     )
     entry = {
         "pr_number": pr_number,
@@ -377,17 +372,17 @@ def merge_closed_memory(
         "closed_findings": closed,
         "accepted_by_design": accepted,
     }
-    by_pr[key] = entry
+    by_pr[key] = as_json(entry)
     save_closed_ledger(ledger, root)
     return state
 
 
 def mark_run_outcome(
-    state: dict[str, Any],
+    state: JsonObject,
     outcome: str,
     fingerprint: str = "",
     root: Path | None = None,
-) -> dict[str, Any]:
+) -> JsonObject:
     """Record loop outcome on state and durable ledger."""
     normalized = str(outcome or "").strip().lower()
     state["last_outcome"] = normalized
@@ -400,9 +395,7 @@ def mark_run_outcome(
     return state
 
 
-def should_short_circuit_confirm(
-    state: dict[str, Any], current_fingerprint: str
-) -> bool:
+def should_short_circuit_confirm(state: JsonObject, current_fingerprint: str) -> bool:
     """True when prior run confirmed clean at this exact PR fingerprint."""
     fp = str(current_fingerprint or "").strip()
     if not fp:
@@ -412,7 +405,7 @@ def should_short_circuit_confirm(
     return str(state.get("last_clean_fingerprint") or "").strip() == fp
 
 
-def default_preferences() -> dict[str, Any]:
+def default_preferences() -> JsonObject:
     """Built-in defaults used only when preferences.json is missing a key."""
     manage = "medium"
     return {
@@ -431,7 +424,7 @@ def default_preferences() -> dict[str, Any]:
     }
 
 
-def normalize_analysis_mode(value: Any) -> str:
+def normalize_analysis_mode(value: JsonValue) -> str:
     """Return canonical analysis_mode (`review`|`debug-like`|`security`).
 
     Aliases: ``debug`` → ``debug-like``; ``sec`` / ``secure`` → ``security``.
@@ -447,7 +440,7 @@ def normalize_analysis_mode(value: Any) -> str:
     return "review"
 
 
-def normalize_manage_severity(value: Any) -> str:
+def normalize_manage_severity(value: JsonValue) -> str:
     """Return a canonical manage_severity floor (`low`|`medium`|`high`|`critical`)."""
     if value is None:
         return "medium"
@@ -459,14 +452,16 @@ def normalize_manage_severity(value: Any) -> str:
     return "medium"
 
 
-def default_diminishing_returns_floor(manage_severity: Any) -> str:
+def default_diminishing_returns_floor(manage_severity: JsonValue) -> str:
     """One severity tier above manage_severity, capped at critical."""
     base = normalize_manage_severity(manage_severity)
     idx = MANAGE_SEVERITY_ORDER.index(base)
     return MANAGE_SEVERITY_ORDER[min(idx + 1, len(MANAGE_SEVERITY_ORDER) - 1)]
 
 
-def normalize_diminishing_returns_floor(value: Any, manage_severity: Any) -> str:
+def normalize_diminishing_returns_floor(
+    value: JsonValue, manage_severity: JsonValue
+) -> str:
     """Canonical diminishing_returns_floor; derive from manage_severity when unset."""
     if value is None:
         return default_diminishing_returns_floor(manage_severity)
@@ -480,25 +475,16 @@ def normalize_diminishing_returns_floor(value: Any, manage_severity: Any) -> str
     return default_diminishing_returns_floor(manage_severity)
 
 
-def normalize_diminishing_returns_round(value: Any) -> int:
+def normalize_diminishing_returns_round(value: JsonValue) -> int:
     """Return a positive int round threshold (default 2)."""
-    if value is None:
-        return 2
-    try:
-        parsed = int(value)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return 2
-    return max(1, parsed)
+    return max(1, as_int(value, 2))
 
 
 def should_defer_for_diminishing_returns(
-    round_n: int, severity: Any, state: dict[str, Any]
+    round_n: int, severity: JsonValue, state: JsonObject
 ) -> bool:
     """True when round has crossed the threshold and severity is below the ratcheted floor."""
-    try:
-        threshold = int(state.get("diminishing_returns_round", 2) or 2)
-    except (TypeError, ValueError):
-        threshold = 2
+    threshold = as_int(state.get("diminishing_returns_round"), 2)
     if round_n < threshold:
         return False
     floor = normalize_diminishing_returns_floor(
@@ -507,7 +493,7 @@ def should_defer_for_diminishing_returns(
     return not severity_meets_floor(severity, floor)
 
 
-def normalize_post_fix_focus(value: Any) -> str:
+def normalize_post_fix_focus(value: JsonValue) -> str:
     """Return canonical post_fix_focus (`delta`|`full`)."""
     if value is None:
         return "delta"
@@ -519,15 +505,15 @@ def normalize_post_fix_focus(value: Any) -> str:
     return "delta"
 
 
-def clean_pass_counts(focus: Any) -> bool:
+def clean_pass_counts(focus: JsonValue) -> bool:
     """Only wide-scope reviews (full / confirm) may credit a clean pass."""
     return str(focus or "").strip().lower() in WIDE_FOCUS_VALUES
 
 
 def apply_clean_pass(
-    state: dict[str, Any],
+    state: JsonObject,
     *,
-    focus: Any,
+    focus: JsonValue,
     coverage_ok: bool = True,
 ) -> int:
     """Increment consecutive_clean_passes only for wide, coverage-OK reviews.
@@ -535,7 +521,7 @@ def apply_clean_pass(
     A clean ``delta`` leaves the counter untouched (fix verified, not a clean
     pass). Returns the resulting consecutive_clean_passes value.
     """
-    current = int(state.get("consecutive_clean_passes", 0) or 0)
+    current = as_int(state.get("consecutive_clean_passes"), 0)
     if not coverage_ok or not clean_pass_counts(focus):
         state["consecutive_clean_passes"] = current
         return current
@@ -549,10 +535,10 @@ def resolve_round_focus(
     round_n: int,
     consecutive_clean_passes: int,
     just_finished_fixer: bool,
-    post_fix_focus: Any = "delta",
-    invocation_focus: Any = None,
+    post_fix_focus: JsonValue = "delta",
+    invocation_focus: JsonValue = None,
     force_full: bool = False,
-    last_focus: Any = None,
+    last_focus: JsonValue = None,
     last_round_clean: bool = False,
 ) -> str:
     """Pick reviewer focus for the next round.
@@ -579,9 +565,7 @@ def resolve_round_focus(
     return normalize_post_fix_focus(post_fix_focus)
 
 
-def validate_still_fresh(
-    state: dict[str, Any], current_fingerprint: str
-) -> bool:
+def validate_still_fresh(state: JsonObject, current_fingerprint: str) -> bool:
     """True when stored lint+build pass matches the current PR fingerprint."""
     if not current_fingerprint:
         return False
@@ -593,19 +577,17 @@ def validate_still_fresh(
     )
 
 
-def severity_meets_floor(severity: Any, floor: Any) -> bool:
+def severity_meets_floor(severity: JsonValue, floor: JsonValue) -> bool:
     """True when finding severity is at or above the manage_severity floor."""
     sev = str(severity or "").strip().lower()
     floor_norm = normalize_manage_severity(floor)
     if sev not in MANAGE_SEVERITY_ORDER:
         # Unknown labels are managed (safe default — do not silently drop).
         return True
-    return MANAGE_SEVERITY_ORDER.index(sev) >= MANAGE_SEVERITY_ORDER.index(
-        floor_norm
-    )
+    return MANAGE_SEVERITY_ORDER.index(sev) >= MANAGE_SEVERITY_ORDER.index(floor_norm)
 
 
-def load_preferences(root: Path | None = None) -> dict[str, Any]:
+def load_preferences(root: Path | None = None) -> JsonObject:
     """Load durable loop preferences; fill missing keys from defaults.
 
     Explicit ``null`` for ``max_rounds`` is preserved (budget-only / unlimited).
@@ -624,12 +606,8 @@ def load_preferences(root: Path | None = None) -> dict[str, Any]:
         # Allow explicit null for max_rounds (unlimited).
         if key == "max_rounds" or data[key] is not None:
             prefs[key] = data[key]
-    prefs["manage_severity"] = normalize_manage_severity(
-        prefs.get("manage_severity")
-    )
-    prefs["post_fix_focus"] = normalize_post_fix_focus(
-        prefs.get("post_fix_focus")
-    )
+    prefs["manage_severity"] = normalize_manage_severity(prefs.get("manage_severity"))
+    prefs["post_fix_focus"] = normalize_post_fix_focus(prefs.get("post_fix_focus"))
     prefs["diminishing_returns_round"] = normalize_diminishing_returns_round(
         prefs.get("diminishing_returns_round")
     )
@@ -641,19 +619,15 @@ def load_preferences(root: Path | None = None) -> dict[str, Any]:
     return prefs
 
 
-def save_preferences(data: dict[str, Any], root: Path | None = None) -> None:
+def save_preferences(data: JsonObject, root: Path | None = None) -> None:
     """Persist preference keys only (never wipe with a full state dump)."""
     path = preferences_path(root)
     merged = default_preferences()
     for key in PREFERENCE_KEYS:
         if key in data:
             merged[key] = data[key]
-    merged["manage_severity"] = normalize_manage_severity(
-        merged.get("manage_severity")
-    )
-    merged["post_fix_focus"] = normalize_post_fix_focus(
-        merged.get("post_fix_focus")
-    )
+    merged["manage_severity"] = normalize_manage_severity(merged.get("manage_severity"))
+    merged["post_fix_focus"] = normalize_post_fix_focus(merged.get("post_fix_focus"))
     merged["diminishing_returns_round"] = normalize_diminishing_returns_round(
         merged.get("diminishing_returns_round")
     )
@@ -672,9 +646,7 @@ def save_preferences(data: dict[str, Any], root: Path | None = None) -> None:
         )
 
 
-def apply_preference_overrides(
-    prefs: dict[str, Any], overrides: dict[str, Any]
-) -> dict[str, Any]:
+def apply_preference_overrides(prefs: JsonObject, overrides: JsonObject) -> JsonObject:
     """Return a copy of prefs with invocation overrides applied."""
     merged = dict(prefs)
     for key in PREFERENCE_KEYS:
@@ -735,9 +707,9 @@ def start_loop_state(
     branch: str,
     toolchain_mode: str = "uv",
     pricing_updated: str = "",
-    overrides: dict[str, Any] | None = None,
+    overrides: JsonObject | None = None,
     root: Path | None = None,
-) -> dict[str, Any]:
+) -> JsonObject:
     """Create a fresh run state from durable preferences + this-run overrides.
 
     Does **not** reset preferences to factory defaults. Invocation overrides
@@ -751,11 +723,11 @@ def start_loop_state(
     save_preferences(prefs, root)
 
     memory = load_pr_closed_memory(pr_number, root)
-    seeded_closed = list(memory.get("closed_findings") or [])
-    seeded_accepted = list(memory.get("accepted_by_design") or [])
+    seeded_closed = as_list(memory.get("closed_findings"))
+    seeded_accepted = as_list(memory.get("accepted_by_design"))
     seeded = bool(seeded_closed or seeded_accepted)
 
-    state: dict[str, Any] = {
+    state: JsonObject = {
         "active": False,
         "pr_number": pr_number,
         "pr_url": pr_url,
@@ -768,7 +740,7 @@ def start_loop_state(
         "max_rounds": prefs.get("max_rounds"),
         "max_tokens_est": prefs.get("max_tokens_est", 1_000_000),
         "max_usd_est": prefs.get("max_usd_est", 2.0),
-        "clean_passes_required": int(prefs.get("clean_passes_required") or 2),
+        "clean_passes_required": as_int(prefs.get("clean_passes_required"), 2),
         "manage_severity": normalize_manage_severity(
             prefs.get("manage_severity", "medium")
         ),
@@ -811,16 +783,16 @@ def start_loop_state(
     return state
 
 
-def closed_signatures(state: dict[str, Any]) -> set[str]:
+def closed_signatures(state: JsonObject) -> set[str]:
     """Return signature ids already fixed or accepted this loop run."""
     out: set[str] = set()
-    for entry in state.get("closed_findings") or []:
+    for entry in as_list(state.get("closed_findings")):
         if not isinstance(entry, dict):
             continue
         sig = entry.get("signature")
         if isinstance(sig, str) and sig.strip():
             out.add(sig.strip())
-    for entry in state.get("accepted_by_design") or []:
+    for entry in as_list(state.get("accepted_by_design")):
         if not isinstance(entry, dict):
             continue
         sig = entry.get("signature")
@@ -830,7 +802,7 @@ def closed_signatures(state: dict[str, Any]) -> set[str]:
 
 
 def append_closed_finding(
-    state: dict[str, Any],
+    state: JsonObject,
     *,
     signature: str,
     location: str,
@@ -840,7 +812,7 @@ def append_closed_finding(
     rationale: str = "",
     fix_shape: str = "",
     root: Path | None = None,
-) -> dict[str, Any]:
+) -> JsonObject:
     """Record a fixed or accepted finding so later rounds do not re-report it.
 
     Idempotent on ``signature``. When ``status`` is ``accepted``, also mirrors
@@ -854,7 +826,7 @@ def append_closed_finding(
     if sig in closed_signatures(state):
         return state
 
-    entry: dict[str, Any] = {
+    entry: JsonObject = {
         "signature": sig,
         "location": location,
         "finding": finding,
@@ -866,12 +838,12 @@ def append_closed_finding(
     if fix_shape:
         entry["fix_shape"] = fix_shape
 
-    closed = list(state.get("closed_findings") or [])
+    closed = as_list(state.get("closed_findings"))
     closed.append(entry)
-    state["closed_findings"] = closed
+    state["closed_findings"] = as_json(closed)
 
     if status == "accepted":
-        accepted = list(state.get("accepted_by_design") or [])
+        accepted = as_list(state.get("accepted_by_design"))
         accepted.append(
             {
                 "signature": sig,
@@ -880,16 +852,16 @@ def append_closed_finding(
                 "rationale": rationale,
             }
         )
-        state["accepted_by_design"] = accepted
+        state["accepted_by_design"] = as_json(accepted)
 
     merge_closed_memory(state, root)
     return state
 
 
-def fixed_locations(state: dict[str, Any]) -> set[str]:
+def fixed_locations(state: JsonObject) -> set[str]:
     """Return paths and path:line locations closed with status fixed this run."""
     out: set[str] = set()
-    for entry in state.get("closed_findings") or []:
+    for entry in as_list(state.get("closed_findings")):
         if not isinstance(entry, dict):
             continue
         if str(entry.get("status") or "").strip().lower() != "fixed":
@@ -904,7 +876,7 @@ def fixed_locations(state: dict[str, Any]) -> set[str]:
     return out
 
 
-def finding_path(location: Any) -> str:
+def finding_path(location: JsonValue) -> str:
     """Strip ``:line`` (and optional column) from a location string."""
     text = str(location or "").strip()
     if not text:
@@ -927,10 +899,10 @@ def finding_path(location: Any) -> str:
     return text
 
 
-def fix_ledger_entries(state: dict[str, Any]) -> list[dict[str, Any]]:
+def fix_ledger_entries(state: JsonObject) -> list[JsonObject]:
     """Compact rows for prompt context: fixed entries with a fix_shape."""
-    rows: list[dict[str, Any]] = []
-    for entry in state.get("closed_findings") or []:
+    rows: list[JsonObject] = []
+    for entry in as_list(state.get("closed_findings")):
         if not isinstance(entry, dict):
             continue
         if str(entry.get("status") or "").strip().lower() != "fixed":
@@ -951,7 +923,7 @@ def fix_ledger_entries(state: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
-def format_fix_ledger_for_prompt(state: dict[str, Any]) -> str:
+def format_fix_ledger_for_prompt(state: JsonObject) -> str:
     """Markdown table of deliberate fix shapes for reviewer/fixer prompts."""
     rows = fix_ledger_entries(state)
     if not rows:
@@ -966,17 +938,15 @@ def format_fix_ledger_for_prompt(state: dict[str, Any]) -> str:
         "|---|---|---|",
     ]
     for row in rows:
-        loc = row["location"].replace("|", "\\|")
-        sig = row["signature"].replace("|", "\\|")
-        shape = row["fix_shape"].replace("|", "\\|").replace("\n", " ")
+        loc = as_str(row.get("location")).replace("|", r"\|")
+        sig = as_str(row.get("signature")).replace("|", r"\|")
+        shape = as_str(row.get("fix_shape")).replace("|", r"\|").replace("\n", " ")
         lines.append(f"| {loc} | `{sig}` | {shape} |")
     lines.append("")
     return "\n".join(lines)
 
 
-def is_contested_against_ledger(
-    finding: dict[str, Any] | None, state: dict[str, Any]
-) -> bool:
+def is_contested_against_ledger(finding: JsonObject | None, state: JsonObject) -> bool:
     """True when a finding targets a path already fixed with a non-empty fix_shape.
 
     Those must escalate as contested — never auto-fix in the opposite direction.
@@ -984,10 +954,7 @@ def is_contested_against_ledger(
     if not isinstance(finding, dict):
         return False
     loc = str(
-        finding.get("location")
-        or finding.get("Location")
-        or finding.get("path")
-        or ""
+        finding.get("location") or finding.get("Location") or finding.get("path") or ""
     ).strip()
     path = finding_path(loc)
     if not path:
@@ -1001,9 +968,9 @@ def is_contested_against_ledger(
     return False
 
 
-def has_fixed_this_run(state: dict[str, Any]) -> bool:
+def has_fixed_this_run(state: JsonObject) -> bool:
     """True when any closed finding has status fixed (including ledger-seeded)."""
-    for entry in state.get("closed_findings") or []:
+    for entry in as_list(state.get("closed_findings")):
         if not isinstance(entry, dict):
             continue
         if str(entry.get("status") or "").strip().lower() == "fixed":
@@ -1012,7 +979,7 @@ def has_fixed_this_run(state: dict[str, Any]) -> bool:
 
 
 def verify_surface_paths(
-    state: dict[str, Any],
+    state: JsonObject,
     fixer_paths: list[str] | None = None,
 ) -> set[str]:
     """Paths in scope for post-fix verify (fixed locations ∪ fixer-touched).
@@ -1032,30 +999,23 @@ def verify_surface_paths(
     return out
 
 
-def _finding_location(finding: dict[str, Any]) -> str:
+def _finding_location(finding: JsonObject) -> str:
     return str(
-        finding.get("location")
-        or finding.get("Location")
-        or finding.get("path")
-        or ""
+        finding.get("location") or finding.get("Location") or finding.get("path") or ""
     ).strip()
 
 
-def _finding_severity(finding: dict[str, Any]) -> str:
-    return str(
-        finding.get("severity") or finding.get("Severity") or ""
-    ).strip().lower()
+def _finding_severity(finding: JsonObject) -> str:
+    return str(finding.get("severity") or finding.get("Severity") or "").strip().lower()
 
 
-def _finding_source(finding: dict[str, Any]) -> str:
-    return str(
-        finding.get("source") or finding.get("Source") or ""
-    ).strip().lower()
+def _finding_source(finding: JsonObject) -> str:
+    return str(finding.get("source") or finding.get("Source") or "").strip().lower()
 
 
 def is_outside_verify_surface(
-    finding: dict[str, Any] | None,
-    state: dict[str, Any],
+    finding: JsonObject | None,
+    state: JsonObject,
     fixer_paths: list[str] | None = None,
 ) -> bool:
     """True when a finding's path is not in the post-fix verify surface."""
@@ -1068,12 +1028,12 @@ def is_outside_verify_surface(
 
 
 def filter_post_fix_findings(
-    findings: list[dict[str, Any]],
-    state: dict[str, Any],
+    findings: list[JsonObject],
+    state: JsonObject,
     *,
     fixer_paths: list[str] | None = None,
     round_n: int = 0,
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+) -> tuple[list[JsonObject], list[JsonObject]]:
     """Split findings into (keep, defer) under post-fix verify mode.
 
     When no fixed findings exist yet, all rows are kept (round-1 discovery).
@@ -1087,8 +1047,8 @@ def filter_post_fix_findings(
         return keep, []
 
     surface = verify_surface_paths(state, fixer_paths)
-    keep: list[dict[str, Any]] = []
-    defer: list[dict[str, Any]] = []
+    keep: list[JsonObject] = []
+    defer: list[JsonObject] = []
     for row in findings:
         if not isinstance(row, dict):
             continue
@@ -1111,9 +1071,9 @@ def filter_post_fix_findings(
 
 
 def filter_open_findings(
-    findings: list[dict[str, Any]],
-    state: dict[str, Any],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    findings: list[JsonObject],
+    state: JsonObject,
+) -> tuple[list[JsonObject], list[JsonObject]]:
     """Split findings into (open, dropped_as_closed) by signature.
 
     Rows whose ``source`` / ``Source`` is in ``ESCALATING_SOURCES``
@@ -1121,8 +1081,8 @@ def filter_open_findings(
     escalate them once.
     """
     closed = closed_signatures(state)
-    open_rows: list[dict[str, Any]] = []
-    dropped: list[dict[str, Any]] = []
+    open_rows: list[JsonObject] = []
+    dropped: list[JsonObject] = []
     for row in findings:
         if not isinstance(row, dict):
             continue
@@ -1138,7 +1098,7 @@ def filter_open_findings(
     return open_rows, dropped
 
 
-def is_active(state: dict[str, Any]) -> bool:
+def is_active(state: JsonObject) -> bool:
     """Return True when the review loop is currently running."""
     return bool(state.get("active"))
 
@@ -1147,7 +1107,7 @@ def is_active(state: dict[str, Any]) -> bool:
 LOOP_SUBAGENT_TYPES = frozenset({"pr-reviewer", "pr-fixer"})
 
 
-def loop_subagent_type(event: dict[str, Any] | None) -> str:
+def loop_subagent_type(event: HookEvent | None) -> str:
     """Extract the Task subagent type from a hook event payload."""
     if not event:
         return ""
@@ -1158,12 +1118,12 @@ def loop_subagent_type(event: dict[str, Any] | None) -> str:
     return ""
 
 
-def is_loop_subagent(event: dict[str, Any] | None) -> bool:
+def is_loop_subagent(event: HookEvent | None) -> bool:
     """Return True when the event is for pr-reviewer or pr-fixer."""
     return loop_subagent_type(event) in LOOP_SUBAGENT_TYPES
 
 
-def resolve_max_rounds(state: dict[str, Any]) -> int | None:
+def resolve_max_rounds(state: JsonObject) -> int | None:
     """Return the round cap, or ``None`` when rounds are unlimited (budget-only).
 
     Unlimited when ``max_rounds`` is missing-as-explicit-null, ``0``, ``null``,
@@ -1194,7 +1154,7 @@ def resolve_max_rounds(state: dict[str, Any]) -> int | None:
     return value
 
 
-def read_stdin_json() -> dict[str, Any]:
+def read_stdin_json() -> HookEvent:
     """Parse JSON from stdin; return empty dict on empty/invalid input."""
     raw = sys.stdin.read()
     if not raw.strip():
@@ -1203,10 +1163,10 @@ def read_stdin_json() -> dict[str, Any]:
         data = json.loads(raw)
     except json.JSONDecodeError:
         return {}
-    return data if isinstance(data, dict) else {}
+    return as_object(data)
 
 
-def emit(payload: dict[str, Any]) -> None:
+def emit(payload: JsonObject) -> None:
     """Write a JSON response to stdout."""
     sys.stdout.write(json.dumps(payload))
     sys.stdout.write("\n")
@@ -1214,7 +1174,7 @@ def emit(payload: dict[str, Any]) -> None:
 
 def allow(message: str | None = None) -> None:
     """Emit a permission allow response."""
-    payload: dict[str, Any] = {"permission": "allow"}
+    payload: JsonObject = {"permission": "allow"}
     if message:
         payload["agent_message"] = message
     emit(payload)
@@ -1222,7 +1182,7 @@ def allow(message: str | None = None) -> None:
 
 def deny(user_message: str, agent_message: str | None = None) -> None:
     """Emit a permission deny response."""
-    payload: dict[str, Any] = {
+    payload: JsonObject = {
         "permission": "deny",
         "user_message": user_message,
     }
@@ -1233,7 +1193,7 @@ def deny(user_message: str, agent_message: str | None = None) -> None:
 
 def ask(user_message: str, agent_message: str | None = None) -> None:
     """Emit a permission ask response."""
-    payload: dict[str, Any] = {
+    payload: JsonObject = {
         "permission": "ask",
         "user_message": user_message,
     }
@@ -1319,11 +1279,11 @@ def bootstrap_pricing(root: Path | None = None) -> Path:
     return dest
 
 
-def load_pricing(root: Path | None = None) -> dict[str, Any]:
+def load_pricing(root: Path | None = None) -> JsonObject:
     """Load pricing.json, bootstrapping from the default asset if needed."""
     path = bootstrap_pricing(root)
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return {}
-    return data if isinstance(data, dict) else {}
+    return as_object(data)

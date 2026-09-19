@@ -8,20 +8,19 @@ orchestrator forgets to stamp ``*_started_at``. Cost must prefer
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
-from typing import Any
+from typing import TypeAlias
 
 import pytest
+from _cost import estimate_since, project_next_cost
+from review_loop_budget import record_subagent_start, resolve_upcoming_model
+from review_loop_round import decide_round_followup, record_round_cost
 
-HOOKS = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(HOOKS))
+JsonObject: TypeAlias = dict[str, object]
 
-from _cost import estimate_since, project_next_cost  # noqa: E402
-from review_loop_budget import record_subagent_start, resolve_upcoming_model  # noqa: E402
-from review_loop_round import decide_round_followup, record_round_cost  # noqa: E402
-
-PLUGIN_ROOT = Path(__file__).resolve().parents[2]
+PLUGIN_ROOT = (
+    Path(__file__).resolve().parents[2] / "plugins" / "ai-agents"
+)
 PRICING_PATH = (
     PLUGIN_ROOT
     / "skills"
@@ -34,7 +33,7 @@ PRICING_PATH = (
 
 
 @pytest.fixture
-def pricing() -> dict[str, Any]:
+def pricing() -> JsonObject:
     """Load the committed default pricing table."""
     return json.loads(PRICING_PATH.read_text(encoding="utf-8"))
 
