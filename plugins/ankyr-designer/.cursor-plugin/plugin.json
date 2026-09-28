@@ -1,0 +1,25 @@
+{
+  "name": "ankyr-designer",
+  "displayName": "Ankyr Designer",
+  "version": "1.2.3-dev",
+  "description": "Ankyr designer — UI/UX planning with user approach, reasoned hierarchy, and literal screen pictures. Install with the Ankyr core and web plugins.",
+  "author": {
+    "name": "Guy Erreich"
+  },
+  "homepage": "https://github.com/GuyErreich/AI_Agents",
+  "repository": "https://github.com/GuyErreich/AI_Agents",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "skills",
+    "rules",
+    "agents",
+    "design",
+    "ui",
+    "ux",
+    "ankyr"
+  ],
+  "rules": "./rules/",
+  "skills": "./skills/",
+  "agents": "./agents/"
+}
