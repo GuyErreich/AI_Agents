@@ -13,6 +13,7 @@ Plugins:
 - [`plugins/ankyr-python`](plugins/ankyr-python) — Python
 - [`plugins/ankyr-node`](plugins/ankyr-node) — TypeScript / JavaScript
 - [`plugins/ankyr-web`](plugins/ankyr-web) — UI, UX, React, Three.js
+- [`plugins/ankyr-designer`](plugins/ankyr-designer) — UI/UX design planning (approach, reasons, wireframes)
 
 ## Install in Cursor
 
@@ -27,9 +28,10 @@ ln -sfn "$(pwd)/plugins/ankyr-authoring" ~/.cursor/plugins/local/ankyr-authoring
 ln -sfn "$(pwd)/plugins/ankyr-python" ~/.cursor/plugins/local/ankyr-python
 ln -sfn "$(pwd)/plugins/ankyr-node" ~/.cursor/plugins/local/ankyr-node
 ln -sfn "$(pwd)/plugins/ankyr-web" ~/.cursor/plugins/local/ankyr-web
+ln -sfn "$(pwd)/plugins/ankyr-designer" ~/.cursor/plugins/local/ankyr-designer
 ```
 
-Reload the Cursor window. The plugins show up as **Ankyr**, **Ankyr Review**, **Ankyr Git**, **Ankyr Authoring**, **Ankyr Python**, **Ankyr Node**, and **Ankyr Web**.
+Reload the Cursor window. The plugins show up as **Ankyr**, **Ankyr Review**, **Ankyr Git**, **Ankyr Authoring**, **Ankyr Python**, **Ankyr Node**, **Ankyr Web**, and **Ankyr Designer**.
 
 ### Team marketplace
 
@@ -66,6 +68,7 @@ plugins/ankyr-authoring/          # agent-hierarchy + improvement-protocol
 plugins/ankyr-python/             # Python skill + rule
 plugins/ankyr-node/               # TypeScript/JavaScript skill + rule
 plugins/ankyr-web/                # UI / UX / React / Three.js
+plugins/ankyr-designer/           # UI/UX design planning (agent + skill)
 ```
 
 ## Consuming repos

@@ -43,6 +43,11 @@
       "name": "ankyr-web",
       "source": "ankyr-web",
       "description": "Ankyr UI, UX, React, and Three.js skills plus web glob rules."
+    },
+    {
+      "name": "ankyr-designer",
+      "source": "ankyr-designer",
+      "description": "Ankyr designer: UI/UX planning with user approach, reasoned hierarchy, and literal screen pictures."
     }
   ]
 }
