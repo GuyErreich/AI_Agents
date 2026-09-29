@@ -1,7 +1,7 @@
 {
   "name": "ankyr-designer",
   "displayName": "Ankyr Designer",
-  "version": "1.3.1-dev",
+  "version": "1.5.1-dev",
   "description": "Ankyr designer — UI/UX planning with user approach, reasoned hierarchy, and literal screen pictures. Install with the Ankyr core and web plugins.",
   "author": {
     "name": "Guy Erreich"
