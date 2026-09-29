@@ -1,6 +1,6 @@
 # Workspace Agent Notes
 
-This repository is the Ankyr Cursor plugin family (`ankyr`, `ankyr-review`, `ankyr-git`, `ankyr-authoring`, `ankyr-python`, `ankyr-node`, `ankyr-web`, `ankyr-designer`). Consuming apps keep only a project overlay (`.cursor/skills/project/**`, `.cursor/rules/project/**`, `AGENT.md`).
+This repository is the Ankyr Cursor plugin family (`ankyr`, `ankyr-review`, `ankyr-git`, `ankyr-authoring`, `ankyr-python`, `ankyr-node`, `ankyr-web`, `ankyr-designer`, `ankyr-cpp`, `ankyr-unreal`). Consuming apps keep only a project overlay (`.cursor/skills/project/**`, `.cursor/rules/project/**`, `AGENT.md`).
 
 ## Validate
 

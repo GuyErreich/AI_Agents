@@ -123,18 +123,21 @@ uv run python scripts/bootstrap_github.py --dry-run
 - `plugins/ankyr-python/.cursor-plugin/plugin.json`
 - `plugins/ankyr-node/.cursor-plugin/plugin.json`
 - `plugins/ankyr-web/.cursor-plugin/plugin.json`
+- `plugins/ankyr-designer/.cursor-plugin/plugin.json`
+- `plugins/ankyr-cpp/.cursor-plugin/plugin.json`
+- `plugins/ankyr-unreal/.cursor-plugin/plugin.json`
 - `.cursor-plugin/marketplace.json`
 
 `uv.lock` is **not** in `version_files` — after a version bump, run `uv lock` (or let Dependabot refresh) so the editable package version matches `pyproject.toml`.
 
-`scripts/sync_version.py --check` and `validate_plugin.py` remain local/CI guards if manifests ever drift. All seven plugin manifests share the `pyproject.toml` version. The GitHub Release tarball attaches `plugins/ankyr` (core) only; the marketplace indexes the git ref for every plugin.
+`scripts/sync_version.py --check` and `validate_plugin.py` remain local/CI guards if manifests ever drift. All 10 plugin manifests share the `pyproject.toml` version. The GitHub Release tarball attaches `plugins/ankyr` (core) only; the marketplace indexes the git ref for every plugin.
 
 ## Migration from `ai-agents`
 
 This is a breaking rename. Consumers who installed the old single plugin must:
 
 1. Disable **AI Agents** (`ai-agents`) in Cursor.
-2. Enable **Ankyr** (Required) plus the topical plugins they need (`ankyr-review`, `ankyr-git`, `ankyr-authoring`) and language plugins (`ankyr-python`, `ankyr-node`, `ankyr-web`).
+2. Enable **Ankyr** (Required) plus the topical plugins they need (`ankyr-review`, `ankyr-git`, `ankyr-authoring`) and language plugins (`ankyr-python`, `ankyr-node`, `ankyr-web`, `ankyr-cpp`, `ankyr-unreal`).
 3. Replace local links: `~/.cursor/plugins/local/ai-agents` → `~/.cursor/plugins/local/ankyr` (and the other plugin dirs if used).
 4. Skill invocations are now prefixed (`/ankyr-python`, `/ankyr-reviewer`). Project overlays under `.cursor/skills/project/**` are unchanged and still win.
 
