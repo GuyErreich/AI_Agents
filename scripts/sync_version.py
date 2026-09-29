@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
+
+# /// script
+# requires-python = ">=3.12"
+# ///
+
 """Sync plugin/marketplace JSON versions from pyproject.toml.
 
 Action-Semver-Control's VersionFileUpdater cannot update JSON lines that end
@@ -16,7 +21,11 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import cast
+
+type JsonPrimitive = str | int | float | bool | None
+type JsonValue = JsonPrimitive | list["JsonValue"] | dict[str, "JsonValue"]
+type JsonObject = dict[str, JsonValue]
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PYPROJECT = REPO_ROOT / "pyproject.toml"
@@ -35,17 +44,19 @@ def read_pyproject_version(path: Path | None = None) -> str:
     match = VERSION_RE.search(text)
     if not match:
         raise ValueError(f'no version = "..." found in {target}')
-    return match.group(1)
+    version = match.group(1)
+    assert isinstance(version, str)
+    return version
 
 
-def _load_json(path: Path) -> dict[str, Any]:
+def _load_json(path: Path) -> JsonObject:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"{path}: root must be an object")
-    return data
+    return cast(JsonObject, data)
 
 
-def _write_json(path: Path, data: dict[str, Any]) -> None:
+def _write_json(path: Path, data: JsonObject) -> None:
     path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
@@ -55,7 +66,9 @@ def _write_json(path: Path, data: dict[str, Any]) -> None:
 def plugin_json_paths() -> list[Path]:
     """Return every ``plugin.json`` listed in marketplace.json."""
     marketplace = _load_json(MARKETPLACE_JSON)
-    prefix = Path(str((marketplace.get("metadata") or {}).get("pluginRoot") or "."))
+    metadata = marketplace.get("metadata")
+    plugin_root = metadata.get("pluginRoot") if isinstance(metadata, dict) else None
+    prefix = Path(str(plugin_root or "."))
     paths: list[Path] = []
     plugins = marketplace.get("plugins")
     if not isinstance(plugins, list):

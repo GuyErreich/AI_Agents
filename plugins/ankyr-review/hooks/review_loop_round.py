@@ -7,16 +7,25 @@
 # requires-python = ">=3.12"
 # ///
 
+
 """subagentStop round accounting for the PR review loop."""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from _types import (  # noqa: E402
+    HookEvent,
+    JsonObject,
+    JsonValue,
+    as_float,
+    as_int,
+    as_json,
+    as_object,
+)
 from _cost import CostEstimate, estimate_since, project_next_cost  # noqa: E402
 from _loop_state import (  # noqa: E402
     emit,
@@ -32,19 +41,14 @@ from _loop_state import (  # noqa: E402
 )
 
 
-def resolve_clean_passes_required(state: dict[str, Any]) -> int:
+def resolve_clean_passes_required(state: JsonObject) -> int:
     """How many consecutive clean full reviews are required before success stop."""
-    raw = state.get("clean_passes_required", 2)
-    try:
-        value = int(raw)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return 2
-    return max(1, value)
+    return max(1, as_int(state.get("clean_passes_required"), 2))
 
 
 def _pending_matches_event(
-    pending: dict[str, Any] | None,
-    event: dict[str, Any],
+    pending: JsonObject | None,
+    event: HookEvent,
 ) -> bool:
     """True when ``_pending_subagent.type`` matches this stop's subagent type."""
     if not pending:
@@ -52,7 +56,7 @@ def _pending_matches_event(
     return str(pending.get("type") or "") == loop_subagent_type(event)
 
 
-def _cost_warning_prefix(state: dict[str, Any]) -> str:
+def _cost_warning_prefix(state: JsonObject) -> str:
     """Format any pending cost-accounting warnings for the follow-up message."""
     warnings_raw = state.get("_cost_warnings")
     if not isinstance(warnings_raw, list) or not warnings_raw:
@@ -63,7 +67,7 @@ def _cost_warning_prefix(state: dict[str, Any]) -> str:
     return f"WARNING: {latest} "
 
 
-def decide_round_followup(state: dict[str, Any], event: dict[str, Any] | None = None) -> str:
+def decide_round_followup(state: JsonObject, event: HookEvent | None = None) -> str:
     """Advise the orchestrator after a loop subagent stops.
 
     Do **not** declare success from an empty ``findings`` list here — the
@@ -75,37 +79,33 @@ def decide_round_followup(state: dict[str, Any], event: dict[str, Any] | None = 
     warn = _cost_warning_prefix(state)
     if state.get("escalation_pending"):
         return (
-            warn
-            + "PR review loop: escalation pending — pause and alert the user. "
+            warn + "PR review loop: escalation pending — pause and alert the user. "
             "Do not start another subagent."
         )
 
-    round_n = int(state.get("round", 0) or 0)
+    round_n = as_int(state.get("round"), 0)
     max_rounds = resolve_max_rounds(state)
-    totals_raw = state.get("totals")
-    totals: dict[str, Any] = totals_raw if isinstance(totals_raw, dict) else {}
+    totals = as_object(state.get("totals"))
     proj_t, proj_u = project_next_cost(state)
-    spent_t = float(totals.get("tokens_est", 0) or 0)
-    spent_u = float(totals.get("usd_est", 0) or 0)
-    max_t = float(state.get("max_tokens_est", 400_000) or 400_000)
-    max_u = float(state.get("max_usd_est", 3.0) or 3.0)
+    spent_t = as_float(totals.get("tokens_est"), 0.0)
+    spent_u = as_float(totals.get("usd_est"), 0.0)
+    max_t = as_float(state.get("max_tokens_est"), 400_000.0)
+    max_u = as_float(state.get("max_usd_est"), 3.0)
     required = resolve_clean_passes_required(state)
-    consecutive = int(state.get("consecutive_clean_passes", 0) or 0)
+    consecutive = as_int(state.get("consecutive_clean_passes"), 0)
     sub = loop_subagent_type(event)
 
     status = str(event.get("status") or "completed").strip().lower() or "completed"
     if status != "completed":
         return (
-            warn
-            + f"PR review loop: {sub or 'subagent'} stopped with status={status} "
+            warn + f"PR review loop: {sub or 'subagent'} stopped with status={status} "
             "(not completed) — do not treat as a normal review/fix result. "
             "Retry once with a fresh subagent, or escalate if it fails again."
         )
 
     if spent_t + proj_t > max_t or spent_u + proj_u > max_u:
         return (
-            warn
-            + "PR review loop: projected spend would exceed budget — "
+            warn + "PR review loop: projected spend would exceed budget — "
             f"spent≈{spent_t:.0f} tok / ${spent_u:.2f}; "
             f"projected next≈{proj_t:.0f} tok / ${proj_u:.2f}; "
             f"caps={max_t:.0f} tok / ${max_u:.2f}. Escalate to the user, "
@@ -114,23 +114,20 @@ def decide_round_followup(state: dict[str, Any], event: dict[str, Any] | None = 
 
     if max_rounds is not None and round_n > max_rounds:
         return (
-            warn
-            + "PR review loop: round cap reached — write the summary canvas "
+            warn + "PR review loop: round cap reached — write the summary canvas "
             "and set active=false."
         )
 
     if consecutive >= required:
         return (
-            warn
-            + f"PR review loop: {consecutive}/{required} consecutive clean "
+            warn + f"PR review loop: {consecutive}/{required} consecutive clean "
             "full reviews already recorded — write the summary canvas and "
             "set active=false."
         )
 
     if sub == "pr-reviewer":
         return (
-            warn
-            + "PR review loop: reviewer finished — collect the findings table "
+            warn + "PR review loop: reviewer finished — collect the findings table "
             "into state, apply the closed-finding filter, then: "
             "(1) if open findings remain → triage + pr-fixer; "
             f"(2) if zero open findings → bump consecutive_clean_passes "
@@ -143,25 +140,23 @@ def decide_round_followup(state: dict[str, Any], event: dict[str, Any] | None = 
 
     if sub == "pr-fixer":
         return (
-            warn
-            + "PR review loop: fixer finished — reset is not needed here; "
+            warn + "PR review loop: fixer finished — reset is not needed here; "
             "launch a fresh full pr-reviewer for the next round. Keep looping "
             f"until {required} consecutive clean reviews or budget/escalation."
         )
 
     return (
-        warn
-        + "PR review loop: continue — launch the next subagent per the skill. "
+        warn + "PR review loop: continue — launch the next subagent per the skill. "
         f"Success requires {required} consecutive clean full reviews (or "
         "budget/escalation), not a single clean pass."
     )
 
 
 def _resolve_model_for_cost(
-    state: dict[str, Any],
-    event: dict[str, Any],
-    pending: dict[str, Any] | None,
-    rounds: list[Any],
+    state: JsonObject,
+    event: HookEvent,
+    pending: JsonObject | None,
+    rounds: list[JsonValue],
 ) -> tuple[str, bool]:
     """Pick the model slug for this stop's cost estimate.
 
@@ -206,10 +201,10 @@ def _resolve_model_for_cost(
 
 
 def _resolve_started_at(
-    state: dict[str, Any],
-    event: dict[str, Any],
-    pending: dict[str, Any] | None,
-    rounds: list[Any],
+    state: JsonObject,
+    event: HookEvent,
+    pending: JsonObject | None,
+    rounds: list[JsonValue],
 ) -> str:
     """Cutoff for the mtime-scan fallback when agent_transcript_path is absent."""
     if pending and pending.get("started_at") and _pending_matches_event(pending, event):
@@ -231,7 +226,7 @@ def _resolve_started_at(
 
 def _apply_event_ground_truth(
     cost: CostEstimate,
-    event: dict[str, Any],
+    event: HookEvent,
     *,
     pending_mismatch: bool,
 ) -> CostEstimate:
@@ -279,8 +274,8 @@ def _apply_event_ground_truth(
 
 
 def _maybe_warn_zero_cost(
-    state: dict[str, Any],
-    event: dict[str, Any],
+    state: JsonObject,
+    event: HookEvent,
     cost: CostEstimate,
 ) -> None:
     """Append a loud warning when completed subagent accounting found nothing."""
@@ -305,9 +300,9 @@ def _maybe_warn_zero_cost(
 
 
 def record_round_cost(
-    state: dict[str, Any],
-    event: dict[str, Any],
-    pricing: dict[str, Any],
+    state: JsonObject,
+    event: HookEvent,
+    pricing: JsonObject,
 ) -> CostEstimate:
     """Accumulate cost for a finished loop subagent into ``state``.
 
@@ -318,12 +313,10 @@ def record_round_cost(
     just recorded.
     """
     rounds_raw = state.get("rounds")
-    rounds: list[Any] = rounds_raw if isinstance(rounds_raw, list) else []
+    rounds: list[JsonValue] = rounds_raw if isinstance(rounds_raw, list) else []
 
     pending_raw = state.get("_pending_subagent")
-    pending: dict[str, Any] | None = (
-        pending_raw if isinstance(pending_raw, dict) else None
-    )
+    pending: JsonObject | None = pending_raw if isinstance(pending_raw, dict) else None
 
     model, pending_mismatch = _resolve_model_for_cost(state, event, pending, rounds)
     started = _resolve_started_at(state, event, pending, rounds)
@@ -341,38 +334,41 @@ def record_round_cost(
     _maybe_warn_zero_cost(state, event, cost)
     cost_dict = cost.to_dict()
 
-    totals = state.setdefault("totals", {})
-    if not isinstance(totals, dict):
-        totals = {}
-        state["totals"] = totals
-    totals["tokens_est"] = float(totals.get("tokens_est", 0) or 0) + cost.tokens_est
-    totals["usd_est"] = round(float(totals.get("usd_est", 0) or 0) + cost.usd_est, 4)
-    totals["turns"] = int(totals.get("turns", 0) or 0) + cost.turns
-    totals["tool_calls"] = int(totals.get("tool_calls", 0) or 0) + cost.tool_calls
+    totals = as_object(state.get("totals"))
+    state["totals"] = totals
+    totals["tokens_est"] = as_float(totals.get("tokens_est"), 0.0) + cost.tokens_est
+    totals["usd_est"] = round(as_float(totals.get("usd_est"), 0.0) + cost.usd_est, 4)
+    totals["turns"] = as_int(totals.get("turns"), 0) + cost.turns
+    totals["tool_calls"] = as_int(totals.get("tool_calls"), 0) + cost.tool_calls
     totals["wall_clock_s"] = round(
-        float(totals.get("wall_clock_s", 0) or 0) + cost.wall_clock_s, 3
+        as_float(totals.get("wall_clock_s"), 0.0) + cost.wall_clock_s, 3
     )
 
     if rounds and isinstance(rounds[-1], dict):
         existing = rounds[-1].get("cost")
         if isinstance(existing, dict) and existing.get("tokens_est"):
-            rounds[-1]["cost"] = {
-                "tokens_in_est": int(existing.get("tokens_in_est", 0) or 0)
-                + cost.tokens_in_est,
-                "tokens_out_est": int(existing.get("tokens_out_est", 0) or 0)
-                + cost.tokens_out_est,
-                "tokens_est": int(existing.get("tokens_est", 0) or 0) + cost.tokens_est,
-                "usd_est": round(
-                    float(existing.get("usd_est", 0) or 0) + cost.usd_est, 4
-                ),
-                "turns": int(existing.get("turns", 0) or 0) + cost.turns,
-                "tool_calls": int(existing.get("tool_calls", 0) or 0) + cost.tool_calls,
-                "wall_clock_s": round(
-                    float(existing.get("wall_clock_s", 0) or 0) + cost.wall_clock_s, 3
-                ),
-                "model": cost.model,
-                "assumptions": cost.assumptions,
-            }
+            rounds[-1]["cost"] = as_json(
+                {
+                    "tokens_in_est": as_int(existing.get("tokens_in_est"), 0)
+                    + cost.tokens_in_est,
+                    "tokens_out_est": as_int(existing.get("tokens_out_est"), 0)
+                    + cost.tokens_out_est,
+                    "tokens_est": as_int(existing.get("tokens_est"), 0)
+                    + cost.tokens_est,
+                    "usd_est": round(
+                        as_float(existing.get("usd_est"), 0.0) + cost.usd_est, 4
+                    ),
+                    "turns": as_int(existing.get("turns"), 0) + cost.turns,
+                    "tool_calls": as_int(existing.get("tool_calls"), 0)
+                    + cost.tool_calls,
+                    "wall_clock_s": round(
+                        as_float(existing.get("wall_clock_s"), 0.0) + cost.wall_clock_s,
+                        3,
+                    ),
+                    "model": cost.model,
+                    "assumptions": cost.assumptions,
+                }
+            )
         else:
             rounds[-1]["cost"] = cost_dict
 

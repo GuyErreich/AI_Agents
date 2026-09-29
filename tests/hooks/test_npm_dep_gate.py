@@ -3,16 +3,10 @@
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
-from typing import Any
 
+import npm_dep_gate as gate
 import pytest
-
-HOOKS = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(HOOKS))
-
-import npm_dep_gate as gate  # noqa: E402
 
 
 @pytest.fixture()
