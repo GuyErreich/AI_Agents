@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           python-version: "3.12"
           enable-cache: true
@@ -35,17 +35,23 @@ jobs:
         run: uv audit --frozen
 
       - name: Ruff lint
-        run: uv run ruff check plugins/ai-agents/hooks scripts
+        run: uv run ruff check plugins/ankyr-review/hooks scripts
 
       - name: Ruff format
-        run: uv run ruff format --check scripts
+        run: uv run ruff format --check plugins/ankyr-review/hooks scripts
+
+      - name: Type check (ty)
+        run: >-
+          uv run ty check
+          --extra-search-path plugins/ankyr-review/hooks
+          --extra-search-path scripts
 
       - name: Pytest
         run: uv run pytest
 
       - name: Upload coverage report
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: actions/upload-code-coverage@1c15be36fc3733ba839b1dd643bd9556e4426dc1 # v1
+        uses: actions/upload-code-coverage@d8e329117199404bba6fc81efe8093dc7c015e34 # v1.4.2
         with:
           file: coverage.xml
           language: Python

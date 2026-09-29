@@ -1,0 +1,15 @@
+---
+description: Security standards for auth, input, data access, and sensitive data
+globs: "**/*.{ts,tsx,js,mjs,py}"
+alwaysApply: false
+---
+
+# Security
+
+When code touches user input, auth, API routes, or sensitive data:
+
+- Apply engineering foundations first (always-applied rule).
+- Prefer the project's security skill; if none, load this plugin's `skills/ankyr-security/SKILL.md` if installed. Security floors always apply.
+- Load its `references/` only when the skill directs.
+
+Key rules: no injection (parameterize), no XSS (escape/sanitize), CSRF protection on state changes, server-side validation with allow-lists, no client-exposed secrets, no credential/PII logging, generic user-facing errors.

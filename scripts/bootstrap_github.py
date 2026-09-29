@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: MIT
 
+
+# /// script
+# requires-python = ">=3.12"
+# ///
+
 """Apply GitHub environments and branch rulesets for AI_Agents CD.
 
 Run locally after signing in with ``gh auth login``:
@@ -17,15 +22,20 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+from typing import cast
+
+type JsonPrimitive = str | int | float | bool | None
+type JsonValue = JsonPrimitive | list["JsonValue"] | dict[str, "JsonValue"]
+type JsonObject = dict[str, JsonValue]
 
 
 def _gh_api(
     method: str,
     path: str,
-    payload: dict | None = None,
+    payload: JsonObject | None = None,
     *,
     dry_run: bool,
-) -> None:
+) -> JsonObject | None:
     cmd = ["gh", "api", "-X", method, path]
     if payload is not None:
         cmd.extend(["--input", "-"])
@@ -33,179 +43,239 @@ def _gh_api(
         print(f"# {method} {path}")
         if payload is not None:
             print(json.dumps(payload, indent=2))
-        return
+        return None
     proc = subprocess.run(
         cmd,
         input=json.dumps(payload).encode() if payload is not None else None,
         check=False,
         capture_output=True,
-        text=payload is None,
     )
     if proc.returncode != 0:
-        stderr = proc.stderr.decode() if isinstance(proc.stderr, bytes) else proc.stderr
+        stderr = proc.stderr.decode()
         raise RuntimeError(f"gh api failed ({path}): {stderr}")
+    if not proc.stdout:
+        return None
+    data = json.loads(proc.stdout.decode())
+    return cast(JsonObject, data) if isinstance(data, dict) else None
 
 
 def _user_id(*, dry_run: bool) -> int:
+    """Return the authenticated GitHub user id (0 in dry-run)."""
     if dry_run:
         return 0
     out = subprocess.check_output(["gh", "api", "user", "--jq", ".id"], text=True)
     return int(out.strip())
 
 
+def _policy_key(policy: JsonObject) -> tuple[str, str]:
+    return (str(policy.get("name") or ""), str(policy.get("type") or "branch"))
+
+
+def reconcile_deployment_policies(
+    repo: str,
+    environment: str,
+    desired: list[JsonObject],
+    *,
+    dry_run: bool,
+) -> None:
+    """Make live deployment policies match ``desired`` (add missing, delete stale)."""
+    base = f"repos/{repo}/environments/{environment}/deployment-branch-policies"
+    desired_keys = {_policy_key(item) for item in desired}
+    if dry_run:
+        print(f"# reconcile {environment} -> {sorted(desired_keys)}")
+        for item in desired:
+            print(f"# POST {base} {json.dumps(item)}")
+        return
+
+    listed = _gh_api("GET", base, dry_run=False) or {}
+    raw_policies = listed.get("branch_policies")
+    existing = [
+        policy
+        for policy in (raw_policies if isinstance(raw_policies, list) else [])
+        if isinstance(policy, dict)
+    ]
+    existing_by_key = {_policy_key(policy): policy for policy in existing}
+
+    for policy in existing:
+        key = _policy_key(policy)
+        if key in desired_keys:
+            continue
+        policy_id = policy["id"]
+        print(f"delete {environment} policy {key[0]!r} ({key[1]}) id={policy_id}")
+        _gh_api("DELETE", f"{base}/{policy_id}", dry_run=False)
+
+    for item in desired:
+        key = _policy_key(item)
+        if key in existing_by_key:
+            continue
+        print(f"create {environment} policy {key[0]!r} ({key[1]})")
+        _gh_api("POST", base, item, dry_run=False)
+
+
 def apply_environments(repo: str, *, dry_run: bool) -> None:
+    """Create staging/production environments (or print payloads)."""
     user_id = _user_id(dry_run=dry_run)
     base = f"repos/{repo}/environments"
-    _gh_api(
-        "PUT",
-        f"{base}/staging",
-        {
-            "can_admins_bypass": True,
-            "deployment_branch_policy": {
-                "protected_branches": False,
-                "custom_branch_policies": True,
-            },
+    staging_env: JsonObject = {
+        "can_admins_bypass": True,
+        "deployment_branch_policy": {
+            "protected_branches": False,
+            "custom_branch_policies": True,
         },
-        dry_run=dry_run,
-    )
-    _gh_api(
-        "PUT",
-        f"{base}/production",
-        {
-            "can_admins_bypass": True,
-            "reviewers": [{"type": "User", "id": user_id}],
-            "deployment_branch_policy": {
-                "protected_branches": False,
-                "custom_branch_policies": True,
-            },
+    }
+    production_env: JsonObject = {
+        "can_admins_bypass": True,
+        "reviewers": [{"type": "User", "id": user_id}],
+        "deployment_branch_policy": {
+            "protected_branches": False,
+            "custom_branch_policies": True,
         },
-        dry_run=dry_run,
-    )
-    if not dry_run:
-        # Branch tips (marketplace indexes branches) plus publish tags.
-        _gh_api(
-            "POST",
-            f"{base}/staging/deployment-branch-policies",
+    }
+    _gh_api("PUT", f"{base}/staging", staging_env, dry_run=dry_run)
+    _gh_api("PUT", f"{base}/production", production_env, dry_run=dry_run)
+    # Branch tips (marketplace indexes branches) plus publish tags.
+    reconcile_deployment_policies(
+        repo,
+        "staging",
+        [
             {"name": "staging", "type": "branch"},
-            dry_run=dry_run,
-        )
-        _gh_api(
-            "POST",
-            f"{base}/staging/deployment-branch-policies",
             {"name": "*.*.*-rc", "type": "tag"},
-            dry_run=dry_run,
-        )
-        _gh_api(
-            "POST",
-            f"{base}/production/deployment-branch-policies",
+        ],
+        dry_run=dry_run,
+    )
+    reconcile_deployment_policies(
+        repo,
+        "production",
+        [
             {"name": "main", "type": "branch"},
-            dry_run=dry_run,
-        )
-        _gh_api(
-            "POST",
-            f"{base}/production/deployment-branch-policies",
             {"name": "*.*.*", "type": "tag"},
-            dry_run=dry_run,
-        )
+        ],
+        dry_run=dry_run,
+    )
 
 
 def apply_rulesets(repo: str, *, dry_run: bool) -> None:
+    """Create branch rulesets (or print payloads)."""
     gh_actions = 15368
     codeql = 57789
-    standard = {
-        "name": "Standard Flow (dev, staging & main)",
-        "target": "branch",
-        "enforcement": "active",
-        "conditions": {
-            "ref_name": {
-                "include": [
-                    "refs/heads/dev",
-                    "refs/heads/staging",
-                    "refs/heads/main",
-                ],
-                "exclude": [],
-            }
-        },
-        "rules": [
-            {"type": "deletion"},
-            {"type": "non_fast_forward"},
-            {"type": "required_signatures"},
-            {
-                "type": "required_status_checks",
-                "parameters": {
-                    "strict_required_status_checks_policy": True,
-                    "do_not_enforce_on_create": False,
-                    "required_status_checks": [
-                        {"context": "Lint, test, plugin", "integration_id": gh_actions},
-                        {"context": "Workflow lint", "integration_id": gh_actions},
-                        {"context": "Gitleaks", "integration_id": gh_actions},
-                        {"context": "SAST", "integration_id": gh_actions},
-                        {"context": "Analyze Python", "integration_id": codeql},
-                        {"context": "license-check", "integration_id": gh_actions},
+    # Nested GitHub API payloads — cast once at the JsonObject boundary.
+    standard = cast(
+        JsonObject,
+        {
+            "name": "Standard Flow (dev, staging & main)",
+            "target": "branch",
+            "enforcement": "active",
+            "conditions": {
+                "ref_name": {
+                    "include": [
+                        "refs/heads/dev",
+                        "refs/heads/staging",
+                        "refs/heads/main",
                     ],
+                    "exclude": [],
+                }
+            },
+            "rules": [
+                {"type": "deletion"},
+                {"type": "non_fast_forward"},
+                {"type": "required_signatures"},
+                {
+                    "type": "required_status_checks",
+                    "parameters": {
+                        "strict_required_status_checks_policy": True,
+                        "do_not_enforce_on_create": False,
+                        "required_status_checks": [
+                            {
+                                "context": "Lint, test, plugin",
+                                "integration_id": gh_actions,
+                            },
+                            {"context": "Workflow lint", "integration_id": gh_actions},
+                            {"context": "Gitleaks", "integration_id": gh_actions},
+                            {"context": "SAST", "integration_id": gh_actions},
+                            {
+                                "context": "Analyze Python",
+                                "integration_id": codeql,
+                            },
+                            {
+                                "context": "license-check",
+                                "integration_id": gh_actions,
+                            },
+                        ],
+                    },
                 },
-            },
-            {
-                "type": "pull_request",
-                "parameters": {
-                    "required_approving_review_count": 1,
-                    "dismiss_stale_reviews_on_push": True,
-                    "require_code_owner_review": True,
-                    "require_last_push_approval": True,
-                    "required_review_thread_resolution": True,
-                    "require_extra_approval_for_unattributed_changes": True,
-                    "allowed_merge_methods": ["squash"],
+                {
+                    "type": "pull_request",
+                    "parameters": {
+                        "required_approving_review_count": 1,
+                        "dismiss_stale_reviews_on_push": True,
+                        "require_code_owner_review": True,
+                        "require_last_push_approval": True,
+                        "required_review_thread_resolution": True,
+                        "require_extra_approval_for_unattributed_changes": True,
+                        "allowed_merge_methods": ["squash"],
+                    },
                 },
-            },
-            {"type": "copilot_code_review", "parameters": {"review_on_push": True}},
-            {"type": "code_quality", "parameters": {"severity": "errors"}},
-            {
-                "type": "code_scanning",
-                "parameters": {
-                    "code_scanning_tools": [
-                        {
-                            "tool": "CodeQL",
-                            "security_alerts_threshold": "high_or_higher",
-                            "alerts_threshold": "errors",
-                        }
-                    ]
+                {
+                    "type": "copilot_code_review",
+                    "parameters": {"review_on_push": True},
                 },
-            },
-            {
-                "type": "code_coverage",
-                "parameters": {"minimum_coverage": 90, "max_coverage_drop": 5},
-            },
-        ],
-        # Repository admins: bypass only via PR. Auto Semver Bot (same Integration
-        # as Action-Semver-Control): always, so finalize auto-promote / promote
-        # can update staging without required checks on a direct ref update.
-        "bypass_actors": [
-            {
-                "actor_id": 5,
-                "actor_type": "RepositoryRole",
-                "bypass_mode": "pull_request",
-            },
-            {
-                "actor_id": 2720857,
-                "actor_type": "Integration",
-                "bypass_mode": "always",
-            },
-        ],
-    }
-    linear_dev = {
-        "name": "Linear history (dev only)",
-        "target": "branch",
-        "enforcement": "active",
-        "conditions": {
-            "ref_name": {"include": ["refs/heads/dev"], "exclude": []},
+                {"type": "code_quality", "parameters": {"severity": "errors"}},
+                {
+                    "type": "code_scanning",
+                    "parameters": {
+                        "code_scanning_tools": [
+                            {
+                                "tool": "CodeQL",
+                                "security_alerts_threshold": "high_or_higher",
+                                "alerts_threshold": "errors",
+                            }
+                        ]
+                    },
+                },
+                {
+                    "type": "code_coverage",
+                    "parameters": {
+                        "minimum_coverage": 90,
+                        "max_coverage_drop": 5,
+                    },
+                },
+            ],
+            # Repository admins: bypass only via PR. Auto Semver Bot (same
+            # Integration as Action-Semver-Control): always, so finalize
+            # auto-promote / promote can update staging without required checks
+            # on a direct ref update.
+            "bypass_actors": [
+                {
+                    "actor_id": 5,
+                    "actor_type": "RepositoryRole",
+                    "bypass_mode": "pull_request",
+                },
+                {
+                    "actor_id": 2720857,
+                    "actor_type": "Integration",
+                    "bypass_mode": "always",
+                },
+            ],
         },
-        "rules": [{"type": "required_linear_history"}],
-    }
+    )
+    linear_dev = cast(
+        JsonObject,
+        {
+            "name": "Linear history (dev only)",
+            "target": "branch",
+            "enforcement": "active",
+            "conditions": {
+                "ref_name": {"include": ["refs/heads/dev"], "exclude": []},
+            },
+            "rules": [{"type": "required_linear_history"}],
+        },
+    )
     _gh_api("POST", f"repos/{repo}/rulesets", standard, dry_run=dry_run)
     _gh_api("POST", f"repos/{repo}/rulesets", linear_dev, dry_run=dry_run)
 
 
 def main() -> int:
+    """CLI entrypoint for environment/ruleset bootstrap."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default="GuyErreich/AI_Agents")
     parser.add_argument("--dry-run", action="store_true")

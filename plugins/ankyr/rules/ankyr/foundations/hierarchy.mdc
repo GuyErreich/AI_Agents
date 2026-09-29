@@ -1,0 +1,15 @@
+---
+description: Load hierarchy skill before creating, naming, moving, or reorganizing folders
+alwaysApply: true
+---
+
+# Folder Hierarchy
+
+Before creating, naming, moving, or reorganizing any folder:
+
+Resolve folder-taxonomy questions in this order; the first source that speaks wins: the `AGENT.md` chain, then project rules, then project skills, then this plugin's `skills/ankyr-hierarchy/SKILL.md` if installed.
+
+- Run the **nesting test** (wrong/meaningless outside parent?) and the **retrieval test** (where would a newcomer look?).
+- Favor retrieval on conflict; leave a pointer from the other path.
+- Load skill `references/` only when restructuring or when the resolved skill directs.
+- Consent, review-gate, and security floors always apply.

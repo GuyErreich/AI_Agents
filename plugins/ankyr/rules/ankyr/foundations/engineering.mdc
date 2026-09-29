@@ -1,0 +1,26 @@
+---
+description: Universal engineering principles applied to all code work
+alwaysApply: true
+---
+
+# Engineering Foundations
+
+Before writing or reviewing code, apply these universal principles:
+
+- Reuse before creating; extract a shared abstraction when the same pattern appears twice.
+- Use explicit, honest types at boundaries; never use typing to hide a design problem.
+- Name by responsibility and domain; stay consistent within a feature.
+- Place code by responsibility; shared vs feature-local must be obvious from the path.
+- Separate data, orchestration, presentation, and I/O; one module, one reason to change.
+- Couple what changes together; decouple what changes for different reasons — avoid both duplication and premature abstraction.
+
+These six principles are the **default**, not the authority. Resolve a question in this order; the first source that speaks wins:
+
+1. The `AGENT.md` chain (leaf → root)
+2. Project rules (`.cursor/rules/project/**`)
+3. Project skills (`.cursor/skills/project/**`)
+4. This plugin's skills, if installed
+
+Consent, review-gate, and security floors always apply and are not overridable by a later source.
+
+Load this plugin's `skills/ankyr-engineering/SKILL.md` only when the project is silent on a principle and the skill is installed. Load its `references/` only when a principle needs deep guidance. Glob-specific rules and downstream skills must not repeat these bullets — they reference this foundation instead.

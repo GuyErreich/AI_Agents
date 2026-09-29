@@ -65,7 +65,7 @@ jobs:
         uses: ./.github/actions/gh-release
         with:
           github_token: ${{ steps.app-token.outputs.token }}
-          plugin_dir: plugins/ai-agents
+          plugin_dir: plugins/ankyr
 
       - name: First marketplace submission issue
         env:
@@ -79,7 +79,7 @@ jobs:
             echo "Not the first production release (count=$PRIOR); skipping issue."
             exit 0
           fi
-          EXISTING="$(gh issue list --search 'Submit ai-agents to Cursor marketplace in:title' \
+          EXISTING="$(gh issue list --search 'Submit ankyr to Cursor marketplace in:title' \
             --state all --json number --jq 'length')"
           if [ "$EXISTING" -gt 0 ]; then
             echo "Marketplace submission issue already exists."
@@ -97,7 +97,7 @@ jobs:
 
           ### Checklist
           - [ ] Repo is public and production branch is \`main\`
-          - [ ] \`.cursor-plugin/marketplace.json\` and \`plugins/ai-agents/.cursor-plugin/plugin.json\` validate
+          - [ ] \`.cursor-plugin/marketplace.json\` and \`plugins/ankyr/.cursor-plugin/plugin.json\` validate
           - [ ] Logo committed and referenced by relative path
           - [ ] README documents usage
           - [ ] Submitted at cursor.com/marketplace/publish
@@ -108,7 +108,7 @@ jobs:
           # Strip leading indentation from the heredoc body.
           sed -i 's/^          //' "$BODY_FILE"
           gh issue create \
-            --title "Submit ai-agents to Cursor marketplace" \
+            --title "Submit ankyr to Cursor marketplace" \
             --body-file "$BODY_FILE"
           rm -f "$BODY_FILE"
 
