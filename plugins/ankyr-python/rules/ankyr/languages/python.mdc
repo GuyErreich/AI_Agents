@@ -13,4 +13,4 @@ When editing matching files:
 - Load its `references/` only when the skill directs.
 - Follow the nearest `AGENT.md` chain for Validate commands.
 
-Key rules: builtin generics, no `Any` / bare `object`, Google docstrings, relative imports, `pathlib`, fail-fast semantic exceptions, keyword-only extras, uv/ruff/mypy.
+Key rules: builtin generics, no `Any` / bare `object`, Google docstrings, relative imports, `pathlib`, fail-fast semantic exceptions, OOP seams (one Protocol + factory), keyword-only extras, uv/ruff/mypy.

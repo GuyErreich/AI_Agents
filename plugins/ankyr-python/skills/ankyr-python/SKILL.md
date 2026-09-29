@@ -1,6 +1,6 @@
 ---
 name: ankyr-python
-description: Python 3.12+ syntax, typing, imports, and tooling discipline — builtin generics, no Any, Google docstrings, pathlib, uv/ruff/mypy. Use when writing or reviewing .py/.pyi files.
+description: Python 3.12+ syntax, typing, imports, OOP seams, and tooling discipline — builtin generics, no Any, Google docstrings, pathlib, strategy Protocol + factory, uv/ruff/mypy. Use when writing or reviewing .py/.pyi files.
 disable-model-invocation: true
 ---
 
@@ -21,6 +21,7 @@ Resolve standards in this order: the `AGENT.md` chain (leaf → root), then proj
 - **Explicit relative imports** within a package; grouped import order (stdlib, third-party, internal); `__all__` for the public surface; do not re-export internals through `__init__.py`. See `references/imports-and-packaging.md`.
 - **`pathlib`**, never `os.path`.
 - **Fail fast** with early returns. Raise semantic custom exceptions, never bare `Exception`; no silent `except: pass`. See `references/errors-and-logging.md`.
+- **OOP seams.** When N backends serve one concern, they implement one interface (strategy / Protocol) selected by a single factory — never N ad-hoc mechanisms. Keep dependency direction one-way; do not reach into collaborator `_private` attributes; prefer composition and delegation over bolting extras onto a shared global. See `references/oop-and-patterns.md`.
 - **Keyword-only arguments** after a bare `*` for multi-argument functions. Optional parameters always carry an explicit default.
 
 ## When to load references
@@ -30,6 +31,7 @@ Resolve standards in this order: the `AGENT.md` chain (leaf → root), then proj
 | Any-free patterns, `TypeAlias` / `NewType` / `Protocol`, dataclass vs Pydantic v2 | `references/typing-and-models.md` |
 | Relative imports, `__all__`, uv and `pyproject.toml` | `references/imports-and-packaging.md` |
 | Fail-fast validation, custom exceptions, logging severity, no `print` | `references/errors-and-logging.md` |
+| Strategy Protocol, factory, dependency direction, structured seam data | `references/oop-and-patterns.md` |
 | pytest, pytest-mock, pyfakefs, shared `tests/fixtures/` | `references/testing.md` |
 
 Load a reference only when a rule above surfaces an issue you need patterns for. Do not preload.
