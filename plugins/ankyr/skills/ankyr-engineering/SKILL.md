@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Engineering Foundations
 
-Language-agnostic principles that every code skill assumes and extends. This skill owns the *why* of good code; downstream skills (`nodejs`, `python`, `ui`, `react`, `testing`, `security`) own the *how* for their domain. Do not restate language syntax or framework rules here.
+Language-agnostic principles that every code skill assumes and extends. This skill owns the *why* of good code; downstream skills (`nodejs`, `python`, `cpp`, `unreal`, `ui`, `react`, `testing`, `security`) own the *how* for their domain. Do not restate language syntax or framework rules here.
 
 This skill is the **default** for those principles when the project is silent. The project is authoritative: resolve `AGENT.md` → project rules → project skills before applying anything here.
 

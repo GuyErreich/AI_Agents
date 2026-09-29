@@ -1,0 +1,22 @@
+{
+  "name": "ankyr-cpp",
+  "displayName": "Ankyr C++",
+  "version": "1.5.1-rc",
+  "description": "Ankyr C++20 language skill and glob rule. Install with the Ankyr core plugin.",
+  "author": {
+    "name": "Guy Erreich"
+  },
+  "homepage": "https://github.com/GuyErreich/AI_Agents",
+  "repository": "https://github.com/GuyErreich/AI_Agents",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "skills",
+    "rules",
+    "cpp",
+    "c++",
+    "ankyr"
+  ],
+  "rules": "./rules/",
+  "skills": "./skills/"
+}

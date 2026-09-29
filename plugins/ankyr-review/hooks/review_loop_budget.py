@@ -7,6 +7,7 @@
 # requires-python = ">=3.12"
 # ///
 
+
 """subagentStart budget guard for the PR review loop."""
 
 from __future__ import annotations
@@ -15,11 +16,19 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
 
 # Allow importing sibling modules when run as a script
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from _types import (
+    HookEvent,
+    JsonObject,
+    JsonValue,
+    as_float,
+    as_int,
+    as_list,
+    as_object,
+)  # noqa: E402
 from _cost import project_next_cost  # noqa: E402
 from _loop_state import (  # noqa: E402
     emit,
@@ -55,8 +64,8 @@ def current_pr_fingerprint() -> str:
 
 
 def resolve_upcoming_model(
-    state: dict[str, Any],
-    event: dict[str, Any] | None = None,
+    state: JsonObject,
+    event: HookEvent | None = None,
     *,
     extra_fallback: str | None = None,
 ) -> str:
@@ -76,11 +85,11 @@ def resolve_upcoming_model(
 
 
 def decide_subagent_start(
-    state: dict[str, Any],
-    event: dict[str, Any] | None = None,
+    state: JsonObject,
+    event: HookEvent | None = None,
     *,
     fingerprint: str | None = None,
-) -> dict[str, Any]:
+) -> JsonObject:
     """Return the permission payload for launching a loop subagent.
 
     Pure decision helper — unit-tested so budget regressions cannot silently
@@ -106,10 +115,9 @@ def decide_subagent_start(
             ),
         }
 
-    round_n = int(state.get("round", 0) or 0)
+    round_n = as_int(state.get("round"), 0)
     max_rounds = resolve_max_rounds(state)
-    rounds_raw = state.get("rounds")
-    rounds: list[object] = rounds_raw if isinstance(rounds_raw, list) else []
+    rounds: list[JsonValue] = as_list(state.get("rounds"))
     if max_rounds is not None and round_n > max_rounds:
         return {
             "permission": "deny",
@@ -134,11 +142,7 @@ def decide_subagent_start(
                     break
             latest = rounds[-1] if rounds else None
             latest_n_raw = latest.get("n") if isinstance(latest, dict) else None
-            latest_n = (
-                int(latest_n_raw)
-                if isinstance(latest_n_raw, int | float | str) and str(latest_n_raw)
-                else 0
-            )
+            latest_n = as_int(latest_n_raw, 0) if latest_n_raw not in (None, "") else 0
             if (
                 sub == "pr-fixer"
                 and isinstance(latest, dict)
@@ -153,17 +157,13 @@ def decide_subagent_start(
                         "(fix likely did not stick); do not re-launch fixer."
                     ),
                     "agent_message": (
-                        "Budget hook denied pr-fixer: unchanged fingerprint "
-                        "after fix."
+                        "Budget hook denied pr-fixer: unchanged fingerprint after fix."
                     ),
                 }
 
-    totals_raw = state.get("totals")
-    totals: dict[str, object] = totals_raw if isinstance(totals_raw, dict) else {}
-    raw_t = totals.get("tokens_est", 0)
-    raw_u = totals.get("usd_est", 0)
-    spent_t = float(raw_t) if isinstance(raw_t, int | float | str) else 0.0
-    spent_u = float(raw_u) if isinstance(raw_u, int | float | str) else 0.0
+    totals = as_object(state.get("totals"))
+    spent_t = as_float(totals.get("tokens_est"), 0.0)
+    spent_u = as_float(totals.get("usd_est"), 0.0)
 
     upcoming_model = resolve_upcoming_model(
         state,
@@ -171,8 +171,8 @@ def decide_subagent_start(
         extra_fallback=str(state.get("reviewer_model") or "") or None,
     )
     proj_t, proj_u = project_next_cost(state, model=upcoming_model)
-    max_t = float(state.get("max_tokens_est", 1_000_000) or 1_000_000)
-    max_u = float(state.get("max_usd_est", 2.0) or 2.0)
+    max_t = as_float(state.get("max_tokens_est"), 1_000_000.0)
+    max_u = as_float(state.get("max_usd_est"), 2.0)
 
     if spent_t + proj_t > max_t or spent_u + proj_u > max_u:
         return {
@@ -191,9 +191,9 @@ def decide_subagent_start(
 
 
 def record_subagent_start(
-    state: dict[str, Any],
-    event: dict[str, Any] | None = None,
-) -> dict[str, Any] | None:
+    state: JsonObject,
+    event: HookEvent | None = None,
+) -> JsonObject | None:
     """Build a ``_pending_subagent`` bridge record for an allowed loop start.
 
     Returns ``None`` when the event is not a loop subagent (or inactive) —

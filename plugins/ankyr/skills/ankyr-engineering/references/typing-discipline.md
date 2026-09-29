@@ -1,6 +1,6 @@
 # Typing Discipline (intent, not syntax)
 
-This is about *what types should express*, independent of language. Language-specific rules (for example TypeScript `any`, `@ts-nocheck`, or `@types/*` packages) live in `nodejs`.
+This is about *what types should express*, independent of language. Language-specific rules (for example TypeScript `any`, `@ts-nocheck`, or `@types/*` packages) live in `nodejs`; C++ ownership and honest-type patterns live in `ankyr-cpp`.
 
 ## Principles
 
@@ -19,4 +19,4 @@ This is about *what types should express*, independent of language. Language-spe
 
 ## What belongs to the language skill
 
-Concrete forbidden patterns, ESLint/tsconfig configuration, and project type-alias conventions are in `nodejs`. Load it for the specifics.
+Concrete forbidden patterns, ESLint/tsconfig configuration, and project type-alias conventions are in `nodejs`. C++ RAII, status types, and diagnostic discipline are in `ankyr-cpp`. Load the matching language skill for the specifics.
