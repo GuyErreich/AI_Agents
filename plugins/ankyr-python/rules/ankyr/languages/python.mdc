@@ -1,0 +1,16 @@
+---
+description: Python language standards
+globs: "**/*.{py,pyi}"
+alwaysApply: false
+---
+
+# Python
+
+When editing matching files:
+
+- Apply engineering foundations first (always-applied rule).
+- Prefer the project's Python skill; if none, load this plugin's `skills/ankyr-python/SKILL.md` if installed.
+- Load its `references/` only when the skill directs.
+- Follow the nearest `AGENT.md` chain for Validate commands.
+
+Key rules: builtin generics, no `Any` / bare `object`, Google docstrings, relative imports, `pathlib`, fail-fast semantic exceptions, keyword-only extras, uv/ruff/mypy.

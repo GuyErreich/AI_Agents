@@ -7,7 +7,7 @@ inputs:
   plugin_dir:
     description: 'Plugin directory to attach as a tarball (optional)'
     required: false
-    default: 'plugins/ai-agents'
+    default: 'plugins/ankyr'
 runs:
   using: "composite"
   steps:
@@ -52,7 +52,7 @@ runs:
           exit 0
         fi
         SAFE_TAG="${TAG//\//-}"
-        ASSET="ai-agents-${SAFE_TAG}.tar.gz"
+        ASSET="ankyr-${SAFE_TAG}.tar.gz"
         tar -czf "$ASSET" -C "$(dirname "$PLUGIN_DIR")" "$(basename "$PLUGIN_DIR")"
         echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
         echo "Created $ASSET"

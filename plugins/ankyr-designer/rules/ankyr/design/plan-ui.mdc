@@ -1,0 +1,26 @@
+---
+description: UI/UX design planning — load designer when layout, flow, hierarchy, or CTA changes
+globs: "**/*.{tsx,jsx,css,scss}"
+alwaysApply: false
+---
+
+# Plan UI
+
+When the task **plans or changes** layout, user flow, visual hierarchy, or a call
+to action:
+
+- Prefer the project's designer skill; if none, load this plugin's
+  `skills/ankyr-designer/SKILL.md` if installed.
+- Produce Job → Approach → One primary → Reasons → Picture before writing
+  components.
+- Load `references/` only when the skill directs.
+
+When the **design is already accepted** (brief signed off, or the user asked only
+to implement a settled layout):
+
+- Do **not** redraw the brief or regenerate wireframes.
+- Prefer the project's UI skill; if none, load `ankyr-ui` if installed.
+- Prefer the project's UX skill; if none, load `ankyr-ux` if installed.
+
+Copy-only, token-only, or bug fixes that do not move layout or the primary action
+do not require a full design brief — a one-line reason is enough.

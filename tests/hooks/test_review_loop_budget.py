@@ -21,14 +21,12 @@ from _cost import (
 from review_loop_budget import decide_subagent_start
 
 PLUGIN_ROOT = (
-    Path(__file__).resolve().parents[2] / "plugins" / "ai-agents"
+    Path(__file__).resolve().parents[2] / "plugins" / "ankyr-review"
 )
 PRICING_PATH = (
     PLUGIN_ROOT
     / "skills"
-    / "code"
-    / "ci"
-    / "pr-review-loop"
+    / "ankyr-ci-pr-review-loop"
     / "assets"
     / "pricing.default.json"
 )

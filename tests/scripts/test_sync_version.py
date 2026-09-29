@@ -32,12 +32,12 @@ def test_sync_updates_drifted_json(tmp_path: Path, monkeypatch) -> None:
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text('[project]\nversion = "9.9.9"\n', encoding="utf-8")
     plugin.write_text(
-        json.dumps({"name": "ai-agents", "version": "0.0.1"}, indent=2) + "\n",
+        json.dumps({"name": "ankyr", "version": "0.0.1"}, indent=2) + "\n",
         encoding="utf-8",
     )
     market.write_text(
         json.dumps(
-            {"name": "ai-agents", "metadata": {"version": "0.0.1"}},
+            {"name": "ankyr", "metadata": {"version": "0.0.1"}},
             indent=2,
         )
         + "\n",
@@ -45,8 +45,8 @@ def test_sync_updates_drifted_json(tmp_path: Path, monkeypatch) -> None:
     )
 
     monkeypatch.setattr(sync_version, "PYPROJECT", pyproject)
-    monkeypatch.setattr(sync_version, "PLUGIN_JSON", plugin)
     monkeypatch.setattr(sync_version, "MARKETPLACE_JSON", market)
+    monkeypatch.setattr(sync_version, "plugin_json_paths", lambda: [plugin])
 
     assert sync_version.main(["--check"]) == 1
     assert sync_version.main([]) == 0

@@ -19,14 +19,12 @@ from review_loop_round import decide_round_followup, record_round_cost
 JsonObject: TypeAlias = dict[str, object]
 
 PLUGIN_ROOT = (
-    Path(__file__).resolve().parents[2] / "plugins" / "ai-agents"
+    Path(__file__).resolve().parents[2] / "plugins" / "ankyr-review"
 )
 PRICING_PATH = (
     PLUGIN_ROOT
     / "skills"
-    / "code"
-    / "ci"
-    / "pr-review-loop"
+    / "ankyr-ci-pr-review-loop"
     / "assets"
     / "pricing.default.json"
 )
