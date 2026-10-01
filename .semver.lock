@@ -1,7 +1,6 @@
 version: 1.5.2-rc
-source_branch: dev
+source_branch: staging
 target_branch: staging
-target_base_sha: af2070bd321a45694b8e621d5392006859c2b80d
-finalized: false
+target_base_sha: 0177727f1efd564b6985bc04c1bb81ee97307666
+finalized: true
 managed_by: auto-semver
-branch_role: release
