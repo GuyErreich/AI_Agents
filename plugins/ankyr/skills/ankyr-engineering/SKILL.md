@@ -1,6 +1,6 @@
 ---
 name: ankyr-engineering
-description: Universal software engineering foundation — duplication, typing intent, naming, folder structure, separation of concerns, and coupling discipline. Default when the project is silent. Use before writing or reviewing any code.
+description: Universal software engineering foundation — duplication, typing intent, naming, folder structure, separation of concerns, coupling, and OOP patterns (interface, delegation, orchestration). Default when the project is silent. Use before writing or reviewing any code.
 disable-model-invocation: true
 ---
 
@@ -20,6 +20,7 @@ This skill is the **default** for those principles when the project is silent. T
 | Folder structure | Code layout: shared vs feature-local; general taxonomy via `hierarchy` | `references/folder-structure.md` |
 | Separation of concerns | One module, one reason to change; keep data, orchestration, presentation, and I/O apart | `references/separation-of-concerns.md` |
 | Coupling / decoupling | Couple what changes together; decouple what changes for different reasons; avoid both duplication and premature abstraction | `references/coupling-decoupling.md` |
+| OOP and patterns | Composition and delegation; an interface plus one selection point at the second variant; no interface for a single implementation | `references/oop-and-patterns.md` |
 
 ## Workflow
 
@@ -31,7 +32,7 @@ This skill is the **default** for those principles when the project is silent. T
 
 ## When to load references
 
-Load a `references/` file only when a principle needs a decision you cannot make from the table above — for example, choosing whether to couple two modules, or whether a repeated block is true duplication or coincidental similarity. Do not preload them.
+Load a `references/` file only when a principle needs a decision you cannot make from the table above — for example, choosing whether to couple two modules, whether a repeated block is true duplication, or which OOP pattern fits. Do not preload them.
 
 ## Default, not authority
 

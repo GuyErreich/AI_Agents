@@ -13,8 +13,9 @@ Before writing or reviewing code, apply these universal principles:
 - Place code by responsibility; shared vs feature-local must be obvious from the path.
 - Separate data, orchestration, presentation, and I/O; one module, one reason to change.
 - Couple what changes together; decouple what changes for different reasons — avoid both duplication and premature abstraction.
+- Prefer composition and delegation. At the second variant of one concern, depend on an interface and select the implementation in one place. Do not add an interface for a single implementation.
 
-These six principles are the **default**, not the authority. Resolve a question in this order; the first source that speaks wins:
+These seven principles are the **default**, not the authority. Resolve a question in this order; the first source that speaks wins:
 
 1. The `AGENT.md` chain (leaf → root)
 2. Project rules (`.cursor/rules/project/**`)
