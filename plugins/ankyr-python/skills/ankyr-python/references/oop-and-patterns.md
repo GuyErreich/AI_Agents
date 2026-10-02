@@ -1,64 +1,70 @@
-# OOP and patterns
+# OOP in Python
 
-Use this when a **second real backend** appears for the same concern. One implementation does not get a Protocol — wait for the second same-reason use case (see engineering coupling defaults).
+How to express the engineering OOP patterns in Python. The meaning of each pattern — interface, delegation, orchestration, strategy, factory, adapter — and when to enforce it lives in the engineering skill's `references/oop-and-patterns.md` when that skill is installed. This page is the syntax.
 
-## One concern, one interface
+Use a `Protocol` when a second real variant of the same concern exists. One implementation stays a concrete class or a function.
 
-N backends for one job implement one strategy surface (`Protocol`), selected by a single factory. Do not invent N ad-hoc mechanisms (a logging `Handler`, a bolted `StreamHandler`, and an observer that writes `sys.stdout`).
+## Interface
+
+`Protocol` is the interface: structural, no shared base class. Use `abc.ABC` only when subclasses must share implementation. Do not inherit from a base just to mark a type.
 
 ```python
 from collections.abc import Mapping
 from typing import Protocol
 
 
-class Renderer(Protocol):
-    def emit(self, message: str, *, level: int, fields: Mapping[str, str]) -> None: ...
-
-
-def select_renderer(config: Config) -> Renderer:
-    if config.backend == "github":
-        return GitHubRenderer(config)
-    if config.backend == "rich":
-        return RichRenderer(config)
-    return PlainRenderer(config)
+class Exporter(Protocol):
+    def export(self, record: Mapping[str, str], *, level: int) -> None: ...
 ```
 
-| Smell | Fix |
-|---|---|
-| N backends via N mechanisms | One `Renderer` Protocol; factory selects the implementation |
-| Bidirectional imports (core ↔ adapter) | Facade depends on the Protocol; adapters never import core view code |
-| Collaborator reaches `view._observers`, `_spinning`, `_refresh()` | If a collaborator needs it, put it on the public Protocol |
-| Extra handlers bolted onto a shared process logger | Composition + delegation through one `Reporter` facade |
-| `setLogRecordFactory()` (or similar) at import time | Wire in an explicit `install(config)` setup function |
-| `is_github_actions()` (or host checks) scattered at call sites | Centralize environment variation in `select_renderer()` |
-| Host literals (log file name, logger name) hardcoded in the library | Constructor `Config` / `Theme` dataclasses so the package is extractable |
+Methods take structured values: mappings, level ints, plain text. They do not take a pre-rendered string or a caller-supplied width. The implementation owns layout.
 
-## Dependency direction
+## Delegation and the factory
 
-```
-facade / Reporter  -->  Renderer (Protocol)
-                              ^
-              rich / plain / github adapters
-```
-
-- Call sites talk to the facade. The facade holds a `Renderer` and delegates.
-- Adapter modules may import shared types and the Protocol. Core view code must not import a concrete adapter.
-- Do not reach into collaborator `_private` attributes. Promote what collaborators need onto the public surface.
-
-## Structured data on the seam
-
-Protocol methods accept structured data — `Mapping[str, str]`, level ints, plain text. Never pre-rendered or pre-wrapped strings, and never an explicit width from the caller. Otherwise the abstraction silently strips a backend's ability to lay itself out (for example Rich reflowing from `console.width`).
+Pass collaborators into the constructor. That is delegation. A module-level factory is the only place that selects the implementation.
 
 ```python
-# Forbidden — caller owns layout
-renderer.emit(panel.render(width=80))
+from dataclasses import dataclass
 
-# Prefer — backend owns layout
-renderer.emit("done", level=logging.INFO, fields={"step": "publish"})
+
+@dataclass(frozen=True)
+class ExportConfig:
+    """Host values. A dataclass is the data object, not a pattern."""
+
+    kind: str
+    destination: str
+
+
+class Publish:
+    def __init__(self, exporter: Exporter) -> None:
+        self._exporter = exporter
+
+    def run(self, record: Mapping[str, str]) -> None:
+        self._exporter.export(record, level=20)
+
+
+class LocalExporter:
+    def __init__(self, destination: str) -> None:
+        self._destination = destination
+
+    def export(self, record: Mapping[str, str], *, level: int) -> None:
+        write_local(self._destination, record, level=level)
+
+
+class RemoteExporter:
+    def __init__(self, destination: str) -> None:
+        self._destination = destination
+
+    def export(self, record: Mapping[str, str], *, level: int) -> None:
+        write_remote(self._destination, record, level=level)
+
+
+def select_exporter(config: ExportConfig) -> Exporter:
+    if config.kind == "remote":
+        return RemoteExporter(config.destination)
+    return LocalExporter(config.destination)
 ```
 
-## Composition and explicit setup
+`Publish` sequences the step and forwards the work. `LocalExporter` and `RemoteExporter` are the two implementations. Call sites call `select_exporter` once and then talk to `Publish`. They do not branch on `config.kind`.
 
-- Prefer composition and delegation over bolting extras onto a shared global (root logger, process-wide factories).
-- Import-time side effects that reconfigure the process are forbidden. Expose `install(config: Config) -> Reporter` (or equivalent) and call it from the host's entrypoint.
-- Host-specific values (file paths, logger names, theme colors) belong in constructor `Config` / `Theme` dataclasses from day one when the package may later leave the host repo.
+A `@dataclass` holds data you construct yourself. It is not an interface, a strategy, or a service.
