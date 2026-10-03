@@ -21,7 +21,8 @@ Resolve standards in this order: the `AGENT.md` chain (leaf → root), then proj
 - **Explicit relative imports** within a package; grouped import order (stdlib, third-party, internal); `__all__` for the public surface; do not re-export internals through `__init__.py`. See `references/imports-and-packaging.md`.
 - **`pathlib`**, never `os.path`.
 - **Fail fast** with early returns. Raise semantic custom exceptions, never bare `Exception`; no silent `except: pass`. See `references/errors-and-logging.md`.
-- **OOP shapes.** Express an interface as a `Protocol`, inject collaborators through the constructor, and select the implementation in one factory. A single implementation stays a concrete class or a function. See `references/oop-and-patterns.md`.
+- **OOP shapes.** Express an interface as a `Protocol`, inject collaborators through the constructor, and select the implementation in one factory. A single implementation stays a concrete class or a function. See `references/oop-and-patterns.md`. Function versus object, and which extension axis stays open, are the engineering skill's `references/oop-and-patterns.md`.
+- **Hot-loop layout.** When a loop streams one field across many elements, follow the performance skill's `references/data-layout.md` if installed.
 - **Keyword-only arguments** after a bare `*` for multi-argument functions. Optional parameters always carry an explicit default.
 
 ## When to load references

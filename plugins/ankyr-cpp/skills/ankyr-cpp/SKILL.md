@@ -25,7 +25,8 @@ Resolve standards in this order: the `AGENT.md` chain (leaf → root), then proj
 - **Logging discipline.** No `printf` / `std::cout` / `std::cerr` debug output in shipped code. Use the project's logger; log a safe string, never secrets or raw exception objects.
 - **Header hygiene.** `#pragma once`, include-what-you-use, no `using namespace` at header scope. See `references/headers-and-includes.md`.
 - **Modern idioms.** `std::ranges` / algorithms over hand-rolled loops, structured bindings, `std::format` over stream chains, `constexpr` / templates over macros.
-- **OOP patterns.** At a second variant of one concern, use a pure-virtual base or a concept and select the implementation in one place. Prefer composition over an inheritance tree. Do not add a base for a single implementation. What each pattern means is the engineering skill's `references/oop-and-patterns.md` if that skill is installed.
+- **OOP patterns.** At a second variant of one concern, use a pure-virtual base or a concept and select the implementation in one place. Prefer composition over an inheritance tree. Do not add a base for a single implementation. What each pattern means, including function versus object and the Expression Problem, is the engineering skill's `references/oop-and-patterns.md` if that skill is installed.
+- **Hot-loop layout.** When a loop streams one field across many elements, follow the performance skill's `references/data-layout.md` if installed.
 - **Concurrency.** Guard shared mutable state. Every `std::atomic` memory order needs an explicit rationale.
 - **Authority for semantics.** [cppreference](https://cppreference.com/) for language and library behavior; [Microsoft C++ docs](https://learn.microsoft.com/en-us/cpp/?view=msvc-170) for MSVC pragmas, intrinsics, and warning codes. [DevDocs C++](https://devdocs.io/cpp/) is a convenient offline-friendly index of the same material.
 

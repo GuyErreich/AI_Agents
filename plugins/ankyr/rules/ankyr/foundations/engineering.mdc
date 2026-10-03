@@ -7,13 +7,13 @@ alwaysApply: true
 
 Before writing or reviewing code, apply these universal principles:
 
-- Reuse before creating; extract a shared abstraction when the same pattern appears twice.
+- Reuse before creating. Extract when a second copy is the same reason to change. Similar shape with an unclear reason waits for a third occurrence. Do not extract coincidental similarity.
 - Use explicit, honest types at boundaries; never use typing to hide a design problem.
 - Name by responsibility and domain; stay consistent within a feature.
 - Place code by responsibility; shared vs feature-local must be obvious from the path.
-- Separate data, orchestration, presentation, and I/O; one module, one reason to change.
+- Separate data, orchestration, presentation, and I/O; one module, one reason to change. Prefer a deep module — a small interface over rich behavior — over a chain of shallow wrappers.
 - Couple what changes together; decouple what changes for different reasons — avoid both duplication and premature abstraction.
-- Prefer composition and delegation. At the second variant of one concern, depend on an interface and select the implementation in one place. Do not add an interface for a single implementation.
+- Prefer composition and delegation. Use a function when there is no state to protect. At the second variant of one concern, depend on an interface and select the implementation in one place. Extend along the axis that will keep growing (new types or new operations). Do not add an interface for a single implementation.
 
 These seven principles are the **default**, not the authority. Resolve a question in this order; the first source that speaks wins:
 

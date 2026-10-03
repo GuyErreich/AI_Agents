@@ -29,10 +29,16 @@ The concrete destination folder is a project decision (see the project `AGENT.md
 
 ## Rule of thumb
 
-Extract on the second occurrence, in the same change. Do not wait for a third copy. The only exception is an explicit, temporary one-off patch the user requested.
+Extract a second copy only when it is the same rule — the same reason to change. Do that in the same change.
+
+Similar shape is not enough. If the blocks might be different concepts, leave them (AHA: avoid hasty abstractions). The Rule of Three applies to that uncertainty: a third occurrence under the same context is the signal they are one rule. Duplication is cheaper than the wrong abstraction.
+
+Do not extract a one- or two-line wrapper. That is a shallow module (see `separation-of-concerns.md`).
+
+The only other exception is an explicit, temporary one-off patch the user requested.
 
 ## Before creating anything new
 
 1. Search for an existing module/helper that does the same thing.
 2. Search for the same logic already living inside another module.
-3. If found in more than one place, extract immediately — do not leave the duplication behind.
+3. If a second copy is the same reason to change, extract it. If the match is only syntactic, leave it.

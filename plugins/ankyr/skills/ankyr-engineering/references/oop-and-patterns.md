@@ -10,6 +10,24 @@ An object hides state and exposes behavior. Callers use the behavior. They do no
 
 Use an object when there is state to protect or a behavior you will swap. Use a plain function when the operation has no state and only one implementation.
 
+## When a function beats an object
+
+A pure function returns a new value from its arguments. It does not mutate inputs, read hidden fields, or perform I/O. Put mutation and I/O in a thin outer layer. Pass values into pure transforms and commit the result at the edge. Shared mutable object graphs are a poor model for concurrent work.
+
+Immutability is the default where allocation is cheap. Update in place on a measured hot path where allocation dominates. Layout for that path lives in the performance skill's `references/data-layout.md` when that skill is installed.
+
+## The Expression Problem
+
+A design is easy to extend on one axis. Pick that axis before adding types or operations.
+
+| Axis that will keep growing | Shape | Cost of the other axis |
+|---|---|---|
+| New data types | A new implementor of an existing interface | A new operation touches every type |
+| New operations | A function over a closed set of data | A new type touches every function |
+
+- **Enforce** the open axis in a module comment so the next edit does not reopen the other one.
+- **Do not** add a Visitor, a type class, or a parallel hierarchy for a single new case. Those mechanisms pay off when both axes are already growing.
+
 ## Interface vs implementation
 
 The **interface** is the contract: method names, inputs, and results. The **implementation** is one concrete type that fulfills it.

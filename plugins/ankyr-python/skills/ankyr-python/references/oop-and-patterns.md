@@ -1,6 +1,6 @@
 # OOP in Python
 
-How to express the engineering OOP patterns in Python. The meaning of each pattern — interface, delegation, orchestration, strategy, factory, adapter — and when to enforce it lives in the engineering skill's `references/oop-and-patterns.md` when that skill is installed. This page is the syntax.
+How to express the engineering OOP patterns in Python. The meaning of each pattern — interface, delegation, orchestration, strategy, factory, adapter — and when to enforce it lives in the engineering skill's `references/oop-and-patterns.md` when that skill is installed. That reference also owns when a function beats an object and the Expression Problem. This page is the syntax.
 
 Use a `Protocol` when a second real variant of the same concern exists. One implementation stays a concrete class or a function.
 
