@@ -17,9 +17,9 @@ Run this **before the first file edit** on branch-worthy work — including afte
 
 1. **Detect checkout type** (see below).
 2. Read the base branch from the repository-root `AGENT.md` Validate block (do not hardcode).
-3. If **primary checkout** → create or reuse a worktree → print absolute path → **stop** (no edits, commits, or pushes in primary).
-4. If current branch **equals the base branch** (even in a linked worktree) → create or reuse a feature worktree → print path → **stop**.
-5. If **linked worktree on the wrong branch** → create/switch to the correct worktree → **stop** until the user opens it.
+3. If **primary checkout** → create or reuse a worktree → print absolute path → **continue there** (no edits, commits, or pushes in primary).
+4. If current branch **equals the base branch** (even in a linked worktree) → create or reuse a feature worktree → print path → **continue there**.
+5. If **linked worktree on the wrong branch** → create/reuse the correct worktree → print path → **continue there** (do not edit the wrong branch).
 6. If **linked worktree on the correct non-base branch** → proceed.
 
 Waivers require explicit user text: **work in place**, **skip worktree**, or **stay in this checkout**. Plan approval alone is **not** a waiver.
@@ -32,7 +32,7 @@ Planning stays write-free. A plan for branch-worthy work **must** open with a Se
 2. The base branch from the repository-root `AGENT.md` Validate block.
 3. The target worktree path.
 
-That Setup step precedes every implementation step. Implementation begins only after that worktree is the open Cursor workspace. A plan without the Setup step is incomplete — amend it before the first edit.
+That Setup step precedes every implementation step. Implementation targets that worktree path (absolute writes + worktree cwd) from the current Cursor session — do **not** require the user to open it as the Cursor workspace. A plan without the Setup step is incomplete — amend it before the first edit.
 
 ## When a worktree is required
 
@@ -61,8 +61,8 @@ Interpretation:
 | Signal | Meaning |
 |---|---|
 | `linked-worktree` | OK to implement **if** current branch matches the task branch **and** is not the AGENT.md base |
-| `primary-checkout` | **Stop** — create/reuse worktree before any edit |
-| Current branch == AGENT.md base | **Stop** — create/reuse a non-base worktree before any edit |
+| `primary-checkout` | Create/reuse the feature worktree; do not edit here — continue at that absolute path |
+| Current branch == AGENT.md base | Create/reuse a non-base worktree; do not edit on base — continue at that absolute path |
 | Path in `git worktree list` under configured `base_dir` | Dedicated worktree checkout |
 
 Read worktree root from repo `.wtp.yml` `defaults.base_dir` when present (project `AGENT.md` may restate it).
@@ -94,13 +94,13 @@ Do **not** use `git checkout -b` in the primary checkout for new work unless the
 After create:
 
 1. Resolve the absolute path: `wtp cd <worktree-name>` (or the path printed by `wtp add` / `git worktree add`).
-2. Tell the user to **open that path as the Cursor workspace** before implementation continues.
-3. **Stop** in the current session after reporting the path — do not assume the user switched workspaces.
-4. Do not assume file edits from the primary checkout will land in the new worktree — agent writes are scoped to the open workspace root.
+2. Tell the user the path. Do **not** require them to open it as the Cursor workspace.
+3. **Continue in the current session** — Write/StrReplace use absolute paths under the worktree; Shell uses that path as `working_directory`. Request elevated permissions when the sandbox cannot write outside the open workspace.
+4. Relative edits against the primary checkout stay there. Creating a worktree does not redirect them — always pass the worktree path explicitly.
 
 ## Post-create verification
 
-In the new worktree directory (after the user opens it):
+In the new worktree directory (via absolute path / worktree cwd — no Cursor window switch required):
 
 1. Confirm project post-create hooks from `.wtp.yml` ran as configured (hooks are project-local, not part of this skill).
 2. Run `git status` — copy hooks that overwrite tracked paths (for example `.cursor/`) can leave the tree dirty relative to the new branch tip. Report dirtiness; do not silently commit hook noise.
@@ -109,7 +109,7 @@ In the new worktree directory (after the user opens it):
 
 ## Working inside a worktree
 
-- Run validate commands and commit / PR / push skills from the worktree cwd.
+- Run validate commands and commit / PR / push skills with cwd = the worktree (never the primary checkout).
 - Diff against the base branch from `AGENT.md`, not against an arbitrary default.
 - Keep one concern per worktree/branch; start another worktree for unrelated work.
 
@@ -175,7 +175,7 @@ Remove with `git worktree remove <path>` (and delete the branch separately if re
 | Stale worktree entries after deleted dirs | `git worktree prune` |
 | `wtp remove` name unclear for slashed branches | Use the directory name from `wtp list` / `git worktree list` |
 | Hooks left tracked files modified | Inspect `git status` / diff; restore or commit only with user intent |
-| User approved plan but workspace is primary or on base | Create worktree, report path, stop — plan approval is not a waiver |
+| User approved plan but workspace is primary or on base | Create worktree, report path, continue there by absolute path — plan approval is not a waiver to edit primary/base |
 | Plan has no worktree Setup step | Amend the plan before the first edit |
 | Agent edited primary before preflight | Follow **Recovery**; do not continue editing in primary |
 | No `.wtp.yml` / no `wtp` | Use **Fallback**; still enforce the hard gate |

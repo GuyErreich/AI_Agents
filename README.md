@@ -8,11 +8,14 @@ Plugins:
 
 - [`plugins/ankyr`](plugins/ankyr) — core (engineering, hierarchy, quality, always-on floor rules)
 - [`plugins/ankyr-review`](plugins/ankyr-review) — reviewer, PR resolver, improve-code, review loops, subagents, hooks
-- [`plugins/ankyr-git`](plugins/ankyr-git) — worktree, commit, PR, push, release
+- [`plugins/ankyr-git`](plugins/ankyr-git) — worktree, commit, issue, PR, push, release
 - [`plugins/ankyr-authoring`](plugins/ankyr-authoring) — agent-hierarchy, improvement-protocol
 - [`plugins/ankyr-python`](plugins/ankyr-python) — Python
 - [`plugins/ankyr-node`](plugins/ankyr-node) — TypeScript / JavaScript
 - [`plugins/ankyr-web`](plugins/ankyr-web) — UI, UX, React, Three.js
+- [`plugins/ankyr-designer`](plugins/ankyr-designer) — UI/UX design planning (approach, reasons, wireframes)
+- [`plugins/ankyr-cpp`](plugins/ankyr-cpp) — C++20
+- [`plugins/ankyr-unreal`](plugins/ankyr-unreal) — Unreal Engine 5
 
 ## Install in Cursor
 
@@ -27,9 +30,12 @@ ln -sfn "$(pwd)/plugins/ankyr-authoring" ~/.cursor/plugins/local/ankyr-authoring
 ln -sfn "$(pwd)/plugins/ankyr-python" ~/.cursor/plugins/local/ankyr-python
 ln -sfn "$(pwd)/plugins/ankyr-node" ~/.cursor/plugins/local/ankyr-node
 ln -sfn "$(pwd)/plugins/ankyr-web" ~/.cursor/plugins/local/ankyr-web
+ln -sfn "$(pwd)/plugins/ankyr-designer" ~/.cursor/plugins/local/ankyr-designer
+ln -sfn "$(pwd)/plugins/ankyr-cpp" ~/.cursor/plugins/local/ankyr-cpp
+ln -sfn "$(pwd)/plugins/ankyr-unreal" ~/.cursor/plugins/local/ankyr-unreal
 ```
 
-Reload the Cursor window. The plugins show up as **Ankyr**, **Ankyr Review**, **Ankyr Git**, **Ankyr Authoring**, **Ankyr Python**, **Ankyr Node**, and **Ankyr Web**.
+Reload the Cursor window. The plugins show up as **Ankyr**, **Ankyr Review**, **Ankyr Git**, **Ankyr Authoring**, **Ankyr Python**, **Ankyr Node**, **Ankyr Web**, **Ankyr Designer**, **Ankyr C++**, and **Ankyr Unreal**.
 
 ### Team marketplace
 
@@ -66,6 +72,9 @@ plugins/ankyr-authoring/          # agent-hierarchy + improvement-protocol
 plugins/ankyr-python/             # Python skill + rule
 plugins/ankyr-node/               # TypeScript/JavaScript skill + rule
 plugins/ankyr-web/                # UI / UX / React / Three.js
+plugins/ankyr-designer/           # UI/UX design planning (agent + skill)
+plugins/ankyr-cpp/                # C++20 skill + rule
+plugins/ankyr-unreal/             # Unreal Engine 5 skill + rule
 ```
 
 ## Consuming repos

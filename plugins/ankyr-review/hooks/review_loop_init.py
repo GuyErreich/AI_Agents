@@ -7,6 +7,7 @@
 # requires-python = ">=3.12"
 # ///
 
+
 """Initialize a fresh PR review-loop run from durable preferences.
 
 Reads JSON on stdin::
@@ -38,6 +39,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from _types import as_int  # noqa: E402
 from _loop_state import (  # noqa: E402
     emit,
     normalize_analysis_mode,
@@ -76,7 +78,7 @@ def main() -> int:
         overrides["analysis_mode"] = normalize_analysis_mode(overrides["analysis_mode"])
 
     state = start_loop_state(
-        pr_number=int(event.get("pr_number") or 0),
+        pr_number=as_int(event.get("pr_number"), 0),
         pr_url=str(event.get("pr_url") or ""),
         branch=str(event.get("branch") or ""),
         toolchain_mode=str(event.get("toolchain_mode") or "uv"),

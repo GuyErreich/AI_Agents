@@ -9,6 +9,8 @@ Determine the tier before reviewing.
 | **pr** | Before push or PR open (gate) | `git diff merge-base...HEAD` (full branch, PR-equivalent) |
 | **file argument** | User names a path | that file/area only |
 
+If the named path is a **directory**, treat it as package-scope for capability routing (Phase 0c may apply). Git scope stays “that file/area only.”
+
 If the tier is unclear, ask once. Default to **pr** when the user mentions PR or branch review; default to **change** for pre-commit.
 
 ## List changed files

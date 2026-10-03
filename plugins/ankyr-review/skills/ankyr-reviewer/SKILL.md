@@ -1,12 +1,12 @@
 ---
 name: ankyr-reviewer
-description: Top-tier single-pass code reviewer — staff bar plus specialist lenses (frontend, backend, realtime-graphics, motion-vfx, typescript) routed by diff, with engineering, logic, threat, and coverage gates. Posts on the open PR via gh when reviewing the PR. No nested subagents. Use before commit, PR open, push, or manual self-review (see code-review-gate rule).
+description: Top-tier single-pass code reviewer — staff bar plus specialist lenses (frontend, backend, realtime-graphics, motion-vfx, typescript, cpp, unreal) routed by diff, with engineering, logic, threat, and coverage gates. Posts on the open PR via gh when reviewing the PR. No nested subagents. Use before commit, PR open, push, or manual self-review (see code-review-gate rule).
 disable-model-invocation: true
 ---
 
 # Code Reviewer
 
-Reviews as a **staff/principal engineer who ships**: correctness and contracts first, then domain depth, then polish. One pass activates every matching **specialist lens** (frontend, backend, graphics, motion/VFX, TypeScript) — not a shallow lint skim and not a swarm of nested subagents.
+Reviews as a **staff/principal engineer who ships**: correctness and contracts first, then domain depth, then polish. One pass activates every matching **specialist lens** (frontend, backend, graphics, motion/VFX, TypeScript, C++, Unreal) — not a shallow lint skim and not a swarm of nested subagents.
 
 ## Foundation
 
@@ -27,9 +27,12 @@ A finding must trace to a standard that **applies to this project**. Do not cite
 | Signal | Capability | Default if installed |
 |---|---|---|
 | any code file | engineering foundations | `ankyr-engineering` (Phase 0) |
+| named path is a directory; or caller passed breadth `module` / `package`; or the tier diff `--name-status` includes `A`, `D`, `R`, or `C` | folder taxonomy + code layout | `ankyr-hierarchy`, `ankyr-engineering` → `references/folder-structure.md` (Phase 0c) |
 | `*.{py,pyi}` | Python language | `ankyr-python` |
 | `test_*.py`, `*_test.py`, `*.{test,spec}.{ts,tsx,js}`, `conftest.py` | tests + language testing refs | `ankyr-testing` + the matching language skill's `references/testing.md` |
 | `*.{ts,tsx,js,mjs}` | TypeScript / JavaScript | `ankyr-nodejs` |
+| `*.{h,hpp,hh,hxx,inl,ipp,cc,cpp,cxx}` | C++ language | `ankyr-cpp` |
+| `**/Source/**`, `*.Build.cs`, `*.Target.cs`, `*.uproject`, `*.uplugin` | Unreal Engine 5 | `ankyr-unreal`, `ankyr-performance` |
 | `*.{tsx,jsx}` components/pages | React + UI + UX | `ankyr-react`, `ankyr-ui`, `ankyr-ux` |
 | `**/three/**`, shaders, R3F/WebGL | 3D / WebGL | `ankyr-threejs`, `ankyr-performance` |
 | effects/timers/listeners/audio/GPU | performance / cleanup | `ankyr-performance` |
@@ -43,6 +46,8 @@ A finding must trace to a standard that **applies to this project**. Do not cite
 |---|---|
 | always | `lenses/staff-bar.md` |
 | `*.{ts,tsx,js,mjs}` | `lenses/typescript.md` |
+| `*.{h,hpp,hh,hxx,inl,ipp,cc,cpp,cxx}` | `lenses/cpp.md` |
+| `**/Source/**`, `*.Build.cs`, `*.Target.cs`, `*.uproject`, `*.uplugin` | `lenses/unreal.md` |
 | components / pages / hooks / UI | `lenses/frontend.md` |
 | supabase / SQL / edge / RLS / auth / API | `lenses/backend.md` |
 | three / R3F / shaders / WebGL | `lenses/realtime-graphics.md` |
@@ -56,19 +61,28 @@ Load a provider only when the diff matches and that standard applies; load lens 
 |---|---|---|
 | 0 | Project standards, then engineering as default | `AGENT.md` + project rules/skills, then `ankyr-engineering` if installed and silent |
 | 0b | Staff bar + specialist lenses | `references/lenses/*` (all matches) |
+| 0c | Structure / hierarchy (when the folder-taxonomy routing row matches) | `ankyr-hierarchy` + `ankyr-engineering` → `references/folder-structure.md` |
 | 1 | Language | path-matched language skill + lens |
 | 2 | React structure | `ankyr-react` if installed + frontend lens |
 | 3 | UI / a11y | `ankyr-ui` if installed + frontend lens |
 | 3b | UX / interactivity | `ankyr-ux` if installed + frontend / motion-vfx lenses |
 | 4 | Performance / memory | `ankyr-performance` if installed (+ realtime-graphics when 3D) |
 | 5 | Security | `ankyr-security` if installed (+ backend lens when data/auth) |
-| 6 | Domain | `ankyr-threejs` if installed, supabase, project skills — path-matched |
+| 6 | Domain | `ankyr-threejs` if installed, `ankyr-unreal` if installed, supabase, project skills — path-matched |
 | 7 | Logic & regression | `references/logic-pass.md` |
 | 8 | Threat model | `references/threat-pass.md` |
 | 9 | Validate | raw shell: every command in the repo `AGENT.md` **Validate** section — **or skip** when loop state fingerprint still matches last pass (orchestrator / PR loop) |
 | 10 | Coverage gate | `references/thoroughness-pass.md` — **required before any clean verdict** |
 
 Run all applicable phases in one session. Do not fix findings unless the user explicitly asked. If there is no diff at all, report one sentence and stop.
+
+### Phase 0c — when and how
+
+- **Run** only when the folder-taxonomy capability row matches. Content-only modifications of existing files (for example a three-file bugfix with no `A`/`D`/`R`/`C`) skip it.
+- **Load** `ankyr-hierarchy` and `ankyr-engineering` → `references/folder-structure.md` only when installed and applicable; skip if uninstalled (same “Default if installed” contract as other rows).
+- **Hunt** with hierarchy’s nesting, retrieval, and one-axis tests plus `folder-structure.md` shared-vs-feature-local. Do not copy those checklists into this skill.
+- **Scope** to the named directory, or the directories touched by `A`/`R`/`D`/`C` paths — not a whole-repo taxonomy audit.
+- **Source** findings as `Convention (Phase 0c)`. Deduplicate with Engineering when it is the same defect.
 
 **False cleans are a defect in the review.** Validate green and “looks fine after the fixer” are not enough. Obey `thoroughness-pass.md` and the staff-bar lens before **Review passed**.
 
@@ -103,7 +117,7 @@ Produce one unified findings table:
 |---|---|---|---|
 
 - **Severity** — `Critical`, `High`, `Medium`, `Low` (highest first).
-- **Source** — `Engineering`, `Logic`, `Security`, `Convention (Phase N)`, or `Lens (frontend|backend|realtime-graphics|motion-vfx|typescript)`.
+- **Source** — `Engineering`, `Logic`, `Security`, `Convention (Phase N)`, or `Lens (frontend|backend|realtime-graphics|motion-vfx|typescript|cpp|unreal)`.
 - **Location** — `path:line` (line optional).
 - **Finding** — one concise sentence with a concrete failure mode.
 

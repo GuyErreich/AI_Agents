@@ -37,5 +37,7 @@ PR creation must **not** create commits or modify repository files. Describe the
 5. **Open the PR:**
    - **Title** — one line; prefix from `references/title-conventions.md` matching the primary change type (prefer `feat:` / `fix:` for auto-semver repos).
    - **Body** — from `assets/pr-template.md`, passed via HEREDOC to `gh pr create --body "$(cat <<'EOF' ... EOF)"`. Group changes under Summary by type (Features, Bug Fixes, …); drop sections with no items.
+   - **Assignee** — pass `--assignee @me` (`@me` is the authenticated `gh` user). If the user named a different assignee, use that login instead of `@me`.
    - Multi-concern branches: use multiple Summary sections when needed; **title** still reflects the dominant change type for squash-merge release notes (`header_only`).
-6. Write complete sentences. Reflect all commits in the branch, not only the most recent. Return the PR URL when done.
+6. **Verify assignee.** `gh pr view --json assignees,url` — confirm the chosen login is present. If create did not assign, run `gh pr edit <n> --add-assignee @me` (or the named login) and re-check. Report if assignment still fails; do not claim success.
+7. Write complete sentences. Reflect all commits in the branch, not only the most recent. Return the PR URL when done.

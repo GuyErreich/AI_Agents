@@ -1,12 +1,12 @@
 ---
 name: ankyr-engineering
-description: Universal software engineering foundation — duplication, typing intent, naming, folder structure, separation of concerns, and coupling discipline. Default when the project is silent. Use before writing or reviewing any code.
+description: Universal software engineering foundation — duplication, typing intent, naming, folder structure, separation of concerns, coupling, and OOP patterns (interface, delegation, orchestration). Default when the project is silent. Use before writing or reviewing any code.
 disable-model-invocation: true
 ---
 
 # Engineering Foundations
 
-Language-agnostic principles that every code skill assumes and extends. This skill owns the *why* of good code; downstream skills (`nodejs`, `python`, `ui`, `react`, `testing`, `security`) own the *how* for their domain. Do not restate language syntax or framework rules here.
+Language-agnostic principles that every code skill assumes and extends. This skill owns the *why* of good code; downstream skills (`nodejs`, `python`, `cpp`, `unreal`, `ui`, `react`, `testing`, `security`) own the *how* for their domain. Do not restate language syntax or framework rules here.
 
 This skill is the **default** for those principles when the project is silent. The project is authoritative: resolve `AGENT.md` → project rules → project skills before applying anything here.
 
@@ -14,24 +14,25 @@ This skill is the **default** for those principles when the project is silent. T
 
 | Principle | Rule | Deep detail |
 |---|---|---|
-| No duplication | Same logic, structure, or pattern in 2+ places → extract a shared abstraction before adding a third copy | `references/duplication-and-reuse.md` |
+| No duplication | Same reason to change in a second copy → extract. Similar shape with an unclear reason waits for a third occurrence (Rule of Three / AHA). Never extract coincidental similarity | `references/duplication-and-reuse.md` |
 | Proper typings | Explicit, honest types at boundaries; never use typing to hide a design gap; types document intent | `references/typing-discipline.md` |
 | Proper naming | Names reveal responsibility; consistent domain vocabulary; no misleading suffixes or cryptic abbreviations | `references/naming.md` |
 | Folder structure | Code layout: shared vs feature-local; general taxonomy via `hierarchy` | `references/folder-structure.md` |
-| Separation of concerns | One module, one reason to change; keep data, orchestration, presentation, and I/O apart | `references/separation-of-concerns.md` |
+| Separation of concerns | One module, one reason to change; a deep module hides rich behavior behind a small interface; keep data, orchestration, presentation, and I/O apart | `references/separation-of-concerns.md` |
 | Coupling / decoupling | Couple what changes together; decouple what changes for different reasons; avoid both duplication and premature abstraction | `references/coupling-decoupling.md` |
+| OOP and patterns | Composition and delegation; a function when there is no state to protect; an interface plus one selection point at the second variant; extend along the open axis (Expression Problem) | `references/oop-and-patterns.md` |
 
 ## Workflow
 
 1. **Search before creating.** Look for an existing module, helper, type, or pattern that already covers the need. Extend it when it covers most of the case.
 2. **Decide the boundary first.** Before writing implementation detail, state where shared logic, feature-local logic, and composition each live.
 3. **Write to the principles above.** Keep each unit single-responsibility and named for what it does.
-4. **Extract on the second occurrence.** When a pattern repeats, extract it in the same change rather than leaving duplication.
-5. **Review against the principles.** Reviewer Phase 0 runs these checks before any domain phase.
+4. **Extract when the reason matches.** A second copy of the same rule is extracted in that change. Similar code with an uncertain reason stays duplicated until a third occurrence shows it is one rule.
+5. **Review against the principles.** Reviewer Phase 0 runs these checks before any domain phase. Folder taxonomy and `references/folder-structure.md` belong to reviewer Phase 0c when the folder-taxonomy capability row matches — Phase 0 does not preload that reference.
 
 ## When to load references
 
-Load a `references/` file only when a principle needs a decision you cannot make from the table above — for example, choosing whether to couple two modules, or whether a repeated block is true duplication or coincidental similarity. Do not preload them.
+Load a `references/` file only when a principle needs a decision you cannot make from the table above — for example, choosing whether to couple two modules, whether a repeated block is true duplication, or which OOP pattern fits. Do not preload them.
 
 ## Default, not authority
 

@@ -11,5 +11,5 @@ header:
     - scripts
   paths-ignore:
     - '**/*.json'
-    - plugins/ankyr-review/hooks/tests
     - plugins/ankyr-review/hooks/state
+    - tests

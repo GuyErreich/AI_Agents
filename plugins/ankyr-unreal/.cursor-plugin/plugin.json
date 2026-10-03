@@ -1,0 +1,22 @@
+{
+  "name": "ankyr-unreal",
+  "displayName": "Ankyr Unreal",
+  "version": "1.6.1",
+  "description": "Ankyr Unreal Engine 5 skill and glob rule. Install with the Ankyr core plugin; prefer ankyr-cpp when also writing portable C++.",
+  "author": {
+    "name": "Guy Erreich"
+  },
+  "homepage": "https://github.com/GuyErreich/AI_Agents",
+  "repository": "https://github.com/GuyErreich/AI_Agents",
+  "license": "MIT",
+  "logo": "assets/logo.svg",
+  "keywords": [
+    "skills",
+    "rules",
+    "unreal",
+    "ue5",
+    "ankyr"
+  ],
+  "rules": "./rules/",
+  "skills": "./skills/"
+}
