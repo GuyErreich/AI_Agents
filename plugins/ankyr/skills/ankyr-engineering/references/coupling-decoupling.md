@@ -19,6 +19,7 @@ Two blocks that look alike but represent different concepts will evolve apart. E
 - Do not add an abstraction layer (a one or two line wrapper, a config object, an interface) for a single current caller and a hypothetical future one.
 - Prefer a small amount of duplication over the wrong abstraction. The wrong abstraction is more expensive to undo than duplication.
 - Add the abstraction when the second real, same-reason use case appears.
+- When the match is uncertain, wait. A third occurrence of the same context (Rule of Three) is evidence they are one rule. See `duplication-and-reuse.md`.
 
 ## Avoid shotgun coupling
 

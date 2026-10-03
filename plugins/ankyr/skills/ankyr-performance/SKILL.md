@@ -1,6 +1,6 @@
 ---
 name: ankyr-performance
-description: Memory-leak prevention and render performance — resource cleanup, render optimization, WebGL/audio/timer disposal. Use when adding effects, listeners, timers, animations, or any resource that needs cleanup.
+description: Memory-leak prevention, render performance, and hot-loop data layout — resource cleanup, render optimization, AoS vs SoA. Use when adding effects, listeners, timers, animations, resources that need cleanup, or a loop over many elements.
 disable-model-invocation: true
 ---
 
@@ -23,6 +23,7 @@ Resolve standards project-first (`AGENT.md` chain, project rules, project skills
 - **Optimize renders where it matters** — memoize values passed to memoized children or used in dependency arrays; do not over-memoize.
 - **Throttle high-frequency listeners** (scroll, resize, mousemove).
 - **Lazy-load heavy, route-local code** to keep the main bundle lean.
+- **Hot loops stream contiguous fields.** A loop that updates one attribute across many elements uses a Structure of Arrays or a contiguous component array. Object graphs stay off that loop. See `references/data-layout.md`.
 
 ## When to load references
 
@@ -30,6 +31,7 @@ Resolve standards project-first (`AGENT.md` chain, project rules, project skills
 |---|---|
 | Cleanup patterns: audio, Three.js, listeners, timers, fetch | `references/cleanup.md` |
 | Render optimization, throttling, code splitting, leak audit table | `references/render-optimization.md` |
+| AoS vs SoA, entity-component-system batches, when to leave the object graph | `references/data-layout.md` |
 
 ## Validation
 

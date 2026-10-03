@@ -14,4 +14,4 @@ When editing UE5 source or module files:
 - Load unreal `references/` only when the skill directs.
 - Follow the nearest `AGENT.md` chain for target names, module layout, and naming overrides.
 
-Key rules: Epic naming (`F`/`U`/`A`/`E`/`I`/`T`, `b` bools, PascalCase), `UPROPERTY`/`TObjectPtr` for GC, no world access in constructors, Tick off by default, `HasAuthority` + validated Server RPCs, C++ owns systems / Blueprints compose.
+Key rules: Epic naming (`F`/`U`/`A`/`E`/`I`/`T`, `b` bools, PascalCase), `UPROPERTY`/`TObjectPtr` for GC, no world access in constructors, Tick off by default, `HasAuthority` + validated Server RPCs, C++ owns systems / Blueprints compose, `UInterface` at the second variant.

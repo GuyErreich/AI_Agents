@@ -21,7 +21,7 @@ def load(data: RawPayload) -> ParsedConfig: ...
 
 - **`TypeAlias`** — a documented name for an existing shape (`JsonObject: TypeAlias = dict[str, object]` is still too loose; name the real keys instead).
 - **`NewType`** — a distinct domain id that must not mix with a raw `str` / `int`.
-- **`Protocol`** — a structural interface when you need a method surface, not a concrete class.
+- **`Protocol`** — a structural interface when you need a method surface, not a concrete class. For how to express that interface in Python, see `oop-and-patterns.md`.
 
 ### Dataclass vs Pydantic v2
 
