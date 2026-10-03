@@ -1,6 +1,6 @@
 ---
 name: ankyr-ci-commit
-description: Commit workflow — confirm consent, review at change tier, split the working tree into logical commits, then commit each with a conventional message. Use when the user asks to commit.
+description: Commit workflow — confirm consent, review at change tier, split the working tree into logical commits, then commit each with a conventional message. Use when the user asks to commit, or when a rebase or other rewrite must be signed again before it is published.
 disable-model-invocation: true
 ---
 
@@ -51,3 +51,29 @@ EOF
 ```
 
 If a commit fails (for example a pre-commit check rejects it), fix the issue and create a **new** commit — do not amend a rejected commit.
+
+## Re-sign after a rewrite
+
+A rebase, amend, or history filter writes new commit objects. A GPG or SSH signature covers one payload — tree, parents, author, committer, and message — so it cannot be copied onto the replacement. GitHub then reports the new objects as unverified (`unsigned`).
+
+When a rewrite replaces commits that were already verified:
+
+1. Replay them with signing. A plain `git rebase <upstream>` does nothing when the branch is already based on that upstream ("up to date") and leaves the unsigned objects in place. Force the replay:
+
+```bash
+git rebase --force-rebase --gpg-sign <upstream>
+```
+
+Rebase keeps the author name, email, and author date. Do not use an interactive rebase to reshuffle the series while re-signing.
+
+2. The committer email must belong to the GitHub account that owns the signing key. A valid signature from any other account's key stays unverified (`unknown_key`). Keep the committer on the identity that key is registered to. Do not retarget the committer to a noreply address that has no matching key.
+
+3. Confirm the signature before treating the rewrite as done. `git log --format='%G?'` prints `N` for SSH signatures until `gpg.ssh.allowedSignersFile` exists locally. That local `N` is not GitHub's verdict. After the consented push, check each new SHA:
+
+```bash
+gh api repos/<owner>/<repo>/commits/<sha> --jq '.commit.verification | {verified, reason}'
+```
+
+`verified: true` and `reason: valid` is the badge. `unsigned` means the rewrite dropped the signature. `unknown_key` means the key is not registered to the committer.
+
+4. If this environment has no signing key, stop. Do not force-push unsigned replacements over verified commits. The push itself still follows `skills/ankyr-ci-push/SKILL.md` (explicit consent, `--force-with-lease`, and no protected branch unless the user named that branch).
