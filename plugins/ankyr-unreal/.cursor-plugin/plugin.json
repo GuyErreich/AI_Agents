@@ -1,7 +1,7 @@
 {
   "name": "ankyr-unreal",
   "displayName": "Ankyr Unreal",
-  "version": "1.5.2-dev",
+  "version": "1.6.0-dev",
   "description": "Ankyr Unreal Engine 5 skill and glob rule. Install with the Ankyr core plugin; prefer ankyr-cpp when also writing portable C++.",
   "author": {
     "name": "Guy Erreich"
