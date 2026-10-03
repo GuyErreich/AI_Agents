@@ -8,7 +8,7 @@ Plugins:
 
 - [`plugins/ankyr`](plugins/ankyr) — core (engineering, hierarchy, quality, always-on floor rules)
 - [`plugins/ankyr-review`](plugins/ankyr-review) — reviewer, PR resolver, improve-code, review loops, subagents, hooks
-- [`plugins/ankyr-git`](plugins/ankyr-git) — worktree, commit, PR, push, release
+- [`plugins/ankyr-git`](plugins/ankyr-git) — worktree, commit, issue, PR, push, release
 - [`plugins/ankyr-authoring`](plugins/ankyr-authoring) — agent-hierarchy, improvement-protocol
 - [`plugins/ankyr-python`](plugins/ankyr-python) — Python
 - [`plugins/ankyr-node`](plugins/ankyr-node) — TypeScript / JavaScript

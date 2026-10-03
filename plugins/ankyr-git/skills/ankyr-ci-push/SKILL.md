@@ -29,4 +29,4 @@ gh pr view --json number,url,state 2>/dev/null
 git push        # only after explicit consent and a clean/again-skipped review
 ```
 
-Never force-push to a shared branch without an explicit request, and warn before any force-push to a protected branch.
+Never force-push to a shared branch without an explicit request, and warn before any force-push to a protected branch. A rewrite must be signed again before that push — see `skills/ankyr-ci-commit/SKILL.md` (`## Re-sign after a rewrite`). Do not publish an `unsigned` or `unknown_key` replacement over commits GitHub had already verified.

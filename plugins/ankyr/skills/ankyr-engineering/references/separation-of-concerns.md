@@ -26,7 +26,21 @@ Keep tightly-related lines together (no blank line between two declarations in t
 
 ## Single-responsibility sizing
 
-When a unit grows past comfortable readability, split it: extract sub-units into their own files and shared helpers into a shared module. Do not leave non-trivial helpers defined inside a parent they do not belong to.
+Split a unit when it has a second reason to change. Keep one algorithm readable from top to bottom. Extract sub-units into their own files and shared helpers into a shared module. Do not leave non-trivial helpers defined inside a parent they do not belong to.
+
+- **Do** extract when a reader must understand a separate responsibility, or when a step will vary independently.
+- **Do not** split a routine into micro-methods because a function passed a line count. A two-to-four-line wrapper whose name restates its body is a shallow module.
+
+## Module depth
+
+A **deep module** hides a lot of behavior behind a small interface: parsing, retry, cache layout, a batch transform. Callers use the interface without reading the body.
+
+A **shallow module** has an interface almost as large as its implementation. Splitting one algorithm into many tiny methods does not remove complexity. It moves the load from reading a sequence into jumping across names.
+
+- **Enforce** a deep module when one stable interface covers a rich job.
+- **Do not** add a facade, helper, or class that only forwards one call.
+
+Comments carry what syntax cannot: invariants, why a layout was chosen, and hardware constraints. Names carry what the code does. A comment that repeats the next line is noise. A comment that states a constraint the syntax cannot is part of the interface.
 
 ## Smell
 

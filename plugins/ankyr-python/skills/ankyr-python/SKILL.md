@@ -1,6 +1,6 @@
 ---
 name: ankyr-python
-description: Python 3.12+ syntax, typing, imports, and tooling discipline — builtin generics, no Any, Google docstrings, pathlib, uv/ruff/mypy. Use when writing or reviewing .py/.pyi files.
+description: Python 3.12+ syntax, typing, imports, and tooling discipline — builtin generics, no Any, Google docstrings, pathlib, Protocol and factory for OOP patterns, uv/ruff/mypy. Use when writing or reviewing .py/.pyi files.
 disable-model-invocation: true
 ---
 
@@ -21,6 +21,8 @@ Resolve standards in this order: the `AGENT.md` chain (leaf → root), then proj
 - **Explicit relative imports** within a package; grouped import order (stdlib, third-party, internal); `__all__` for the public surface; do not re-export internals through `__init__.py`. See `references/imports-and-packaging.md`.
 - **`pathlib`**, never `os.path`.
 - **Fail fast** with early returns. Raise semantic custom exceptions, never bare `Exception`; no silent `except: pass`. See `references/errors-and-logging.md`.
+- **OOP shapes.** Express an interface as a `Protocol`, inject collaborators through the constructor, and select the implementation in one factory. A single implementation stays a concrete class or a function. See `references/oop-and-patterns.md`. Function versus object, and which extension axis stays open, are the engineering skill's `references/oop-and-patterns.md`.
+- **Hot-loop layout.** When a loop streams one field across many elements, follow the performance skill's `references/data-layout.md` if installed.
 - **Keyword-only arguments** after a bare `*` for multi-argument functions. Optional parameters always carry an explicit default.
 
 ## When to load references
@@ -30,6 +32,7 @@ Resolve standards in this order: the `AGENT.md` chain (leaf → root), then proj
 | Any-free patterns, `TypeAlias` / `NewType` / `Protocol`, dataclass vs Pydantic v2 | `references/typing-and-models.md` |
 | Relative imports, `__all__`, uv and `pyproject.toml` | `references/imports-and-packaging.md` |
 | Fail-fast validation, custom exceptions, logging severity, no `print` | `references/errors-and-logging.md` |
+| `Protocol`, constructor injection, factory, structured method inputs | `references/oop-and-patterns.md` |
 | pytest, pytest-mock, pyfakefs, shared `tests/fixtures/` | `references/testing.md` |
 
 Load a reference only when a rule above surfaces an issue you need patterns for. Do not preload.
