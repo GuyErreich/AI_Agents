@@ -23,6 +23,7 @@ Resolve standards in this order: the `AGENT.md` chain (leaf → root), then proj
 - **Complete hook/effect dependency arrays** where the framework requires them.
 - **Console discipline.** Only `console.error`/`console.warn` for unrecoverable or expected-degradation cases; never `console.log/debug/info` in shipped code. Log `e instanceof Error ? e.message : String(e)`, never the raw error object.
 - **OOP patterns.** At a second variant of one concern, use a named `interface` (or a function type) and select the implementation in one place. Do not add an interface for a single implementation. What each pattern means, including function versus object and the Expression Problem, is the engineering skill's `references/oop-and-patterns.md` if that skill is installed.
+- **Hot-loop layout.** When a loop streams one field across many elements, follow the performance skill's `references/data-layout.md` if installed.
 
 ## When to load references
 
