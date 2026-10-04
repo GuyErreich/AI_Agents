@@ -109,6 +109,8 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 **Concurrency:** `auto-semver.yml` must queue bump runs per target branch (`cancel-in-progress: false`). See [Action-Semver-Control SETUP — Concurrent merges](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/SETUP.md#concurrent-merges--bump-queue) and [TROUBLESHOOTING](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TROUBLESHOOTING.md).
 
+**`.semver.lock` tip:** `target_base_sha` must be a commit that exists on the remote (the published promote tip). A local-only squash SHA breaks the next Auto Semver Bump (`git rev-list <sha>..HEAD`).
+
 **Hook file modes:** Keep plugin hooks as `100644` and invoke them with `bash ./hooks/run-python.sh …`. `validate_plugin.py` fails if any file under `plugins/ankyr-review/hooks/` is `100755`. ASC 1.6.17+ can rewrite destination modes via a verified Git Database REST fallback when GraphQL `createCommitOnBranch` cannot represent them, so a promote can carry `100644` onto a tip that still has `+x`.
 
 ## Version sync
