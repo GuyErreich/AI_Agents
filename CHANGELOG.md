@@ -1,14 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.6.1-dev] - 03-10-2026
+## [1.6.2-dev] - 12-10-2026
 
-### Features & Enhancements
-- add OOP seam and design-pattern guidance (#99)
-### Bug Fixes & Resolutions
-- assign authenticated gh user on issue and PR create (#98)
-### Documentation
-- re-sign commits after a history rewrite (#107)
+### Infrastructure & Tooling
+- Bump ruff from 0.16.9 to 0.16.10 (#115)
 
 ## License
 This project is licensed under the MIT License.
