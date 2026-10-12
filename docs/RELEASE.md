@@ -103,13 +103,13 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 | Workflow | Mechanism |
 |---|---|
-| `auto-semver.yml` / `promote.yml` | Marketplace action `GuyErreich/Action-Semver-Control@1.6.17` + App token (`signed-commits: true`) |
+| `auto-semver.yml` / `promote.yml` | Reusable workflows `semver-bump.reusable.yml@v1` and `semver-promote.reusable.yml@v1` (App token; `signed-commits` defaults to true) |
 
-**Pin:** `GuyErreich/Action-Semver-Control@1.6.17` (verified REST fallback for executable/symlink modes from [ASC #291](https://github.com/GuyErreich/Action-Semver-Control/pull/291); JSON trailing-comma `version_files` from [ASC #284](https://github.com/GuyErreich/Action-Semver-Control/issues/284) / [#285](https://github.com/GuyErreich/Action-Semver-Control/pull/285)). Prefer floating `@v1` again once that major tag is past 1.6.17. Callers use the Docker action with local `app-authentication` (`vars.GH_APP_CLIENT_ID` + `secrets.GH_APP_PRIVATE_KEY`).
+**Pin:** floating major tag `@v1` on `GuyErreich/Action-Semver-Control` (currently `1.8.15`, same commit as the `v1` tag). Callers pass `vars.GH_APP_CLIENT_ID` and `secrets.GH_APP_PRIVATE_KEY` into those reusable workflows, which mint the App token and create verified commits. Publish workflows still use the local `app-authentication` composite.
 
 **Concurrency:** `auto-semver.yml` must queue bump runs per target branch (`cancel-in-progress: false`). See [Action-Semver-Control SETUP — Concurrent merges](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/SETUP.md#concurrent-merges--bump-queue) and [TROUBLESHOOTING](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TROUBLESHOOTING.md).
 
-**Hook file modes:** Keep plugin hooks as `100644` and invoke them with `bash ./hooks/run-python.sh …`. `validate_plugin.py` fails if any file under `plugins/ankyr-review/hooks/` is `100755`. ASC 1.6.17+ can rewrite destination modes via a verified Git Database REST fallback when GraphQL `createCommitOnBranch` cannot represent them, so a promote can carry `100644` onto a tip that still has `+x`.
+**Hook file modes:** Keep plugin hooks as `100644` and invoke them with `bash ./hooks/run-python.sh …`. `validate_plugin.py` fails if any file under `plugins/ankyr-review/hooks/` is `100755`. The `@v1` action can rewrite destination modes via a verified Git Database REST fallback when GraphQL `createCommitOnBranch` cannot represent them, so a promote can carry `100644` onto a tip that still has `+x`.
 
 ## Version sync
 
@@ -128,7 +128,7 @@ uv run python scripts/bootstrap_github.py --dry-run
 - `plugins/ankyr-unreal/.cursor-plugin/plugin.json`
 - `.cursor-plugin/marketplace.json`
 
-`uv.lock` is **not** in `version_files` — after a version bump, run `uv lock` (or let Dependabot refresh) so the editable package version matches `pyproject.toml`.
+`uv.lock` is **not** in `version_files`. `lock_sync.ecosystems: [uv]` patches the root package version inside the existing lock to PEP 440 (`1.3.1-dev` becomes `1.3.1.dev0`) on the reusable runner, which has no consumer `uv`. Run `uv lock` when dependencies change; a version-only bump does not need a full re-lock.
 
 `scripts/sync_version.py --check` and `validate_plugin.py` remain local/CI guards if manifests ever drift. All 10 plugin manifests share the `pyproject.toml` version. The GitHub Release tarball attaches `plugins/ankyr` (core) only; the marketplace indexes the git ref for every plugin.
 

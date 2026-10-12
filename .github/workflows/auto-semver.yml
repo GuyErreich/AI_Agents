@@ -16,37 +16,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  bump-version:
+  bump:
     name: Bump or finalize
     if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Get GitHub App Token
-        uses: ./.github/actions/app-authentication
-        id: app-token
-        with:
-          client-id: ${{ vars.GH_APP_CLIENT_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-
-      - name: Configure Git for App
-        run: |
-          git config user.name "${{ steps.app-token.outputs.user-name }}"
-          git config user.email "${{ steps.app-token.outputs.user-email }}"
-          git remote set-url origin "https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/${{ github.repository }}.git"
-
-      # Pin ASC ≥1.6.17 for REST signed fallback on executable/symlink modes
-      # (ASC #291) and JSON trailing-comma version_files (ASC #284/#285).
-      # Floating @v1 still pointed at an older release when this landed; switch
-      # back to @v1 once the major tag is force-updated past 1.6.17.
-      - name: Run Auto Semver Action
-        uses: GuyErreich/Action-Semver-Control@1.6.17
-        with:
-          github-token: ${{ steps.app-token.outputs.token }}
-          signed-commits: "true"
-          debug: "true"
+    uses: GuyErreich/Action-Semver-Control/.github/workflows/semver-bump.reusable.yml@v1
+    with:
+      client-id: ${{ vars.GH_APP_CLIENT_ID }}
+    secrets:
+      app-private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
