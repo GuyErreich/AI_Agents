@@ -403,9 +403,9 @@ def check_executable_bits(
     """Reject git ``100755`` hook files and require interpreter-prefixed commands.
 
     Repo convention: keep hooks as ``100644`` and invoke them with
-    ``bash ./hooks/run-python.sh``. ASC 1.6.17+ can publish executable modes via
-    a verified REST fallback, but this plugin still standardizes on non-executable
-    hooks so Cursor does not depend on ``+x``.
+    ``bash ./hooks/run-python.sh``. Action-Semver-Control can publish executable
+    modes via a verified REST fallback, but this plugin still standardizes on
+    non-executable hooks so Cursor does not depend on ``+x``.
     """
     hooks_dir = plugin_root / "hooks"
     if hooks_dir.is_dir():

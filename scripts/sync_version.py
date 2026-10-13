@@ -10,8 +10,8 @@
 
 """Sync plugin/marketplace JSON versions from pyproject.toml.
 
-Action-Semver-Control's VersionFileUpdater cannot update JSON lines that end
-with a comma. Keep pyproject.toml as the source of truth and propagate here.
+Action-Semver-Control updates these files through ``version_files``. This
+script remains the local and CI guard that they still match ``pyproject.toml``.
 """
 
 from __future__ import annotations
