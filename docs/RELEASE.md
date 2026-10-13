@@ -103,9 +103,9 @@ uv run python scripts/bootstrap_github.py --dry-run
 
 | Workflow | Mechanism |
 |---|---|
-| `auto-semver.yml` / `promote.yml` | Reusable workflows `semver-bump.reusable.yml@v1` and `semver-promote.reusable.yml@v1` (App token; `signed-commits` defaults to true) |
+| `auto-semver.yml` / `promote.yml` | Marketplace action `GuyErreich/Action-Semver-Control@v1` + local App token (`signed-commits: true`) |
 
-**Pin:** floating major tag `@v1` on `GuyErreich/Action-Semver-Control` (currently `1.8.15`, same commit as the `v1` tag). Callers pass `vars.GH_APP_CLIENT_ID` and `secrets.GH_APP_PRIVATE_KEY` into those reusable workflows, which mint the App token and create verified commits. Publish workflows still use the local `app-authentication` composite.
+**Pin:** `GuyErreich/Action-Semver-Control@v1` (floating major tag; currently `1.8.15`). The action input `signed-commits` defaults to false, so callers pass `true`. They mint the token with the local `app-authentication` composite (`vars.GH_APP_CLIENT_ID` + `secrets.GH_APP_PRIVATE_KEY`). Publish workflows use that same composite.
 
 **Concurrency:** `auto-semver.yml` must queue bump runs per target branch (`cancel-in-progress: false`). See [Action-Semver-Control SETUP — Concurrent merges](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/SETUP.md#concurrent-merges--bump-queue) and [TROUBLESHOOTING](https://github.com/GuyErreich/Action-Semver-Control/blob/dev/docs/TROUBLESHOOTING.md).
 
@@ -128,7 +128,7 @@ uv run python scripts/bootstrap_github.py --dry-run
 - `plugins/ankyr-unreal/.cursor-plugin/plugin.json`
 - `.cursor-plugin/marketplace.json`
 
-`uv.lock` is **not** in `version_files`. `lock_sync.ecosystems: [uv]` patches the root package version inside the existing lock to PEP 440 (`1.3.1-dev` becomes `1.3.1.dev0`) on the reusable runner, which has no consumer `uv`. Run `uv lock` when dependencies change; a version-only bump does not need a full re-lock.
+`uv.lock` is **not** in `version_files`. `lock_sync.ecosystems: [uv]` patches the root package version inside the existing lock to PEP 440 (`1.3.1-dev` becomes `1.3.1.dev0`). The action installs a private `uv` for itself and does not use that binary to re-lock the caller repo. Run `uv lock` when dependencies change; a version-only bump does not need a full re-lock.
 
 `scripts/sync_version.py --check` and `validate_plugin.py` remain local/CI guards if manifests ever drift. All 10 plugin manifests share the `pyproject.toml` version. The GitHub Release tarball attaches `plugins/ankyr` (core) only; the marketplace indexes the git ref for every plugin.
 

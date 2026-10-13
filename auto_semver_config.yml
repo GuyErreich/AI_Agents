@@ -13,7 +13,7 @@ promotions:
     to_branch: main
     auto_promote: false
 
-# The reusable runner has no consumer uv, so lock_sync patches the root
+# The action runner has no consumer uv, so lock_sync patches the root
 # package version inside the existing uv.lock (PEP 440). It does not re-lock.
 lock_sync:
   ecosystems:
