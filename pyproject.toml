@@ -13,7 +13,7 @@ dev = [
     "pytest-mock>=3.14",
     "pyfakefs>=5.6",
     "ruff>=0.16.10",
-    "ty>=0.0.82",
+    "ty>=0.0.86",
 ]
 
 [tool.ruff]
