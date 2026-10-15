@@ -13,8 +13,20 @@ promotions:
     to_branch: main
     auto_promote: false
 
-# ASC VersionFileUpdater (1.6.15+) updates these; uv.lock is refreshed separately.
-# Callers pin Action-Semver-Control@1.6.17 for mode-aware signed promote.
+# The action runner has no consumer uv, so lock_sync patches the root
+# package version inside the existing uv.lock (PEP 440). It does not re-lock.
+lock_sync:
+  ecosystems:
+    - uv
+
+release:
+  strategy: single
+  branch_prefix: auto-semver/release/
+  cleanup_merged: true
+
+bump:
+  mode: classic
+
 version_files:
   - "pyproject.toml"
   - "plugins/ankyr/.cursor-plugin/plugin.json"
@@ -30,133 +42,135 @@ version_files:
   - ".cursor-plugin/marketplace.json"
 
 commit_groups:
-  - title: "Breaking Changes"
-    match_groups:
-      - "Breaking Changes"
-    patterns:
-      - "^(BREAKING CHANGE|breaking):"
-      - "^(major):"
-      - "^feat.*!:"
-      - "^fix.*!:"
-    priority: 1
+  summary_mode: header_only
+  groups:
+    - title: "Breaking Changes"
+      match_groups:
+        - "Breaking Changes"
+      patterns:
+        - "^(BREAKING CHANGE|breaking):"
+        - "^(major):"
+        - "^feat.*!:"
+        - "^fix.*!:"
+      priority: 1
 
-  - title: "Features & Enhancements"
-    match_groups:
-      - "Features"
-      - "New Features"
-      - "Enhancements"
-    patterns:
-      - "^feat(\\([^)]*\\))?:"
-      - "^feature(\\([^)]*\\))?:"
-      - "^Add "
-      - "^Added "
-      - "^Enhance "
-      - "^Enhanced "
-      - "^add(\\([^)]*\\))?:"
-      - "^enhance(\\([^)]*\\))?:"
-      - "^Implement "
-      - "^Implemented "
-      - "^Improve "
-      - "^Improved "
-      - "^Support "
-    priority: 2
+    - title: "Features & Enhancements"
+      match_groups:
+        - "Features"
+        - "New Features"
+        - "Enhancements"
+      patterns:
+        - "^feat(\\([^)]*\\))?:"
+        - "^feature(\\([^)]*\\))?:"
+        - "^Add "
+        - "^Added "
+        - "^Enhance "
+        - "^Enhanced "
+        - "^add(\\([^)]*\\))?:"
+        - "^enhance(\\([^)]*\\))?:"
+        - "^Implement "
+        - "^Implemented "
+        - "^Improve "
+        - "^Improved "
+        - "^Support "
+      priority: 2
 
-  - title: "Skills, Rules & Agents"
-    match_groups:
-      - "Skills"
-      - "Rules"
-      - "Agents"
-    patterns:
-      - "^skill(\\([^)]*\\))?:"
-      - "^rule(\\([^)]*\\))?:"
-      - "^agent(\\([^)]*\\))?:"
-      - "^hooks?(\\([^)]*\\))?:"
-    priority: 3
+    - title: "Skills, Rules & Agents"
+      match_groups:
+        - "Skills"
+        - "Rules"
+        - "Agents"
+      patterns:
+        - "^skill(\\([^)]*\\))?:"
+        - "^rule(\\([^)]*\\))?:"
+        - "^agent(\\([^)]*\\))?:"
+        - "^hooks?(\\([^)]*\\))?:"
+      priority: 3
 
-  - title: "Refactoring & Code Quality"
-    match_groups:
-      - "Code Refactoring"
-      - "Refactoring"
-      - "Style"
-    patterns:
-      - "^refactor(\\([^)]*\\))?:"
-      - "^Refactor "
-      - "^style(\\([^)]*\\))?:"
-      - "^format(\\([^)]*\\))?:"
-      - "^lint(\\([^)]*\\))?:"
-      - "^Clean "
-      - "^Simplify "
-    priority: 4
+    - title: "Refactoring & Code Quality"
+      match_groups:
+        - "Code Refactoring"
+        - "Refactoring"
+        - "Style"
+      patterns:
+        - "^refactor(\\([^)]*\\))?:"
+        - "^Refactor "
+        - "^style(\\([^)]*\\))?:"
+        - "^format(\\([^)]*\\))?:"
+        - "^lint(\\([^)]*\\))?:"
+        - "^Clean "
+        - "^Simplify "
+      priority: 4
 
-  - title: "Infrastructure & Tooling"
-    match_groups:
-      - "Infrastructure"
-      - "Chores"
-      - "Build"
-      - "CI"
-      - "CI/CD"
-      - "Workflows"
-    patterns:
-      - "^chore(\\([^)]*\\))?:"
-      - "^ci(\\([^)]*\\))?:"
-      - "^build(\\([^)]*\\))?:"
-      - "^devops(\\([^)]*\\))?:"
-      - "^deps?(\\([^)]*\\))?:"
-      - "^Update "
-      - "^Updated "
-    priority: 5
+    - title: "Infrastructure & Tooling"
+      match_groups:
+        - "Infrastructure"
+        - "Chores"
+        - "Build"
+        - "CI"
+        - "CI/CD"
+        - "Workflows"
+      patterns:
+        - "^chore(\\([^)]*\\))?:"
+        - "^ci(\\([^)]*\\))?:"
+        - "^build(\\([^)]*\\))?:"
+        - "^devops(\\([^)]*\\))?:"
+        - "^deps?(\\([^)]*\\))?:"
+        - "^Update "
+        - "^Updated "
+      priority: 5
 
-  - title: "Bug Fixes & Resolutions"
-    match_groups:
-      - "Bug Fixes"
-      - "Bug Fix"
-      - "Fixes"
-    patterns:
-      - "^fix(\\([^)]*\\))?:"
-      - "^Fix "
-      - "^Resolve "
-      - "^Resolved "
-      - "^Fixed "
-      - "^bug(\\([^)]*\\))?:"
-      - "^hotfix(\\([^)]*\\))?:"
-      - "^patch(\\([^)]*\\))?:"
-    priority: 6
+    - title: "Bug Fixes & Resolutions"
+      match_groups:
+        - "Bug Fixes"
+        - "Bug Fix"
+        - "Fixes"
+      patterns:
+        - "^fix(\\([^)]*\\))?:"
+        - "^Fix "
+        - "^Resolve "
+        - "^Resolved "
+        - "^Fixed "
+        - "^bug(\\([^)]*\\))?:"
+        - "^hotfix(\\([^)]*\\))?:"
+        - "^patch(\\([^)]*\\))?:"
+      priority: 6
 
-  - title: "Testing"
-    match_groups:
-      - "Tests"
-      - "Testing"
-    patterns:
-      - "^test(\\([^)]*\\))?:"
-      - "^tests?(\\([^)]*\\))?:"
-      - "^testing(\\([^)]*\\))?:"
-    priority: 7
+    - title: "Testing"
+      match_groups:
+        - "Tests"
+        - "Testing"
+      patterns:
+        - "^test(\\([^)]*\\))?:"
+        - "^tests?(\\([^)]*\\))?:"
+        - "^testing(\\([^)]*\\))?:"
+      priority: 7
 
-  - title: "Documentation"
-    match_groups:
-      - "Documentation"
-      - "Docs"
-    patterns:
-      - "^docs?(\\([^)]*\\))?:"
-      - "^documentation(\\([^)]*\\))?:"
-      - "^readme(\\([^)]*\\))?:"
-      - "^Documentation "
-      - "^README "
-    priority: 8
+    - title: "Documentation"
+      match_groups:
+        - "Documentation"
+        - "Docs"
+      patterns:
+        - "^docs?(\\([^)]*\\))?:"
+        - "^documentation(\\([^)]*\\))?:"
+        - "^readme(\\([^)]*\\))?:"
+        - "^Documentation "
+        - "^README "
+      priority: 8
 
-  - title: "Ignore"
-    patterns:
-      - "^Release [0-9]+\\.[0-9]+\\.[0-9]+.*"
-      - "^\\*\\* [0-9].*"
-      - "^[0-9]+\\.[0-9]+\\.[0-9]+.*"
-      - "^chore\\(release\\):"
-      - "^sync: version"
-    priority: 90
+    - title: "Ignore"
+      patterns:
+        - "^Release [0-9]+\\.[0-9]+\\.[0-9]+.*"
+        - "^\\*\\* [0-9].*"
+        - "^[0-9]+\\.[0-9]+\\.[0-9]+.*"
+        - "^chore\\(release\\):"
+        - "^sync: version"
+      priority: 90
 
-  - title: "Other Changes"
-    patterns:
-      - ".*"
-    priority: 99
+    - title: "Other Changes"
+      patterns:
+        - ".*"
+      priority: 99
 
 pull_request:
   title: "Release {{version}}"
@@ -183,7 +197,7 @@ changelog:
   template: |
     ## [{{version}}] - {{date}}
 
-    {% for group in grouped_messages -%}
+    {% for group in commit_groups -%}
     {% if group.title != "Ignore" and group.commits -%}
     ### {{ group.title }}
     {% for commit in group.commits -%}

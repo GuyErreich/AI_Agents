@@ -51,7 +51,7 @@ jobs:
 
       - name: Validate promotion (dry run)
         if: ${{ inputs.dry_run }}
-        uses: GuyErreich/Action-Semver-Control@1.6.17
+        uses: GuyErreich/Action-Semver-Control@v1
         with:
           action: promote
           to_branch: ${{ inputs.to_branch }}
@@ -59,18 +59,16 @@ jobs:
           dry_run: "true"
           github-token: ${{ steps.app-token.outputs.token }}
           signed-commits: "true"
-          debug: "true"
 
       - name: Execute Promotion
         if: ${{ !inputs.dry_run }}
-        uses: GuyErreich/Action-Semver-Control@1.6.17
+        uses: GuyErreich/Action-Semver-Control@v1
         with:
           action: promote
           to_branch: ${{ inputs.to_branch }}
           from_tag: ${{ inputs.from_tag }}
           github-token: ${{ steps.app-token.outputs.token }}
           signed-commits: "true"
-          debug: "true"
 
       - name: Summary
         if: always()

@@ -1,6 +1,6 @@
 [project]
 name = "ai-agents"
-version = "1.6.1-rc"
+version = "1.6.8-rc"
 description = "Cursor plugin — portable agent skills, rules, and review-loop hooks."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -12,8 +12,8 @@ dev = [
     "pytest-cov>=5.0",
     "pytest-mock>=3.14",
     "pyfakefs>=5.6",
-    "ruff>=0.16.7",
-    "ty>=0.0.82",
+    "ruff>=0.17.0",
+    "ty>=0.0.86",
 ]
 
 [tool.ruff]
