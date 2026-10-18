@@ -1,10 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.6.8-rc] - 15-10-2026
+## [1.6.9-rc] - 18-10-2026
 
-### Features & Enhancements
-- add OOP seam and design-pattern guidance (#99)
 ### Infrastructure & Tooling
 - Bump ruff from 0.16.9 to 0.16.10 (#115)
 - call Action-Semver-Control reusable workflows at v1 (#119)
@@ -14,9 +12,7 @@ All notable changes to this project will be documented in this file.
 - Bump ruff from 0.16.10 to 0.17.0 (#122)
 - Bump astral-sh/setup-uv from 10.2.0 to 10.3.0 (#123)
 ### Bug Fixes & Resolutions
-- assign authenticated gh user on issue and PR create (#98)
-### Documentation
-- re-sign commits after a history rewrite (#107)
+- surface important skills in the agent catalog (#130)
 
 ## License
 This project is licensed under the MIT License.

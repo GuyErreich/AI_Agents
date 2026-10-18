@@ -1,7 +1,6 @@
 ---
 name: ankyr-unreal
 description: Unreal Engine 5 C++ — Epic naming, UObject/GC, reflection, Tick discipline, authority, Blueprint boundary, modules, and content VCS. Use when writing or reviewing Source/, .Build.cs, .uproject, or UE gameplay code.
-disable-model-invocation: true
 ---
 
 # Unreal Engine 5

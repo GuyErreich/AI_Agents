@@ -1,7 +1,6 @@
 ---
 name: ankyr-agent-hierarchy
 description: Agent-library hierarchy — when to add a rule, SKILL.md, reference, or asset; link depth vs folder depth; prefer deepening over widening. Use when creating or reorganizing skills, rules, or AGENT.md under .cursor/ or the agent stack.
-disable-model-invocation: true
 ---
 
 # Agent Hierarchy
@@ -45,6 +44,14 @@ Skills must not require another skill file as a hard first step (`## Extends` + 
 ## Plugin skill discovery
 
 Plugin skills must live at **one level** under the skills root: `skills/<name>/SKILL.md`, and frontmatter `name` must equal that folder. Cursor's plugin loader discovers each subdirectory of `skills/` that contains `SKILL.md`; nested trees such as `skills/code/languages/python/` do not register. Category grouping belongs in the skill `name` (`ankyr-ci-commit`, `ankyr-agent-hierarchy`), not extra folders.
+
+## Invocation
+
+Cursor loads a skill from its description. `disable-model-invocation: true` keeps that description out of the catalog, so the skill loads only from `/skill-name` or from a rule that names the file.
+
+- Rules carry file-type triggers: a glob rule forces the short key rules in and names the skill to load.
+- Skills omit `disable-model-invocation` and omit `paths`. The description stays in the catalog, so the agent can load the skill before a file of that type exists, and the catalog gives the absolute path a rule's plugin-relative pointer cannot.
+- Push, release, and the review loops (`ankyr-ci-push`, `ankyr-ci-release`, `ankyr-pr-resolver`, `ankyr-ci-local-review-loop`, `ankyr-ci-pr-review-loop`) keep the flag.
 
 ## Aggregation decision
 

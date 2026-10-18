@@ -1,7 +1,6 @@
 ---
 name: ankyr-ci-commit
 description: Commit workflow — confirm consent, review at change tier, split the working tree into logical commits, then commit each with a conventional message. Use when the user asks to commit, or when a rebase or other rewrite must be signed again before it is published.
-disable-model-invocation: true
 ---
 
 # CI — Commit

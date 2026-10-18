@@ -1,7 +1,6 @@
 ---
 name: ankyr-improvement-protocol
 description: Flags and implements improvements to skills, rules, and agent instructions. Use when discovering patterns that should be documented, after any task that surfaces a reusable gap, or when updating `skills/` or `rules/`.
-disable-model-invocation: true
 ---
 
 # Improvement Protocol

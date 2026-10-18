@@ -1,7 +1,6 @@
 ---
 name: ankyr-testing
 description: Test-authoring discipline — test behavior at seams, mock only true I/O, prefer fakes and real files over mocking internals, shared setup, one regression test per bug. Use when writing or reviewing tests.
-disable-model-invocation: true
 ---
 
 # Testing

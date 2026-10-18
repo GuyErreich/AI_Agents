@@ -1,7 +1,6 @@
 ---
 name: ankyr-security
 description: Vulnerability prevention — injection, XSS, CSRF, auth/session, input validation, secret handling, uploads, and safe error logging. Use when code touches user input, auth, API routes, data access, or sensitive data.
-disable-model-invocation: true
 ---
 
 # Security & Vulnerability Prevention
