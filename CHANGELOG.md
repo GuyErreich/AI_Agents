@@ -1,14 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.6.3] - 04-10-2026
+## [1.6.9-rc] - 18-10-2026
 
 ### Infrastructure & Tooling
-- point semver lock at the published 1.6.1 promote commit (#111)
+- Bump ruff from 0.16.9 to 0.16.10 (#115)
+- call Action-Semver-Control reusable workflows at v1 (#119)
+- Bump actions/upload-code-coverage from 1.4.2 to 1.4.4 (#116)
+- Bump ty from 0.0.84 to 0.0.86 (#120)
+- Bump the github-codeql-action group with 3 updates (#121)
+- Bump ruff from 0.16.10 to 0.17.0 (#122)
+- Bump astral-sh/setup-uv from 10.2.0 to 10.3.0 (#123)
 ### Bug Fixes & Resolutions
-- drop stale paths left on main by the 1.6.1 promote (#110)
-### Documentation
-- note that semver lock tip must be a published commit (#113)
+- surface important skills in the agent catalog (#130)
 
 ## License
 This project is licensed under the MIT License.

@@ -1,7 +1,6 @@
 ---
 name: ankyr-python
 description: Python 3.12+ syntax, typing, imports, and tooling discipline — builtin generics, no Any, Google docstrings, pathlib, Protocol and factory for OOP patterns, uv/ruff/mypy. Use when writing or reviewing .py/.pyi files.
-disable-model-invocation: true
 ---
 
 # Python

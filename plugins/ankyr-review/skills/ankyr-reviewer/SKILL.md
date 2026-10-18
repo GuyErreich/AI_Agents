@@ -1,7 +1,6 @@
 ---
 name: ankyr-reviewer
 description: Top-tier single-pass code reviewer — staff bar plus specialist lenses (frontend, backend, realtime-graphics, motion-vfx, typescript, cpp, unreal) routed by diff, with engineering, logic, threat, and coverage gates. Posts on the open PR via gh when reviewing the PR. No nested subagents. Use before commit, PR open, push, or manual self-review (see code-review-gate rule).
-disable-model-invocation: true
 ---
 
 # Code Reviewer

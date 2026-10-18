@@ -1,7 +1,6 @@
 ---
 name: ankyr-engineering
 description: Universal software engineering foundation — duplication, typing intent, naming, folder structure, separation of concerns, coupling, and OOP patterns (interface, delegation, orchestration). Default when the project is silent. Use before writing or reviewing any code.
-disable-model-invocation: true
 ---
 
 # Engineering Foundations
