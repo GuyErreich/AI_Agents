@@ -1,7 +1,6 @@
 ---
 name: ankyr-threejs
 description: React Three Fiber and Three.js — render-loop performance, typed materials/refs, shader uniforms, and resource disposal. Use when writing or reviewing R3F/WebGL components.
-paths: "**/three/**/*.{ts,tsx}"
 ---
 
 # React Three Fiber & 3D

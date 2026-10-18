@@ -1,7 +1,6 @@
 ---
 name: ankyr-cpp
 description: C++20 syntax, ownership, diagnostics, and tooling discipline — honest types, RAII, no UB shortcuts, fail-fast errors, clang-tidy/CMake. Use when writing or reviewing .h/.hpp/.cc/.cpp files.
-paths: "**/*.{h,hpp,hh,hxx,inl,ipp,cc,cpp,cxx}"
 ---
 
 # C++

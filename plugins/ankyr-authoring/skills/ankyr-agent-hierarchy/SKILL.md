@@ -49,8 +49,8 @@ Plugin skills must live at **one level** under the skills root: `skills/<name>/S
 
 Cursor loads a skill from its description. `disable-model-invocation: true` keeps that description out of the catalog, so the skill loads only from `/skill-name` or from a rule that names the file.
 
-- File-type skills omit the flag and set `paths` to the same globs as their rule, on one line (`paths: "**/*.{py,pyi}"`).
-- Task skills (testing, engineering, hierarchy, agent-hierarchy, improvement-protocol, reviewer, commit, issue, PR) omit the flag and omit `paths`, so the description can match before a file of that type exists.
+- Rules carry file-type triggers: a glob rule forces the short key rules in and names the skill to load.
+- Skills omit `disable-model-invocation` and omit `paths`. The description stays in the catalog, so the agent can load the skill before a file of that type exists, and the catalog gives the absolute path a rule's plugin-relative pointer cannot.
 - Push, release, and the review loops (`ankyr-ci-push`, `ankyr-ci-release`, `ankyr-pr-resolver`, `ankyr-ci-local-review-loop`, `ankyr-ci-pr-review-loop`) keep the flag.
 
 ## Aggregation decision

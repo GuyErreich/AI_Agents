@@ -1,7 +1,6 @@
 ---
 name: ankyr-ux
 description: Web UX — tactile feedback, motion, overlays, pickers, generative sound, and library choice for interactive surfaces. Use when adding buttons, sheets, tabs, transitions, pickers, or choosing animation/overlay libraries.
-paths: "**/*.{tsx,jsx,css,scss}"
 ---
 
 # Web UX

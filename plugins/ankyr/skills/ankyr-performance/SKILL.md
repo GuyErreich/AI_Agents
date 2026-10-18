@@ -1,7 +1,6 @@
 ---
 name: ankyr-performance
 description: Memory-leak prevention, render performance, and hot-loop data layout — resource cleanup, render optimization, AoS vs SoA. Use when adding effects, listeners, timers, animations, resources that need cleanup, or a loop over many elements.
-paths: "**/*.{ts,tsx,jsx}"
 ---
 
 # Performance & Memory
