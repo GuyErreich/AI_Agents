@@ -1,7 +1,7 @@
 ---
 name: ankyr-nodejs
 description: TypeScript and JavaScript syntax, typing, and tooling discipline — no any, no suppression, async/await, lint hygiene. Use when writing or reviewing .ts/.tsx/.js files.
-disable-model-invocation: true
+paths: "**/*.{ts,tsx,js,mjs,cjs}"
 ---
 
 # Node.js / TypeScript

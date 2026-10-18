@@ -1,7 +1,7 @@
 ---
 name: ankyr-react
 description: React patterns — hook dependencies, component structure, render optimization, and GSAP integration. Use when writing or reviewing React components and hooks.
-disable-model-invocation: true
+paths: "**/*.{tsx,jsx}"
 ---
 
 # React

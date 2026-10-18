@@ -1,7 +1,6 @@
 ---
 name: ankyr-ci-issue
 description: GitHub issue creation workflow — write a title and body, create with gh, and assign the authenticated local user. Use when the user asks to open, create, or file a GitHub issue.
-disable-model-invocation: true
 ---
 
 # CI — Issue

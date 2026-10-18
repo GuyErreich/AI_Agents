@@ -1,7 +1,6 @@
 ---
 name: ankyr-ci-pr
 description: Pull-request creation workflow — review at PR tier, then open the PR with a conventional title and Summary + Test plan body from the assets template. Use when the user asks to create or open a PR.
-disable-model-invocation: true
 ---
 
 # CI — Pull Request
