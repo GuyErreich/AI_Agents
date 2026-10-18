@@ -1,7 +1,6 @@
 ---
 name: ankyr-ui
 description: Web UI architecture — reuse-driven component/hook/style extraction, responsive variant structure, and accessible interactive elements. Use when designing or refactoring UI structure.
-disable-model-invocation: true
 ---
 
 # Web UI Architecture

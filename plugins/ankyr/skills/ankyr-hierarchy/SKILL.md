@@ -1,7 +1,6 @@
 ---
 name: ankyr-hierarchy
 description: Domain-agnostic folder hierarchy decisions — where a folder belongs, when to nest for context vs stay generic, one axis per level, and when to restructure a drifted tree. Use before creating, naming, moving, or reorganizing folders in any tree (source, docs, assets, skills, rules).
-disable-model-invocation: true
 ---
 
 # Folder Hierarchy
